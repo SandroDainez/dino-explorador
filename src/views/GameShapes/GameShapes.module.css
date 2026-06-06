@@ -1,0 +1,303 @@
+.gameContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: space-around;
+  gap: 24px;
+}
+
+/* Bridge Arena */
+.bridgeArea {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(to bottom, #cfd8dc 0%, #90a4ae 100%);
+  border-radius: var(--radius-xl);
+  border: 4px solid #78909c;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 24px;
+}
+
+.bridge {
+  display: flex;
+  width: 85%;
+  height: 90px;
+  background: #546e7a;
+  border-radius: var(--radius-md);
+  padding: 8px;
+  gap: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.bridgeSegment {
+  flex: 1;
+  height: 100%;
+  background: #78909c;
+  border-radius: var(--radius-sm);
+  border: 3px solid #37474f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: var(--transition-bounce);
+}
+
+.segmentFixed {
+  background: #cfd8dc;
+  border-color: #455a64;
+}
+
+.segmentHole {
+  background: #37474f;
+  border-style: dashed;
+  border-color: var(--color-yellow);
+}
+
+.hollowBlock {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.15);
+}
+
+.placedShape {
+  transform: scale(0.9);
+  animation: pop-in 0.4s ease-out;
+}
+
+.shapeHollowShadow {
+  transform: scale(0.9);
+  opacity: 0.5;
+}
+
+/* Dino avatar positions on bridge */
+.dinoOnBridge {
+  position: absolute;
+  bottom: 95px; /* stands on top of the bridge */
+  z-index: 10;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 4px 4px rgba(0,0,0,0.15));
+}
+
+/* Options Selector at the bottom */
+.optionsContainer {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.shapeCard {
+  background: white;
+  border: 4px solid var(--color-gray-200);
+  border-radius: var(--radius-xl);
+  padding: 16px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  box-shadow: var(--shadow-bubble);
+  transition: var(--transition-bounce);
+}
+
+.shapeCard:hover {
+  transform: translateY(-4px) scale(1.04);
+  box-shadow: var(--shadow-bubble-hover);
+  border-color: var(--color-blue);
+}
+
+.shapeCard:active {
+  transform: translateY(6px);
+  box-shadow: var(--shadow-bubble-active);
+}
+
+.shapeSvgWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 90px;
+  width: 90px;
+}
+
+.shapeLabel {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-gray-800);
+  margin-top: 6px;
+}
+
+/* Interaction States */
+.wrongCard {
+  animation: shake 0.4s ease-in-out;
+  opacity: 0.4;
+  filter: grayscale(0.8);
+  cursor: not-allowed;
+}
+
+.placingCard {
+  animation: celebrate 0.5s ease-in-out;
+  transform: scale(0);
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .bridgeArea {
+    height: 150px;
+    padding-bottom: 16px;
+  }
+  .bridge {
+    height: 60px;
+    gap: 6px;
+    padding: 4px;
+  }
+  .dinoOnBridge {
+    bottom: 64px;
+  }
+  .shapeCard {
+    padding: 10px;
+    min-width: 90px;
+  }
+  .shapeSvgWrapper {
+    height: 60px;
+    width: 60px;
+  }
+  .shapeLabel {
+    font-size: 0.9rem;
+  }
+}
+
+/* Victory Screen Styles */
+.victoryCard {
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  box-shadow: var(--shadow-soft);
+  max-width: 500px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 4px solid var(--color-green-light);
+}
+
+.victoryBadge {
+  font-size: 4rem;
+  line-height: 1;
+  margin-bottom: 16px;
+  animation: bounce-slow 2s infinite;
+}
+
+.victoryTitle {
+  font-size: 2.5rem;
+  color: var(--color-green-dark);
+  margin-bottom: 12px;
+}
+
+.victoryText {
+  font-size: 1.2rem;
+  color: var(--color-gray-800);
+  text-align: center;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.victoryStarsContainer {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.victoryStar {
+  font-size: 2.5rem;
+  display: inline-block;
+}
+
+.finalStarFilled {
+  filter: drop-shadow(0 4px 8px rgba(255, 193, 7, 0.4));
+  animation: pulse-soft 1.5s ease-in-out infinite;
+  transform: scale(1.15);
+}
+
+.finalStarEmpty {
+  filter: grayscale(1) opacity(0.15);
+}
+
+.victoryButtons {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .victoryCard {
+    padding: 24px;
+  }
+  .victoryTitle {
+    font-size: 1.8rem;
+  }
+  .victoryText {
+    font-size: 0.95rem;
+    margin-bottom: 16px;
+  }
+  .victoryStarsContainer {
+    margin-bottom: 20px;
+  }
+  .victoryButtons {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+.sparkleGroup {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 20;
+}
+
+.sparkleGroup span {
+  position: absolute;
+  font-size: 2rem;
+  opacity: 0;
+  animation: sparkle-float 1.2s ease-out forwards;
+}
+
+.sparkle1 {
+  left: -40px;
+  top: 20px;
+  animation-delay: 0s;
+}
+
+.sparkle2 {
+  left: 10px;
+  top: -30px;
+  font-size: 2.5rem !important;
+  animation-delay: 0.2s;
+}
+
+.sparkle3 {
+  left: 50px;
+  top: 15px;
+  animation-delay: 0.1s;
+}
+
+@keyframes sparkle-float {
+  0% { transform: translateY(20px) scale(0.5); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateY(-90px) scale(1.3); opacity: 0; }
+}
+

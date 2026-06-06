@@ -1,0 +1,290 @@
+.gameContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: space-around;
+  gap: 20px;
+  position: relative;
+}
+
+/* Cave Ceiling Arena */
+.caveBoard {
+  position: relative;
+  width: 500px;
+  height: 250px;
+  background: radial-gradient(circle at center, #263238 0%, #151a1d 100%);
+  border: 6px solid #455a64;
+  border-radius: var(--radius-xl);
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.8), var(--shadow-soft);
+  overflow: hidden;
+}
+
+.stalactitesSvg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.85;
+}
+
+/* Firefly positioning and animations */
+.fireflyWrapper {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@keyframes firefly-glow {
+  0%, 100% { opacity: 0.6; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+.glowingAura {
+  animation: firefly-glow 2s ease-in-out infinite;
+}
+
+@keyframes firefly-flutter {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  33% { transform: translateY(-5px) rotate(-3deg); }
+  66% { transform: translateY(3px) rotate(3deg); }
+}
+
+.firefly {
+  animation: firefly-flutter 4s ease-in-out infinite;
+}
+
+/* Counting Tag (1, 2, 3... helper balloon) */
+.countTag {
+  position: absolute;
+  top: -15px;
+  background: var(--color-yellow);
+  color: var(--color-yellow-dark);
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 900;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Number cards options */
+.optionsContainer {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.numberBtn {
+  background: white;
+  border: 4px solid var(--color-gray-200);
+  border-radius: var(--radius-xl);
+  width: 72px;
+  height: 72px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-bubble);
+  transition: var(--transition-bounce);
+  outline: none;
+}
+
+.numberBtn:hover {
+  transform: translateY(-4px) scale(1.08);
+  box-shadow: var(--shadow-bubble-hover);
+  border-color: var(--color-blue);
+}
+
+.numberBtn:active {
+  transform: translateY(6px);
+  box-shadow: var(--shadow-bubble-active);
+}
+
+.numberLabel {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--color-gray-800);
+}
+
+/* States */
+.wrongBtn {
+  animation: shake 0.4s ease-in-out;
+  opacity: 0.4;
+  filter: grayscale(0.8);
+  cursor: not-allowed;
+}
+
+.correctBtn {
+  border-color: var(--color-green);
+  background-color: var(--color-green-light);
+  transform: scale(1.08);
+}
+
+.dinoCorner {
+  position: absolute;
+  bottom: -10px;
+  right: -10px;
+  pointer-events: none;
+  opacity: 0.75;
+}
+
+@media (max-width: 768px) {
+  .caveBoard {
+    width: 300px;
+    height: 180px;
+  }
+  /* Scale position coords down slightly using percentages in CSS or similar.
+     For simplicity on smaller screens, we can scale the whole board down using CSS scale! */
+  .numberBtn {
+    width: 54px;
+    height: 54px;
+    border-width: 3px;
+  }
+  .numberLabel {
+    font-size: 1.6rem;
+  }
+  .dinoCorner {
+    display: none;
+  }
+}
+
+/* Victory Screen Styles */
+.victoryCard {
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  box-shadow: var(--shadow-soft);
+  max-width: 500px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 4px solid var(--color-green-light);
+}
+
+.victoryBadge {
+  font-size: 4rem;
+  line-height: 1;
+  margin-bottom: 16px;
+  animation: bounce-slow 2s infinite;
+}
+
+.victoryTitle {
+  font-size: 2.5rem;
+  color: var(--color-green-dark);
+  margin-bottom: 12px;
+}
+
+.victoryText {
+  font-size: 1.2rem;
+  color: var(--color-gray-800);
+  text-align: center;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.victoryStarsContainer {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.victoryStar {
+  font-size: 2.5rem;
+  display: inline-block;
+}
+
+.finalStarFilled {
+  filter: drop-shadow(0 4px 8px rgba(255, 193, 7, 0.4));
+  animation: pulse-soft 1.5s ease-in-out infinite;
+  transform: scale(1.15);
+}
+
+.finalStarEmpty {
+  filter: grayscale(1) opacity(0.15);
+}
+
+.victoryButtons {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .victoryCard {
+    padding: 24px;
+  }
+  .victoryTitle {
+    font-size: 1.8rem;
+  }
+  .victoryText {
+    font-size: 0.95rem;
+    margin-bottom: 16px;
+  }
+  .victoryStarsContainer {
+    margin-bottom: 20px;
+  }
+  .victoryButtons {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+.sparkleGroup {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 20;
+}
+
+.sparkleGroup span {
+  position: absolute;
+  font-size: 2rem;
+  opacity: 0;
+  animation: sparkle-float 1.2s ease-out forwards;
+}
+
+.sparkle1 {
+  left: -40px;
+  top: 20px;
+  animation-delay: 0s;
+}
+
+.sparkle2 {
+  left: 10px;
+  top: -30px;
+  font-size: 2.5rem !important;
+  animation-delay: 0.2s;
+}
+
+.sparkle3 {
+  left: 50px;
+  top: 15px;
+  animation-delay: 0.1s;
+}
+
+@keyframes sparkle-float {
+  0% { transform: translateY(20px) scale(0.5); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateY(-90px) scale(1.3); opacity: 0; }
+}
