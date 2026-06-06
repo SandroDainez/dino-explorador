@@ -60,7 +60,7 @@ export const useSpeechSynthesis = () => {
       utterance.rate = 0.95;  // Slightly slower for better comprehension by kids
 
       window.speechSynthesis.speak(utterance);
-    }, 100);
+    }, 20);
   };
 
   const cancelSpeech = () => {
