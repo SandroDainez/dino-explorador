@@ -6,6 +6,7 @@ let isSpeechUnlocked = false;
 if (typeof window !== 'undefined' && window.speechSynthesis) {
   const unlock = () => {
     try {
+      // Prime with a silent character to unlock the channel
       const u = new SpeechSynthesisUtterance('a');
       u.volume = 0;
       window.speechSynthesis.speak(u);
@@ -36,31 +37,33 @@ export const useSpeechSynthesis = () => {
       return;
     }
 
-    // Cancel any current narration
-    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'pt-BR';
+    
+    // Attempt to set a friendly Portuguese voice if available
+    const voices = window.speechSynthesis.getVoices();
+    const ptVoice = voices.find(voice => voice.lang.startsWith('pt'));
+    if (ptVoice) {
+      utterance.voice = ptVoice;
+    }
 
-    // Use a small timeout to let the browser process the cancel before speaking, preventing queue lockup
-    setTimeout(() => {
-      if (!window.speechSynthesis) return;
-      
-      // Resume in case the engine is stuck in a paused state
-      window.speechSynthesis.resume();
+    utterance.pitch = 1.2; // Slightly higher pitch for child-friendly tone
+    utterance.rate = 0.95;  // Slightly slower for better comprehension by kids
 
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'pt-BR';
-      
-      // Attempt to set a friendly Portuguese voice if available
-      const voices = window.speechSynthesis.getVoices();
-      const ptVoice = voices.find(voice => voice.lang.startsWith('pt'));
-      if (ptVoice) {
-        utterance.voice = ptVoice;
-      }
-
-      utterance.pitch = 1.2; // Slightly higher pitch for child-friendly tone
-      utterance.rate = 0.95;  // Slightly slower for better comprehension by kids
-
+    // If nothing is currently speaking, speak synchronously to maintain user gesture stack (crucial for iOS Safari)
+    if (!window.speechSynthesis.speaking) {
       window.speechSynthesis.speak(utterance);
-    }, 20);
+      isSpeechUnlocked = true;
+    } else {
+      // If already speaking, cancel first and wait a brief moment to avoid WebKit crash/lockup
+      window.speechSynthesis.cancel();
+      setTimeout(() => {
+        if (window.speechSynthesis) {
+          window.speechSynthesis.resume();
+          window.speechSynthesis.speak(utterance);
+        }
+      }, 30);
+    }
   };
 
   const cancelSpeech = () => {
