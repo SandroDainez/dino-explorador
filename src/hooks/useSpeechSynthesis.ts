@@ -2,6 +2,26 @@ import { useGame } from '../context/GameContext';
 
 let isSpeechUnlocked = false;
 
+// Global listener to unlock Web Speech API on iOS / Android browsers on first user gesture
+if (typeof window !== 'undefined' && window.speechSynthesis) {
+  const unlock = () => {
+    try {
+      // Prime with a silent character to unlock the channel
+      const u = new SpeechSynthesisUtterance('a');
+      u.volume = 0;
+      window.speechSynthesis.speak(u);
+      isSpeechUnlocked = true;
+      console.log('Web Speech API successfully unlocked on mobile via silent priming.');
+    } catch (e) {
+      console.warn('SpeechSynthesis unlock failed:', e);
+    }
+    window.removeEventListener('click', unlock);
+    window.removeEventListener('touchstart', unlock);
+  };
+  window.addEventListener('click', unlock, { passive: true });
+  window.addEventListener('touchstart', unlock, { passive: true });
+}
+
 export const useSpeechSynthesis = () => {
   const { speechEnabled } = useGame();
 
@@ -17,38 +37,36 @@ export const useSpeechSynthesis = () => {
       return;
     }
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'pt-BR';
-    
-    // Attempt to set a friendly Portuguese voice if available
-    const voices = window.speechSynthesis.getVoices();
-    const ptVoice = voices.find(voice => voice.lang.startsWith('pt'));
-    if (ptVoice) {
-      utterance.voice = ptVoice;
-    }
+    // Cancel any current narration
+    window.speechSynthesis.cancel();
 
-    utterance.pitch = 1.2; // Slightly higher pitch for child-friendly tone
-    utterance.rate = 0.95;  // Slightly slower for better comprehension by kids
+    // Use a small timeout to let the browser process the cancel before speaking, preventing queue lockup
+    setTimeout(() => {
+      if (!window.speechSynthesis) return;
+      
+      // Resume in case the engine is stuck in a paused state
+      window.speechSynthesis.resume();
 
-    // If nothing is currently speaking, speak synchronously to maintain user gesture stack (crucial for iOS Safari)
-    if (!window.speechSynthesis.speaking) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'pt-BR';
+      
+      // Attempt to set a friendly Portuguese voice if available
+      const voices = window.speechSynthesis.getVoices();
+      const ptVoice = voices.find(voice => voice.lang.startsWith('pt'));
+      if (ptVoice) {
+        utterance.voice = ptVoice;
+      }
+
+      utterance.pitch = 1.2; // Slightly higher pitch for child-friendly tone
+      utterance.rate = 0.95;  // Slightly slower for better comprehension by kids
+
       window.speechSynthesis.speak(utterance);
+      
+      // If a manual speech succeeds, we can also ensure unlocked state is true
       if (!isAuto) {
         isSpeechUnlocked = true;
       }
-    } else {
-      // If already speaking, cancel first and wait a brief moment to avoid WebKit crash/lockup
-      window.speechSynthesis.cancel();
-      setTimeout(() => {
-        if (window.speechSynthesis) {
-          window.speechSynthesis.resume();
-          window.speechSynthesis.speak(utterance);
-          if (!isAuto) {
-            isSpeechUnlocked = true;
-          }
-        }
-      }, 30);
-    }
+    }, 100); // 100ms is safe and standard for iOS WebKit cancel-speak transition
   };
 
   const cancelSpeech = () => {
