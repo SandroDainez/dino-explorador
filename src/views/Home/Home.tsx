@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
 import type { DinoType, DinoColor, DinoAccessory } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
@@ -50,6 +50,17 @@ export const Home: React.FC = () => {
     updateDinoConfig({ accessory });
   };
 
+  const [hasInteracted, setHasInteracted] = useState(false);
+
+  const handleFirstInteraction = () => {
+    if (hasInteracted) return;
+    setHasInteracted(true);
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+      speak(introText);
+    }
+  };
+
   const handleStartGame = () => {
     playSuccess();
     cancelSpeech();
@@ -57,7 +68,11 @@ export const Home: React.FC = () => {
   };
 
   return (
-    <div className={styles.container}>
+    <div
+      className={styles.container}
+      onClick={handleFirstInteraction}
+      onTouchStart={handleFirstInteraction}
+    >
       {/* Background Clouds */}
       <div className={styles.cloud1} />
       <div className={styles.cloud2} />
