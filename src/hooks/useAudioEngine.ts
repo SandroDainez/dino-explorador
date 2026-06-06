@@ -1,12 +1,30 @@
 import { useGame } from '../context/GameContext';
 
+let sharedAudioContext: AudioContext | null = null;
+
 export const useAudioEngine = () => {
   const { soundEnabled } = useGame();
 
   const getAudioContext = (): AudioContext | null => {
     if (typeof window === 'undefined') return null;
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-    return AudioContextClass ? new AudioContextClass() : null;
+    
+    try {
+      if (!sharedAudioContext) {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioContextClass) {
+          sharedAudioContext = new AudioContextClass();
+        }
+      }
+      
+      // Resume context if suspended by browser autoplay policies
+      if (sharedAudioContext && sharedAudioContext.state === 'suspended') {
+        sharedAudioContext.resume();
+      }
+    } catch (e) {
+      console.warn('Failed to initialize AudioContext:', e);
+    }
+    
+    return sharedAudioContext;
   };
 
   const createOscillator = (
