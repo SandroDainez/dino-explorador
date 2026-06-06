@@ -5,8 +5,8 @@
   height: auto;
   overflow-y: auto;
   align-items: center;
-  justify-content: space-around;
-  gap: 20px;
+  justify-content: flex-start;
+  padding-bottom: 2rem;
 }
 
 /* Signboard detailing the requested number */
@@ -52,7 +52,7 @@
   display: flex;
   gap: 24px;
   justify-content: center;
-  width: 100%;
+  margin-top: 2rem;
   flex-wrap: wrap;
 }
 
@@ -70,7 +70,7 @@
   box-shadow: var(--shadow-bubble);
   transition: var(--transition-bounce);
   outline: none;
-  position: relative;
+  margin-bottom: 1rem;
 }
 
 .nestCard:hover {
@@ -85,7 +85,9 @@
 }
 
 .nestSvg {
-  overflow: visible;
+  width: 100%;
+  max-width: 180px;
+  height: auto;
 }
 
 .eggCountBadge {
@@ -135,7 +137,7 @@
     font-size: 2.2rem;
   }
   .nestCard {
-    min-width: 140px;
+    min-width: 120px;
     padding: 8px;
   }
   .eggCountBadge {
