@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
 import type { DinoType, DinoColor, DinoAccessory } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
@@ -6,6 +6,8 @@ import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { Volume2, VolumeX, Sparkles } from 'lucide-react';
 import styles from './Home.module.css';
+
+let initialLoad = true;
 
 export const Home: React.FC = () => {
   const {
@@ -21,19 +23,70 @@ export const Home: React.FC = () => {
   const { playClick, playHover, playSuccess } = useAudioEngine();
   const { speak, cancelSpeech } = useSpeechSynthesis();
 
+  const [showSplash, setShowSplash] = useState(initialLoad);
+
   const introText = "Olá, amiguinho! Vamos criar o seu dinossauro de aventura? Escolha o tipo de dinossauro, a sua cor favorita e um acessório bem legal. Depois, clique no botão verde JOGAR para começar a nossa exploração!";
 
-  useEffect(() => {
-    // Narrate introduction when landing page mounts
-    const timer = setTimeout(() => {
-      speak(introText);
-    }, 1000);
+  const handleStartDiscovery = () => {
+    playSuccess();
+    initialLoad = false;
+    setShowSplash(false);
+    // Trigger speech synthesis directly in the user click callback to unlock and narrate immediately
+    speak(introText);
+  };
 
-    return () => {
-      clearTimeout(timer);
-      cancelSpeech();
-    };
-  }, []);
+  useEffect(() => {
+    // Narrate introduction when landing page mounts (only if splash is already dismissed, e.g. when returning to home later)
+    if (!showSplash) {
+      const timer = setTimeout(() => {
+        speak(introText);
+      }, 1000);
+
+      return () => {
+        clearTimeout(timer);
+        cancelSpeech();
+      };
+    }
+  }, [showSplash]);
+
+  if (showSplash) {
+    return (
+      <div className={styles.container}>
+        {/* Background Clouds */}
+        <div className={styles.cloud1} />
+        <div className={styles.cloud2} />
+
+        <div className={styles.splashCard}>
+          <h1 className={styles.splashTitle}>
+            <span className={styles.word1}>DINO</span>
+            <span className={styles.word2}>EXPLORADOR</span>
+          </h1>
+          <p className={styles.splashSubtitle}>Uma Aventura Educativa Pré-Histórica!</p>
+
+          <div className={styles.splashDinoPlate}>
+            <DinoAvatar
+              type="trex"
+              color="green"
+              accessory="hat"
+              animation="celebrate"
+              size={180}
+            />
+          </div>
+
+          <button
+            id="btn-start-discovery"
+            className={`${styles.btnStartDiscovery} animate-pulse-soft`}
+            onClick={handleStartDiscovery}
+            onMouseEnter={playHover}
+          >
+            <Sparkles size={24} />
+            <span>INICIAR AVENTURA!</span>
+            <Sparkles size={24} />
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const handleTypeChange = (type: DinoType) => {
     playClick();
