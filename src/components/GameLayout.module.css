@@ -304,8 +304,11 @@
 }
 
 @media (max-width: 768px) {
-  .mainContent {
+    .mainContent {
     padding: 16px;
+    overflow: visible;
+    height: auto;
+    flex: none;
   }
   .volcanoLeft, .palmTreeRight {
     display: none; /* Hide background illustrations on small mobile to avoid clutter */
