@@ -50,8 +50,8 @@
 /* Nests Cards Row */
 .nestsContainer {
   display: flex;
-  gap: 24px;
-  justify-content: center;
+  gap: 16px;
+  justify-content: space-between;
   margin-top: 2rem;
   flex-wrap: wrap;
 }
@@ -66,7 +66,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 200px;
+  width: 45%;
+  max-width: 200px;
   box-shadow: var(--shadow-bubble);
   transition: var(--transition-bounce);
   outline: none;
@@ -138,6 +139,8 @@
   }
   .nestCard {
     min-width: 120px;
+    width: 45%;
+    max-width: 200px;
     padding: 8px;
   }
   .eggCountBadge {
