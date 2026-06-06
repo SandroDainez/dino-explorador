@@ -151,6 +151,12 @@
   }
   .container {
     padding: 16px;
+    height: auto;
+    min-height: 100vh;
+    justify-content: flex-start;
+    gap: 12px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
 
@@ -215,8 +221,14 @@
 
 @media (max-width: 768px) {
   .dinoPlate {
-    width: 180px;
-    height: 180px;
+    width: 140px;
+    height: 140px;
+    border-width: 5px;
+  }
+  .dinoPlate::after {
+    bottom: 15px;
+    width: 95px;
+    height: 10px;
   }
   .previewLabel {
     font-size: 1.1rem;

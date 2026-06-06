@@ -24,6 +24,18 @@ export const Home: React.FC = () => {
   const { speak, cancelSpeech } = useSpeechSynthesis();
 
   const [showSplash, setShowSplash] = useState(initialLoad);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const dinoSize = isMobile ? 130 : 240;
 
   const introText = "Olá, amiguinho! Vamos criar o seu dinossauro de aventura? Escolha o tipo de dinossauro, a sua cor favorita e um acessório bem legal. Depois, clique no botão verde JOGAR para começar a nossa exploração!";
 
@@ -175,7 +187,7 @@ export const Home: React.FC = () => {
               color={dino.color}
               accessory={dino.accessory}
               animation="idle"
-              size={240}
+              size={dinoSize}
               className={styles.dinoPreviewAvatar}
             />
           </div>
