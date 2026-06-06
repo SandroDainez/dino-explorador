@@ -26,7 +26,7 @@ export const Home: React.FC = () => {
   useEffect(() => {
     // Narrate introduction when landing page mounts
     const timer = setTimeout(() => {
-      speak(introText);
+      speak(introText, true);
     }, 1000);
 
     return () => {

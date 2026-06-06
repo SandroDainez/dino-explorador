@@ -146,7 +146,7 @@ export const WorldMap: React.FC = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      speak(mapInstructions);
+      speak(mapInstructions, true);
     }, 800);
 
     return () => {
