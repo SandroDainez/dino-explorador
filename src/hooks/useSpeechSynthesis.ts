@@ -1,41 +1,10 @@
 import { useGame } from '../context/GameContext';
 
-let isSpeechUnlocked = false;
-
-// Global listener to unlock Web Speech API on iOS / Android browsers on first user gesture
-if (typeof window !== 'undefined' && window.speechSynthesis) {
-  const unlock = () => {
-    try {
-      // Prime with a silent character to unlock the channel
-      const u = new SpeechSynthesisUtterance('a');
-      u.volume = 0;
-      window.speechSynthesis.speak(u);
-      isSpeechUnlocked = true;
-      console.log('Web Speech API successfully unlocked on mobile via silent priming.');
-    } catch (e) {
-      console.warn('SpeechSynthesis unlock failed:', e);
-    }
-    window.removeEventListener('click', unlock);
-    window.removeEventListener('touchstart', unlock);
-  };
-  window.addEventListener('click', unlock, { passive: true });
-  window.addEventListener('touchstart', unlock, { passive: true });
-}
-
 export const useSpeechSynthesis = () => {
   const { speechEnabled } = useGame();
 
-  const speak = (text: string, isAuto = false) => {
+  const speak = (text: string) => {
     if (!speechEnabled || typeof window === 'undefined' || !window.speechSynthesis) return;
-
-    // Check if device is mobile
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-    // If on mobile and it's an auto-speech (from useEffect), skip if not unlocked yet to avoid freezing Safari queue
-    if (isMobile && isAuto && !isSpeechUnlocked) {
-      console.log('Skipping auto-speech on mobile before first user interaction.');
-      return;
-    }
 
     // Cancel any current narration
     window.speechSynthesis.cancel();
@@ -61,12 +30,7 @@ export const useSpeechSynthesis = () => {
       utterance.rate = 0.95;  // Slightly slower for better comprehension by kids
 
       window.speechSynthesis.speak(utterance);
-      
-      // If a manual speech succeeds, we can also ensure unlocked state is true
-      if (!isAuto) {
-        isSpeechUnlocked = true;
-      }
-    }, 100); // 100ms is safe and standard for iOS WebKit cancel-speak transition
+    }, 100);
   };
 
   const cancelSpeech = () => {

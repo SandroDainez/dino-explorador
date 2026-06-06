@@ -35,33 +35,6 @@ const GameRouter: React.FC = () => {
 };
 
 function App() {
-  React.useEffect(() => {
-    const unlockSpeech = () => {
-      if (typeof window !== 'undefined' && window.speechSynthesis) {
-        try {
-          const utterance = new SpeechSynthesisUtterance('');
-          window.speechSynthesis.speak(utterance);
-        } catch (e) {
-          console.warn('Speech unlock failed:', e);
-        }
-        window.removeEventListener('click', unlockSpeech);
-        window.removeEventListener('touchstart', unlockSpeech);
-      }
-    };
-    
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      window.addEventListener('click', unlockSpeech);
-      window.addEventListener('touchstart', unlockSpeech);
-    }
-    
-    return () => {
-      if (typeof window !== 'undefined') {
-        window.removeEventListener('click', unlockSpeech);
-        window.removeEventListener('touchstart', unlockSpeech);
-      }
-    };
-  }, []);
-
   return (
     <GameProvider>
       <GameRouter />

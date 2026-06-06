@@ -55,8 +55,8 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
-      speak(instructionText, true);
-    }, 50);
+      speak(instructionText);
+    }, 800);
     
     return () => {
       clearTimeout(timer);
