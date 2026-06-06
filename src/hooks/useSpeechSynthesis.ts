@@ -6,7 +6,8 @@ let isSpeechUnlocked = false;
 if (typeof window !== 'undefined' && window.speechSynthesis) {
   const unlock = () => {
     try {
-      const u = new SpeechSynthesisUtterance('');
+      const u = new SpeechSynthesisUtterance('a');
+      u.volume = 0;
       window.speechSynthesis.speak(u);
       isSpeechUnlocked = true;
       console.log('Web Speech API successfully unlocked on mobile.');
