@@ -2,26 +2,6 @@ import { useGame } from '../context/GameContext';
 
 let isSpeechUnlocked = false;
 
-// Global listener to unlock Web Speech API on iOS / Android browsers on first user gesture
-if (typeof window !== 'undefined' && window.speechSynthesis) {
-  const unlock = () => {
-    try {
-      // Prime with a silent character to unlock the channel
-      const u = new SpeechSynthesisUtterance('a');
-      u.volume = 0;
-      window.speechSynthesis.speak(u);
-      isSpeechUnlocked = true;
-      console.log('Web Speech API successfully unlocked on mobile.');
-    } catch (e) {
-      console.warn('SpeechSynthesis unlock failed:', e);
-    }
-    window.removeEventListener('click', unlock);
-    window.removeEventListener('touchstart', unlock);
-  };
-  window.addEventListener('click', unlock, { passive: true });
-  window.addEventListener('touchstart', unlock, { passive: true });
-}
-
 export const useSpeechSynthesis = () => {
   const { speechEnabled } = useGame();
 
@@ -53,7 +33,9 @@ export const useSpeechSynthesis = () => {
     // If nothing is currently speaking, speak synchronously to maintain user gesture stack (crucial for iOS Safari)
     if (!window.speechSynthesis.speaking) {
       window.speechSynthesis.speak(utterance);
-      isSpeechUnlocked = true;
+      if (!isAuto) {
+        isSpeechUnlocked = true;
+      }
     } else {
       // If already speaking, cancel first and wait a brief moment to avoid WebKit crash/lockup
       window.speechSynthesis.cancel();
@@ -61,6 +43,9 @@ export const useSpeechSynthesis = () => {
         if (window.speechSynthesis) {
           window.speechSynthesis.resume();
           window.speechSynthesis.speak(utterance);
+          if (!isAuto) {
+            isSpeechUnlocked = true;
+          }
         }
       }, 30);
     }
