@@ -213,8 +213,8 @@ export const GameCounting: React.FC = () => {
                 key={idx}
                 className={styles.fireflyWrapper}
                 style={{
-                  left: `${pos.x}px`,
-                  top: `${pos.y}px`,
+                  left: `${(pos.x / 500) * 100}%`,
+                  top: `${(pos.y / 250) * 100}%`,
                 }}
               >
                 {renderFireflySvg(idx * 0.15)}

@@ -271,6 +271,7 @@ export const GameColors: React.FC = () => {
               accessory={dino.accessory}
               animation={dinoEmotion}
               size={180}
+              className={styles.dinoSvg}
             />
             {biteFruit && (
               <div className={styles.sparkleGroup}>
