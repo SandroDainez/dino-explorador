@@ -160,6 +160,9 @@ export const GameLetters: React.FC = () => {
           {/* River Area showing Dino jumping across stepping stones */}
           <div className={styles.riverArea}>
             <div className={styles.riverWater}>
+              {/* Left starting river bank */}
+              <div className={styles.riverBankLeft} />
+
               {/* Stepping Stones inside the river */}
               {currentOptions.map((letter, idx) => {
                 const isWrong = wrongAnswers.includes(letter);
@@ -186,11 +189,14 @@ export const GameLetters: React.FC = () => {
                 );
               })}
 
+              {/* Right landing river bank */}
+              <div className={styles.riverBankRight} />
+
               {/* Dino Avatar positioned above water, jumping */}
               <div
                 className={`${styles.dinoOnRiver} ${jumpingStoneIdx !== null ? styles.dinoJumping : ''}`}
                 style={{
-                  left: jumpingStoneIdx !== null ? `${15 + jumpingStoneIdx * 35}%` : '50%',
+                  left: jumpingStoneIdx !== null ? `${30 + jumpingStoneIdx * 20}%` : '10%',
                   transform: 'translateX(-50%)',
                 }}
               >
@@ -199,7 +205,8 @@ export const GameLetters: React.FC = () => {
                   color={dino.color}
                   accessory={dino.accessory}
                   animation={dinoEmotion}
-                  size={110}
+                  size={100}
+                  className={styles.dinoSvg}
                 />
               </div>
             </div>

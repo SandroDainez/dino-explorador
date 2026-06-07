@@ -252,7 +252,7 @@ export const GameShapes: React.FC = () => {
             <div
               className={styles.dinoOnBridge}
               style={{
-                left: `${15 + step * 15}%`,
+                left: `${16 + step * 17}%`,
                 transition: 'left 1s ease-in-out',
               }}
             >
@@ -262,6 +262,7 @@ export const GameShapes: React.FC = () => {
                 accessory={dino.accessory}
                 animation={dinoEmotion}
                 size={120}
+                className={styles.dinoSvg}
               />
             </div>
           </div>

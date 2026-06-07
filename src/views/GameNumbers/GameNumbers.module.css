@@ -137,14 +137,23 @@
   .numberBig {
     font-size: 2.2rem;
   }
+  .nestsContainer {
+    gap: 8px;
+    justify-content: center;
+  }
   .nestCard {
-    min-width: 120px;
-    width: 45%;
-    max-width: 200px;
-    padding: 8px;
+    min-width: unset;
+    width: 46%;
+    max-width: 130px;
+    padding: 8px 4px;
+  }
+  .nestSvg {
+    max-width: 90px;
   }
   .eggCountBadge {
     font-size: 0.85rem;
+    padding: 2px 8px;
+    margin-top: 4px;
   }
 }
 

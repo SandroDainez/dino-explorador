@@ -83,6 +83,21 @@
   z-index: 10;
   transform: translateX(-50%);
   filter: drop-shadow(0 4px 4px rgba(0,0,0,0.15));
+  width: 120px;
+  height: 120px;
+}
+
+.dinoSvg {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.placedShape svg,
+.shapeHollowShadow svg {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 44px;
+  max-height: 44px;
 }
 
 /* Options Selector at the bottom */
@@ -104,7 +119,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 120px;
+  width: 45%;
+  max-width: 200px;
   box-shadow: var(--shadow-bubble);
   transition: var(--transition-bounce);
 }
@@ -163,10 +179,21 @@
   }
   .dinoOnBridge {
     bottom: 64px;
+    width: 60px;
+    height: 60px;
+  }
+  .placedShape svg,
+  .shapeHollowShadow svg {
+    max-width: 28px;
+    max-height: 28px;
+  }
+  .hollowBlock {
+    font-size: 1.1rem;
   }
   .shapeCard {
-    padding: 10px;
-    min-width: 90px;
+    padding: 10px 4px;
+    width: 46%;
+    max-width: 140px;
   }
   .shapeSvgWrapper {
     height: 60px;
