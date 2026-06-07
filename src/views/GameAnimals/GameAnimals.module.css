@@ -147,18 +147,32 @@
   opacity: 0.8;
 }
 
+@media (max-width: 1024px) {
+  .dinoCorner {
+    display: none;
+  }
+}
+
 @media (max-width: 768px) {
+  .gameContainer {
+    flex-direction: column;
+    gap: 16px;
+    padding-bottom: 1.5rem;
+  }
   .optionsContainer {
     flex-direction: row;
     max-width: 100%;
     gap: 8px;
+    justify-content: center;
   }
   .animalCard {
     flex-direction: column;
-    padding: 8px;
+    padding: 8px 4px;
     gap: 4px;
     flex: 1;
-    min-width: 90px;
+    min-width: unset;
+    width: 31%;
+    max-width: 115px;
     align-items: center;
   }
   .animalSvgWrapper {
@@ -167,9 +181,6 @@
   }
   .animalLabel {
     font-size: 0.85rem;
-  }
-  .dinoCorner {
-    display: none;
   }
 }
 

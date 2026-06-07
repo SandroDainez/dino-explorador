@@ -26,7 +26,7 @@ export const useSpeechSynthesis = () => {
         utterance.voice = ptVoice;
       }
 
-      utterance.pitch = 1.2; // Slightly higher pitch for child-friendly tone
+      utterance.pitch = 1.0; // Keep normal pitch to avoid robotic/metallic effect on mobile
       utterance.rate = 0.95;  // Slightly slower for better comprehension by kids
 
       window.speechSynthesis.speak(utterance);
