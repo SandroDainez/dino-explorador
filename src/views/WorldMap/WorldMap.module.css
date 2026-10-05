@@ -180,10 +180,10 @@
 
 .pond {
   position: absolute;
-  left: 34%;
-  top: 40%;
-  width: 14%;
-  height: 10%;
+  left: 5%;
+  bottom: 7%;
+  width: 11%;
+  height: 8%;
   border-radius: 50%;
   background: radial-gradient(ellipse at 40% 40%, #d5f3ff 0%, #5aa7c8 55%, #3d7f68 100%);
   box-shadow: inset 0 -4px 6px rgba(20, 50, 40, 0.2);
