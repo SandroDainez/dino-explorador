@@ -266,7 +266,7 @@ export const Home: React.FC = () => {
         <p className={styles.playHint}>O mapa com os seis joguinhos abre por aqui.</p>
         <button
           id="btn-play-game"
-          className={`${styles.btnPlay} animate-pulse-soft`}
+          className={styles.btnPlay}
           onClick={handleStartGame}
           onMouseEnter={playHover}
         >
