@@ -260,7 +260,7 @@ export const Home: React.FC = () => {
           </div>
 
           <button
-            id="btn-play-game-card"
+            id="btn-play-game"
             className={styles.btnPlay}
             onClick={handleStartGame}
             onMouseEnter={playHover}
@@ -274,23 +274,6 @@ export const Home: React.FC = () => {
           </button>
         </section>
       </div>
-      </div>
-
-      <div className={styles.actionContainer}>
-        <p className={styles.playHint}>O mapa com os seis joguinhos abre por aqui.</p>
-        <button
-          id="btn-play-game"
-          className={styles.btnPlay}
-          onClick={handleStartGame}
-          onMouseEnter={playHover}
-        >
-          <Sparkles size={26} />
-          <span className={styles.playText}>
-            <span className={styles.playTitle}>JOGAR</span>
-            <span className={styles.playSub}>Abrir os joguinhos</span>
-          </span>
-          <Sparkles size={26} />
-        </button>
       </div>
     </div>
   );
