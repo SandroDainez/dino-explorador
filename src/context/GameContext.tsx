@@ -53,16 +53,33 @@ const defaultProgress: GameProgress = {
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
+const PROGRESS_KEY = 'dino_explorador_progress';
+
+function readProgress(): GameProgress {
+  try {
+    // Old scores lived in localStorage and showed up for the next person
+    // on the same browser. Keep them only for this tab.
+    localStorage.removeItem(PROGRESS_KEY);
+    const saved = sessionStorage.getItem(PROGRESS_KEY);
+    if (!saved) return defaultProgress;
+    const parsed = JSON.parse(saved) as GameProgress;
+    return {
+      ...defaultProgress,
+      ...parsed,
+      stars: { ...defaultProgress.stars, ...parsed.stars },
+    };
+  } catch {
+    return defaultProgress;
+  }
+}
+
 export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [dino, setDino] = useState<DinoConfig>(() => {
     const saved = localStorage.getItem('dino_explorador_dino');
     return saved ? JSON.parse(saved) : defaultDino;
   });
 
-  const [progress, setProgress] = useState<GameProgress>(() => {
-    const saved = localStorage.getItem('dino_explorador_progress');
-    return saved ? JSON.parse(saved) : defaultProgress;
-  });
+  const [progress, setProgress] = useState<GameProgress>(readProgress);
 
   const [soundEnabled, setSoundEnabledState] = useState<boolean>(() => {
     const saved = localStorage.getItem('dino_explorador_sound');
@@ -81,7 +98,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [dino]);
 
   useEffect(() => {
-    localStorage.setItem('dino_explorador_progress', JSON.stringify(progress));
+    sessionStorage.setItem(PROGRESS_KEY, JSON.stringify(progress));
   }, [progress]);
 
   useEffect(() => {
