@@ -10,10 +10,11 @@
 html, body {
   width: 100%;
   height: 100%;
+  height: 100dvh;
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background: var(--color-sky);
+  background: #1d4e89;
   font-family: var(--font-body);
   color: var(--color-gray-900);
 }
@@ -21,7 +22,9 @@ html, body {
 #root {
   width: 100%;
   height: 100%;
+  height: 100dvh;
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   position: relative;

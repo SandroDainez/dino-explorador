@@ -4,6 +4,7 @@ import type { GameView } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
 import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
 import { DinoAvatar } from '../../components/DinoAvatar';
+import { PrehistoricScene } from '../../components/PrehistoricScene';
 import { Home, Award, Volume2, VolumeX, RefreshCw } from 'lucide-react';
 import styles from './WorldMap.module.css';
 
@@ -33,8 +34,8 @@ const MAP_NODES: MapNode[] = [
         <circle cx="56" cy="63" r="4.5" fill="#4CAF50" />
       </svg>
     ),
-    x: 15,
-    y: 35,
+    x: 16,
+    y: 30,
     color: '#FF5722',
     desc: 'Aprenda as cores!',
   },
@@ -49,8 +50,8 @@ const MAP_NODES: MapNode[] = [
         <polygon points="50,44 53,51 60,51 55,55 57,62 50,58 43,62 45,55 40,51 47,51" fill="#FFD54F" />
       </svg>
     ),
-    x: 45,
-    y: 20,
+    x: 44,
+    y: 18,
     color: '#9C27B0',
     desc: 'Brinque com as formas!',
   },
@@ -66,8 +67,8 @@ const MAP_NODES: MapNode[] = [
         <ellipse cx="58" cy="55" rx="6" ry="9" fill="#C8E6C9" stroke="#37474F" transform="rotate(20 58 55)" />
       </svg>
     ),
-    x: 80,
-    y: 30,
+    x: 76,
+    y: 28,
     color: '#2196F3',
     desc: 'Conte e choque ovos!',
   },
@@ -82,8 +83,8 @@ const MAP_NODES: MapNode[] = [
         <text x="70" y="54" fontFamily="Fredoka" fontSize="18" fontWeight="bold" fill="white" textAnchor="middle" style={{ textShadow: '1px 1px 0 #263238' }}>B</text>
       </svg>
     ),
-    x: 20,
-    y: 70,
+    x: 22,
+    y: 62,
     color: '#4CAF50',
     desc: 'Ache as letras certas!',
   },
@@ -100,8 +101,8 @@ const MAP_NODES: MapNode[] = [
         <polygon points="74,36 82,24 69,29" fill="#FF9800" />
       </svg>
     ),
-    x: 50,
-    y: 80,
+    x: 48,
+    y: 70,
     color: '#FF9800',
     desc: 'Descubra os animais!',
   },
@@ -116,8 +117,8 @@ const MAP_NODES: MapNode[] = [
         <polygon points="52,78 57,64 62,78" fill="#80D8FF" />
       </svg>
     ),
-    x: 82,
-    y: 70,
+    x: 78,
+    y: 58,
     color: '#00BCD4',
     desc: 'Conte os objetos!',
   },
@@ -153,7 +154,7 @@ export const WorldMap: React.FC = () => {
       clearTimeout(timer);
       cancelSpeech();
     };
-  }, []);
+  }, [speak, cancelSpeech]);
 
   const handleNodeClick = (node: MapNode) => {
     if (movingToNode) return; // prevent multiple clicks while moving
@@ -189,7 +190,7 @@ export const WorldMap: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      {/* Settings & Reset Bar */}
+      <PrehistoricScene />
       <div className={styles.topBar}>
         <button
           id="btn-back-to-customizer"
@@ -220,7 +221,7 @@ export const WorldMap: React.FC = () => {
               playClick();
               const nextState = !speechEnabled;
               setSpeechEnabled(nextState);
-              if (nextState) speak(mapInstructions);
+              if (nextState) speak(mapInstructions, true);
               else cancelSpeech();
             }}
             onMouseEnter={playHover}
@@ -260,17 +261,33 @@ export const WorldMap: React.FC = () => {
         </div>
       </div>
 
-      {/* Map Board */}
+      <h2 className={styles.mapHeading}>Toque em um lugar para jogar</h2>
+
       <div className={styles.mapArea}>
-        {/* Draw simple decorative pathway lines on background (SVG Overlay) */}
-        <svg className={styles.pathwaySvg}>
+        <div className={styles.mapDecor} aria-hidden="true">
+          <span className={styles.pond} />
+          <span className={styles.treeOne} />
+          <span className={styles.treeTwo} />
+          <span className={styles.boulder} />
+        </div>
+        <svg className={styles.pathwaySvg} viewBox="0 0 100 100" preserveAspectRatio="none">
           <path
-            d="M 15 35 Q 30 25, 45 20 T 80 30 T 82 70 T 50 80 T 20 70 Z"
+            d="M 16 30 C 28 18, 36 16, 44 18 C 58 22, 66 24, 76 28 C 84 40, 82 50, 78 58 C 70 68, 58 74, 48 70 C 36 66, 28 66, 22 62"
             fill="none"
-            stroke="rgba(255,255,255,0.4)"
-            strokeWidth="8"
-            strokeDasharray="15, 10"
+            stroke="#8a5a32"
+            strokeWidth="3.2"
             strokeLinecap="round"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
+          <path
+            d="M 16 30 C 28 18, 36 16, 44 18 C 58 22, 66 24, 76 28 C 84 40, 82 50, 78 58 C 70 68, 58 74, 48 70 C 36 66, 28 66, 22 62"
+            fill="none"
+            stroke="#e6c48a"
+            strokeWidth="1.3"
+            strokeLinecap="round"
+            strokeDasharray="4 5"
+            vectorEffect="non-scaling-stroke"
           />
         </svg>
 
@@ -282,7 +299,7 @@ export const WorldMap: React.FC = () => {
             <button
               key={node.id}
               id={`map-node-${node.id}`}
-              className={`${styles.mapNode} ${movingToNode === node.id ? styles.targetNode : ''}`}
+              className={`${styles.mapNode} ${movingToNode === node.id ? styles.targetNode : ''} ${node.x < 30 ? styles.edgeLeft : ''} ${node.x > 70 ? styles.edgeRight : ''}`}
               style={{
                 left: `${node.x}%`,
                 top: `${node.y}%`,

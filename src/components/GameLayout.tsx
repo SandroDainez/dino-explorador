@@ -3,6 +3,7 @@ import { useGame } from '../context/GameContext';
 import { useAudioEngine } from '../hooks/useAudioEngine';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { ArrowLeft, Volume2, VolumeX, HelpCircle } from 'lucide-react';
+import { PrehistoricScene } from './PrehistoricScene';
 import styles from './GameLayout.module.css';
 
 interface GameLayoutProps {
@@ -42,7 +43,7 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
     const nextState = !speechEnabled;
     setSpeechEnabled(nextState);
     if (nextState) {
-      setTimeout(() => speak(instructionText), 100);
+      speak(instructionText, true);
     } else {
       cancelSpeech();
     }
@@ -62,23 +63,13 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
       clearTimeout(timer);
       cancelSpeech();
     };
-  }, [instructionText, currentStep]);
+  }, [instructionText, currentStep, speak, cancelSpeech]);
 
   return (
     <div className={styles.container}>
       {/* BACKGROUND LANDSCAPE (Ultra Premium) */}
       <div className={styles.skyBackground}>
-        {/* Parallax Clouds */}
-        <div className={styles.cloud1} />
-        <div className={styles.cloud2} />
-        
-        {/* Flying Pterodactyl in the background */}
-        <div className={styles.pterodactylBg}>
-          <svg width="40" height="25" viewBox="0 0 40 25" fill="#E65100" opacity="0.35">
-            <path d="M 0 10 Q 10 0, 20 10 T 40 10 Q 30 18, 20 12 T 0 10" />
-            <path d="M 20 12 L 20 22 L 18 12 Z" />
-          </svg>
-        </div>
+        <PrehistoricScene />
 
         {/* Volcano Left */}
         <div className={styles.volcanoLeft}>

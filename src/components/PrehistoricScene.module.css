@@ -1,0 +1,205 @@
+.scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sky {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 78% 8%, rgba(255, 214, 140, 0.55), transparent 32%),
+    linear-gradient(180deg, #1d4e89 0%, #3d8ec8 28%, #f3c98a 62%, #f6e2b8 78%, #c8d98a 100%);
+}
+
+.sunWrap {
+  position: absolute;
+  top: 7%;
+  right: 12%;
+  width: 120px;
+  height: 120px;
+}
+
+.sunHalo {
+  position: absolute;
+  inset: -30px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 236, 180, 0.85) 0%, rgba(255, 196, 110, 0.25) 45%, transparent 70%);
+}
+
+.sun {
+  position: absolute;
+  inset: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, #fff8df 0%, #ffd56a 45%, #f5a53a 100%);
+  box-shadow: 0 0 30px rgba(255, 186, 72, 0.75);
+}
+
+.cloud {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 40px;
+  filter: drop-shadow(0 8px 10px rgba(70, 90, 120, 0.12));
+}
+
+.cloud::before,
+.cloud::after {
+  content: '';
+  position: absolute;
+  background: inherit;
+  border-radius: 50%;
+}
+
+.cloudFar {
+  width: 150px;
+  height: 42px;
+  top: 14%;
+  left: -180px;
+  opacity: 0.75;
+  animation: cloud-drift-slow 46s linear infinite;
+}
+
+.cloudFar::before {
+  width: 58px;
+  height: 58px;
+  top: -30px;
+  left: 22px;
+}
+
+.cloudFar::after {
+  width: 42px;
+  height: 42px;
+  top: -18px;
+  left: 70px;
+}
+
+.cloudMid {
+  width: 210px;
+  height: 54px;
+  top: 22%;
+  left: -240px;
+  opacity: 0.88;
+  animation: cloud-drift-medium 58s linear infinite;
+  animation-delay: -18s;
+}
+
+.cloudMid::before {
+  width: 84px;
+  height: 84px;
+  top: -46px;
+  left: 28px;
+}
+
+.cloudMid::after {
+  width: 62px;
+  height: 62px;
+  top: -28px;
+  left: 96px;
+}
+
+.cloudNear {
+  width: 120px;
+  height: 34px;
+  top: 10%;
+  left: -140px;
+  opacity: 0.7;
+  animation: cloud-drift-slow 72s linear infinite;
+  animation-delay: -30s;
+}
+
+.cloudNear::before {
+  width: 46px;
+  height: 46px;
+  top: -22px;
+  left: 18px;
+}
+
+.cloudNear::after {
+  width: 34px;
+  height: 34px;
+  top: -14px;
+  left: 54px;
+}
+
+.flyby {
+  position: absolute;
+  top: 16%;
+  width: 72px;
+  height: 32px;
+  left: -10%;
+  animation: pterodactyl-fly-bg 42s linear infinite;
+  filter: drop-shadow(0 6px 4px rgba(80, 30, 10, 0.15));
+}
+
+.ridges {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 8%;
+  width: 100%;
+  height: 48%;
+}
+
+.haze {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 14%;
+  height: 90px;
+  background: linear-gradient(180deg, transparent, rgba(255, 236, 205, 0.35) 40%, rgba(200, 217, 138, 0.15));
+}
+
+.flora {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 28%;
+  z-index: 2;
+}
+
+.ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 16%;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(255, 255, 255, 0.18), transparent 40%),
+    linear-gradient(180deg, #7eae4e 0%, #5d8c38 35%, #6a4a2c 100%);
+  z-index: 1;
+}
+
+.grassEdge {
+  position: absolute;
+  top: -10px;
+  left: 0;
+  right: 0;
+  height: 22px;
+  background:
+    radial-gradient(circle at 12px 16px, #8fce5d 10px, transparent 11px) 0 0 / 28px 22px repeat-x,
+    radial-gradient(circle at 8px 16px, #67a344 9px, transparent 10px) 10px 0 / 26px 22px repeat-x;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(20, 32, 28, 0.18) 100%);
+  z-index: 3;
+}
+
+@media (max-width: 768px) {
+  .sunWrap {
+    width: 84px;
+    height: 84px;
+    top: 4%;
+    right: 6%;
+  }
+
+  .flora {
+    height: 22%;
+  }
+}

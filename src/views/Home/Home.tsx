@@ -4,10 +4,12 @@ import type { DinoType, DinoColor, DinoAccessory } from '../../context/GameConte
 import { useAudioEngine } from '../../hooks/useAudioEngine';
 import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
 import { DinoAvatar } from '../../components/DinoAvatar';
+import { PrehistoricScene } from '../../components/PrehistoricScene';
 import { Volume2, VolumeX, Sparkles } from 'lucide-react';
 import styles from './Home.module.css';
 
 let initialLoad = true;
+let ignoreHomeAutoNarration = false;
 
 export const Home: React.FC = () => {
   const {
@@ -25,49 +27,52 @@ export const Home: React.FC = () => {
 
   const [showSplash, setShowSplash] = useState(initialLoad);
   const [isMobile, setIsMobile] = useState(false);
+  const [isShort, setIsShort] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
+      setIsShort(window.innerHeight <= 760);
     };
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const dinoSize = isMobile ? 130 : 240;
+  const dinoSize = isMobile ? 112 : isShort ? 128 : 200;
 
-  const introText = "Olá, amiguinho! Vamos criar o seu dinossauro de aventura? Escolha o tipo de dinossauro, a sua cor favorita e um acessório bem legal. Depois, clique no botão verde JOGAR para começar a nossa exploração!";
+  const introText = "Olá, amiguinho! Vamos criar o seu dinossauro de aventura? Escolha o tipo, a cor e um acessório. Depois, toque no botão verde JOGAR para abrir os joguinhos.";
 
   const handleStartDiscovery = () => {
     playSuccess();
     initialLoad = false;
+    ignoreHomeAutoNarration = true;
+    window.setTimeout(() => {
+      ignoreHomeAutoNarration = false;
+    }, 1600);
     setShowSplash(false);
-    // Trigger speech synthesis directly in the user click callback to unlock and narrate immediately
     speak(introText);
   };
 
   useEffect(() => {
-    // Narrate introduction when landing page mounts (only if splash is already dismissed, e.g. when returning to home later)
-    if (!showSplash) {
-      const timer = setTimeout(() => {
-        speak(introText);
-      }, 1000);
+    if (showSplash || ignoreHomeAutoNarration) return;
 
-      return () => {
-        clearTimeout(timer);
-        cancelSpeech();
-      };
-    }
-  }, [showSplash]);
+    const timer = window.setTimeout(() => {
+      speak(introText);
+    }, 500);
+
+    return () => {
+      window.clearTimeout(timer);
+      cancelSpeech();
+    };
+  }, [showSplash, speak, cancelSpeech]);
 
   if (showSplash) {
     return (
       <div className={styles.container}>
-        {/* Background Clouds */}
-        <div className={styles.cloud1} />
-        <div className={styles.cloud2} />
+        <PrehistoricScene />
 
+        <div className={styles.stage}>
         <div className={styles.splashCard}>
           <h1 className={styles.splashTitle}>
             <span className={styles.word1}>DINO</span>
@@ -81,7 +86,7 @@ export const Home: React.FC = () => {
               color="green"
               accessory="hat"
               animation="celebrate"
-              size={180}
+              size={isShort ? 96 : 168}
             />
           </div>
 
@@ -95,6 +100,7 @@ export const Home: React.FC = () => {
             <span>INICIAR AVENTURA!</span>
             <Sparkles size={24} />
           </button>
+        </div>
         </div>
       </div>
     );
@@ -123,11 +129,9 @@ export const Home: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      {/* Background Clouds */}
-      <div className={styles.cloud1} />
-      <div className={styles.cloud2} />
+      <PrehistoricScene />
 
-      {/* Top Bar Settings */}
+      <div className={styles.stage}>
       <div className={styles.settingsBar}>
         <button
           id="btn-toggle-sound-home"
@@ -146,7 +150,7 @@ export const Home: React.FC = () => {
             playClick();
             const nextState = !speechEnabled;
             setSpeechEnabled(nextState);
-            if (nextState) speak(introText);
+            if (nextState) speak(introText, true);
             else cancelSpeech();
           }}
           onMouseEnter={playHover}
@@ -162,10 +166,9 @@ export const Home: React.FC = () => {
           <span className={styles.word1}>DINO</span>
           <span className={styles.word2}>EXPLORADOR</span>
         </h1>
-        <p className={styles.subtitle}>Uma Aventura Educativa Pré-Histórica!</p>
+        <p className={styles.subtitle}>Crie seu explorador e entre nos joguinhos</p>
       </header>
 
-      {/* Main Selection Area */}
       <div className={styles.workspace}>
         {/* Preview Panel (Left) */}
         <section className={styles.previewSection}>
@@ -257,18 +260,22 @@ export const Home: React.FC = () => {
           </div>
         </section>
       </div>
+      </div>
 
-      {/* Start Button */}
       <div className={styles.actionContainer}>
+        <p className={styles.playHint}>O mapa com os seis joguinhos abre por aqui.</p>
         <button
           id="btn-play-game"
           className={`${styles.btnPlay} animate-pulse-soft`}
           onClick={handleStartGame}
           onMouseEnter={playHover}
         >
-          <Sparkles size={28} />
-          <span>JOGAR!</span>
-          <Sparkles size={28} />
+          <Sparkles size={26} />
+          <span className={styles.playText}>
+            <span className={styles.playTitle}>JOGAR</span>
+            <span className={styles.playSub}>Abrir os joguinhos</span>
+          </span>
+          <Sparkles size={26} />
         </button>
       </div>
     </div>
