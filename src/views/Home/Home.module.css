@@ -25,7 +25,7 @@
   align-items: center;
   justify-content: safe center;
   gap: 12px;
-  padding: 12px 28px 8px;
+  padding: 12px 28px 120px;
 }
 
 /* Clouds background */
@@ -169,7 +169,7 @@
   }
   .stage {
     justify-content: flex-start;
-    padding: 10px 14px 8px;
+    padding: 10px 14px 120px;
     gap: 10px;
   }
 }
@@ -273,6 +273,11 @@
   gap: 16px;
 }
 
+.configSection .btnPlay {
+  margin-top: 4px;
+  width: 100%;
+}
+
 .sectionTitle {
   font-size: 1.8rem;
   color: var(--color-blue-dark);
@@ -372,18 +377,20 @@
 
 /* Play Button Action */
 .actionContainer {
-  position: relative;
-  z-index: 5;
-  flex-shrink: 0;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 80;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px calc(18px + env(safe-area-inset-bottom));
-  background: linear-gradient(180deg, rgba(255, 248, 232, 0.08), rgba(255, 246, 226, 0.94) 30%);
+  gap: 4px;
+  padding: 10px 16px calc(14px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(255, 248, 232, 0), rgba(255, 246, 226, 0.96) 28%);
   border-top: 1px solid rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(10px);
+  box-shadow: 0 -10px 24px rgba(20, 40, 16, 0.12);
 }
 
 .playHint {
@@ -422,7 +429,9 @@
   color: white;
   background: linear-gradient(180deg, #5cbf63 0%, #2f8d3a 100%);
   border: none;
-  padding: 12px 28px;
+  width: min(520px, 100%);
+  justify-content: center;
+  padding: 12px 22px;
   border-radius: 22px;
   box-shadow:
     0 8px 0 #1f6a2b,
@@ -432,7 +441,6 @@
   align-items: center;
   gap: 12px;
   transition: var(--transition-bounce);
-  transform: translateY(0);
 }
 
 .btnPlay:hover {
@@ -462,7 +470,7 @@
   .stage {
     justify-content: flex-start;
     gap: 6px;
-    padding: 6px 20px 4px;
+    padding: 6px 20px 120px;
   }
 
   .gameTitle {

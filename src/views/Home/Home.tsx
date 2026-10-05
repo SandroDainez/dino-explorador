@@ -41,7 +41,7 @@ export const Home: React.FC = () => {
 
   const dinoSize = isMobile ? 112 : isShort ? 128 : 200;
 
-  const introText = "Olá, amiguinho! Vamos criar o seu dinossauro de aventura? Escolha o tipo, a cor e um acessório. Depois, toque no botão verde JOGAR para abrir os joguinhos.";
+  const introText = "Olá! Escolha o seu dinossauro. Depois toque no botão verde JOGAR para abrir os joguinhos.";
 
   const handleStartDiscovery = () => {
     playSuccess();
@@ -258,6 +258,20 @@ export const Home: React.FC = () => {
               ))}
             </div>
           </div>
+
+          <button
+            id="btn-play-game-card"
+            className={styles.btnPlay}
+            onClick={handleStartGame}
+            onMouseEnter={playHover}
+          >
+            <Sparkles size={22} />
+            <span className={styles.playText}>
+              <span className={styles.playTitle}>JOGAR</span>
+              <span className={styles.playSub}>Abrir os joguinhos</span>
+            </span>
+            <Sparkles size={22} />
+          </button>
         </section>
       </div>
       </div>

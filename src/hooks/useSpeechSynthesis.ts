@@ -57,7 +57,7 @@ function splitForSpeech(text: string): string[] {
   const source = sentences.length ? sentences : [normalized];
 
   for (const sentence of source) {
-    if (sentence.length <= 170) {
+    if (sentence.length <= 120) {
       chunks.push(sentence);
       continue;
     }
@@ -66,7 +66,7 @@ function splitForSpeech(text: string): string[] {
     let buffer = '';
     for (const piece of pieces) {
       const next = buffer ? `${buffer}, ${piece}` : piece;
-      if (next.length > 170 && buffer) {
+      if (next.length > 120 && buffer) {
         chunks.push(buffer);
         buffer = piece;
       } else {
@@ -91,8 +91,8 @@ function stopKeepAlive() {
 
 function startKeepAlive() {
   if (keepAliveTimer !== null || typeof window === 'undefined') return;
-  // Chrome pauses the speech engine on longer narrations. Resuming keeps
-  // the queue alive without the pause/resume cycle that clips words.
+  // If Chrome leaves the engine paused, resume it. Do not pause on purpose:
+  // that interruption is what cuts the sentence in the middle.
   keepAliveTimer = window.setInterval(() => {
     const synth = window.speechSynthesis;
     if (!synth) return;
@@ -140,27 +140,35 @@ export const useSpeechSynthesis = () => {
       const utterance = new SpeechSynthesisUtterance(chunks[index]);
       held.push(utterance);
       utterance.lang = 'pt-BR';
-      utterance.rate = 0.92;
+      utterance.rate = 0.9;
       utterance.pitch = 1;
       utterance.volume = 1;
       if (voice) utterance.voice = voice;
 
-      utterance.onend = () => {
-        if (myGen !== generation) return;
+      let chunkDone = false;
+      const finishChunk = () => {
+        if (chunkDone || myGen !== generation) return;
+        chunkDone = true;
         index += 1;
-        window.setTimeout(pump, 80);
+        window.setTimeout(pump, 90);
       };
 
+      utterance.onend = finishChunk;
       utterance.onerror = (event) => {
         if (myGen !== generation) return;
         if (event.error === 'interrupted' || event.error === 'canceled') return;
-        index += 1;
-        window.setTimeout(pump, 40);
+        finishChunk();
       };
 
       if (synth.paused) synth.resume();
       synth.speak(utterance);
       startKeepAlive();
+
+      const expectedMs = Math.max(1400, chunks[index].length * 75);
+      window.setTimeout(() => {
+        if (myGen !== generation || chunkDone) return;
+        if (!synth.speaking && !synth.pending) finishChunk();
+      }, expectedMs);
     };
 
     const wasBusy = synth.speaking || synth.pending;
