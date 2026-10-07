@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
 import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
@@ -78,13 +78,22 @@ interface Question {
   options: ShapeOption[];
 }
 
+function buildShapeQuestions(): Question[] {
+  const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
+  return shuffle(SHAPES).map((targetShape) => {
+    const pool = SHAPES.filter((shape) => shape.id !== targetShape.id);
+    const randomOthers = shuffle(pool).slice(0, 2);
+    return { targetShape, options: shuffle([targetShape, ...randomOthers]) };
+  });
+}
+
 export const GameShapes: React.FC = () => {
   const { dino, completeWorld, setCurrentView } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
-  const { speak, cancelSpeech } = useSpeechSynthesis();
+  const { cancelSpeech } = useSpeechSynthesis();
 
   const [step, setStep] = useState(0);
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [questions, setQuestions] = useState<Question[]>(buildShapeQuestions);
   const [gameState, setGameState] = useState<'playing' | 'victory'>('playing');
   const [dinoEmotion, setDinoEmotion] = useState<'idle' | 'walk' | 'celebrate' | 'sad'>('idle');
   const [totalAttempts, setTotalAttempts] = useState(0);
@@ -95,27 +104,14 @@ export const GameShapes: React.FC = () => {
 
   const totalQuestions = 5;
 
-  useEffect(() => {
-    // Generate 5 questions
-    const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
-    const shuffledShapes = shuffle(SHAPES);
-    
-    // We have 5 shapes, so each question will use one of them as the target!
-    const questionsList: Question[] = shuffledShapes.map((targetShape) => {
-      const pool = SHAPES.filter((s) => s.id !== targetShape.id);
-      const randomOthers = shuffle(pool).slice(0, 2); // 2 distractors (total 3 options)
-      const options = shuffle([targetShape, ...randomOthers]);
-      return { targetShape, options };
-    });
-
-    setQuestions(questionsList);
-  }, []);
-
   const currentQuestion = questions[step];
   
-  const instructionText = currentQuestion
-    ? `Dino precisa da pedra em forma de ${currentQuestion.targetShape.name} para consertar a ponte! Qual é ela?`
-    : '';
+  const starsForRun = totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1;
+  const instructionText = gameState === 'victory'
+    ? `Incrível! Você consertou a ponte inteira! O Dino conseguiu atravessar para o templo e ganhou ${starsForRun} estrelas!`
+    : currentQuestion
+      ? `Dino precisa da pedra em forma de ${currentQuestion.targetShape.name} para consertar a ponte! Qual é ela?`
+      : '';
 
   const handleShapeClick = (shapeId: string) => {
     if (gameState === 'victory' || dinoEmotion !== 'idle' || animatingShape !== null) return;
@@ -172,7 +168,6 @@ export const GameShapes: React.FC = () => {
     else if (totalAttempts <= 7) starsEarned = 2;
 
     completeWorld('shapes', starsEarned);
-    speak(`Incrível! Você consertou a ponte inteira! O Dino conseguiu atravessar para o templo e ganhou ${starsEarned} estrelas!`);
   };
 
   const handlePlayAgain = () => {
@@ -186,23 +181,14 @@ export const GameShapes: React.FC = () => {
     setBridgeState([false, false, false, false, false]);
     setAnimatingShape(null);
 
-    // Regenerate questions
-    const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
-    const shuffledShapes = shuffle(SHAPES);
-    const questionsList: Question[] = shuffledShapes.map((targetShape) => {
-      const pool = SHAPES.filter((s) => s.id !== targetShape.id);
-      const randomOthers = shuffle(pool).slice(0, 2);
-      const options = shuffle([targetShape, ...randomOthers]);
-      return { targetShape, options };
-    });
-    setQuestions(questionsList);
+    setQuestions(buildShapeQuestions());
   };
 
   return (
     <GameLayout
       title="Templo das Formas"
-      instructionText={gameState === 'victory' ? 'Ponte consertada!' : instructionText}
-      starsEarned={gameState === 'victory' ? (totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1) : 0}
+      instructionText={instructionText}
+      starsEarned={gameState === 'victory' ? starsForRun : 0}
       currentStep={gameState === 'victory' ? undefined : step + 1}
       totalSteps={gameState === 'victory' ? undefined : totalQuestions}
     >
@@ -212,6 +198,24 @@ export const GameShapes: React.FC = () => {
         <div className={styles.gameContainer}>
           {/* Bridge Arena */}
           <div className={styles.bridgeArea}>
+            <div className={styles.dinoTrack}>
+              <div
+                className={styles.dinoOnBridge}
+                style={{
+                  left: `${15 + step * 15}%`,
+                  transition: 'left 1s ease-in-out',
+                }}
+              >
+                <DinoAvatar
+                  type={dino.type}
+                  color={dino.color}
+                  accessory={dino.accessory}
+                  animation={dinoEmotion}
+                  size={116}
+                />
+              </div>
+            </div>
+
             {/* The Bridge */}
             <div className={styles.bridge}>
               {bridgeState.map((fixed, idx) => {
@@ -246,23 +250,6 @@ export const GameShapes: React.FC = () => {
                   </div>
                 );
               })}
-            </div>
-
-            {/* Dino Walking on the Bridge */}
-            <div
-              className={styles.dinoOnBridge}
-              style={{
-                left: `${15 + step * 15}%`,
-                transition: 'left 1s ease-in-out',
-              }}
-            >
-              <DinoAvatar
-                type={dino.type}
-                color={dino.color}
-                accessory={dino.accessory}
-                animation={dinoEmotion}
-                size={120}
-              />
             </div>
           </div>
 

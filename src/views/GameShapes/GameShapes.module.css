@@ -2,25 +2,28 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100%;
+  height: auto;
+  min-height: 100%;
   align-items: center;
-  justify-content: space-around;
-  gap: 24px;
+  justify-content: flex-start;
+  gap: 20px;
 }
 
 /* Bridge Arena */
 .bridgeArea {
   position: relative;
   width: 100%;
-  height: 250px;
+  height: auto;
+  flex-shrink: 0;
   background: linear-gradient(to bottom, #cfd8dc 0%, #90a4ae 100%);
   border-radius: var(--radius-xl);
   border: 4px solid #78909c;
-  overflow: hidden;
+  overflow: visible;
   display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding-bottom: 24px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 12px 12px 18px;
 }
 
 .bridge {
@@ -75,13 +78,22 @@
   opacity: 0.5;
 }
 
-/* Dino avatar positions on bridge */
+.dinoTrack {
+  position: relative;
+  width: 100%;
+  height: 118px;
+  flex-shrink: 0;
+  z-index: 2;
+}
+
+/* Dino stands on the bridge, inside the layout so the top is never clipped */
 .dinoOnBridge {
   position: absolute;
-  bottom: 95px; /* stands on top of the bridge */
-  z-index: 10;
+  bottom: -6px;
+  z-index: 2;
   transform: translateX(-50%);
   filter: drop-shadow(0 4px 4px rgba(0,0,0,0.15));
+  line-height: 0;
 }
 
 /* Options Selector at the bottom */
@@ -152,16 +164,19 @@
 
 @media (max-width: 768px) {
   .bridgeArea {
-    height: 190px;
-    padding-bottom: 16px;
+    padding: 8px 8px 12px;
   }
   .bridge {
     height: 60px;
     gap: 6px;
     padding: 4px;
   }
-  .dinoOnBridge {
-    bottom: 64px;
+  .dinoTrack {
+    height: 92px;
+  }
+  .dinoOnBridge svg {
+    width: 88px;
+    height: 88px;
   }
   .shapeCard {
     padding: 10px;

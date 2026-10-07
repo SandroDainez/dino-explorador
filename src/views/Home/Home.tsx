@@ -59,7 +59,7 @@ export const Home: React.FC = () => {
 
     const timer = window.setTimeout(() => {
       speak(introText);
-    }, 500);
+    }, 0);
 
     return () => {
       window.clearTimeout(timer);

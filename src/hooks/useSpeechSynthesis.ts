@@ -33,54 +33,21 @@ function pickPortugueseVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoi
     const name = voice.name.toLowerCase();
     let value = 0;
     if (normalize(voice.lang).startsWith('pt-br')) value += 40;
-    if (/neural|natural|premium|enhanced|wavenet|google/.test(name)) value += 25;
-    if (/luciana|francisca|maria|fernanda|vit[oó]ria|camila|antonio/.test(name)) value += 12;
-    if (/compact|espeak/.test(name)) value -= 15;
+    // On-device voices start immediately. Google voices are downloaded and
+    // often stay silent or begin a second later.
+    if (voice.localService) value += 35;
+    if (/luciana|francisca|maria|fernanda|vit[oó]ria|camila|antonio|felipe|joana/.test(name)) value += 20;
+    if (/google|wavenet|network/.test(name)) value -= 40;
+    if (/compact|espeak/.test(name)) value -= 10;
     return value;
   };
 
   return [...pool].sort((a, b) => score(b) - score(a))[0];
 }
 
-function splitForSpeech(text: string): string[] {
-  const normalized = text.replace(/\s+/g, ' ').trim();
-  if (!normalized) return [];
-
-  // Ellipsis is a pause ("1... 2..."), not three sentence endings.
-  const protectedText = normalized.replace(/\.{2,}/g, '…');
-  const sentences = protectedText
-    .split(/(?<=[.!?…])\s+/)
-    .map((part) => part.replace(/…/g, '...').trim())
-    .filter((part) => /[\p{L}\p{N}]/u.test(part));
-
-  const chunks: string[] = [];
-  const source = sentences.length ? sentences : [normalized];
-
-  for (const sentence of source) {
-    if (sentence.length <= 120) {
-      chunks.push(sentence);
-      continue;
-    }
-
-    const pieces = sentence.split(/,\s+/);
-    let buffer = '';
-    for (const piece of pieces) {
-      const next = buffer ? `${buffer}, ${piece}` : piece;
-      if (next.length > 120 && buffer) {
-        chunks.push(buffer);
-        buffer = piece;
-      } else {
-        buffer = next;
-      }
-    }
-    if (buffer) chunks.push(buffer);
-  }
-
-  return chunks;
-}
-
 let generation = 0;
 let keepAliveTimer: number | null = null;
+const retainedUtterances: SpeechSynthesisUtterance[] = [];
 
 function stopKeepAlive() {
   if (keepAliveTimer !== null) {
@@ -91,8 +58,8 @@ function stopKeepAlive() {
 
 function startKeepAlive() {
   if (keepAliveTimer !== null || typeof window === 'undefined') return;
-  // If Chrome leaves the engine paused, resume it. Do not pause on purpose:
-  // that interruption is what cuts the sentence in the middle.
+  // Chrome sometimes pauses the engine on its own. Resume only — pausing
+  // here is what chops the sentence in the middle.
   keepAliveTimer = window.setInterval(() => {
     const synth = window.speechSynthesis;
     if (!synth) return;
@@ -112,8 +79,10 @@ export const useSpeechSynthesis = () => {
   const cancelSpeech = useCallback(() => {
     generation += 1;
     stopKeepAlive();
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      window.speechSynthesis.cancel();
+    const synth = typeof window !== 'undefined' ? window.speechSynthesis : undefined;
+    // cancel() while the engine is idle makes the next speak() silent on Chrome.
+    if (synth && (synth.speaking || synth.pending)) {
+      synth.cancel();
     }
   }, []);
 
@@ -121,70 +90,55 @@ export const useSpeechSynthesis = () => {
     if (!(force || speechEnabled)) return;
     if (typeof window === 'undefined' || !window.speechSynthesis) return;
 
-    const synth = window.speechSynthesis;
-    const chunks = splitForSpeech(text);
-    if (!chunks.length) return;
+    const phrase = text.replace(/\s+/g, ' ').trim();
+    if (!phrase) return;
 
+    const synth = window.speechSynthesis;
     const myGen = ++generation;
     const voice = pickPortugueseVoice(loadVoices());
-    const held: SpeechSynthesisUtterance[] = [];
-    let index = 0;
 
-    const pump = () => {
-      if (myGen !== generation) return;
-      if (index >= chunks.length) {
-        stopKeepAlive();
-        return;
-      }
-
-      const utterance = new SpeechSynthesisUtterance(chunks[index]);
-      held.push(utterance);
+    const createUtterance = () => {
+      const utterance = new SpeechSynthesisUtterance(phrase);
+      retainedUtterances.push(utterance);
+      if (retainedUtterances.length > 8) retainedUtterances.shift();
       utterance.lang = 'pt-BR';
-      utterance.rate = 0.9;
+      utterance.rate = 1;
       utterance.pitch = 1;
       utterance.volume = 1;
       if (voice) utterance.voice = voice;
-
-      let chunkDone = false;
-      const finishChunk = () => {
-        if (chunkDone || myGen !== generation) return;
-        chunkDone = true;
-        index += 1;
-        window.setTimeout(pump, 90);
+      utterance.onend = () => {
+        if (myGen === generation) stopKeepAlive();
       };
-
-      utterance.onend = finishChunk;
-      utterance.onerror = (event) => {
-        if (myGen !== generation) return;
-        if (event.error === 'interrupted' || event.error === 'canceled') return;
-        finishChunk();
-      };
-
-      if (synth.paused) synth.resume();
-      synth.speak(utterance);
-      startKeepAlive();
-
-      const expectedMs = Math.max(1400, chunks[index].length * 75);
-      window.setTimeout(() => {
-        if (myGen !== generation || chunkDone) return;
-        if (!synth.speaking && !synth.pending) finishChunk();
-      }, expectedMs);
+      return utterance;
     };
 
-    const wasBusy = synth.speaking || synth.pending;
-    if (wasBusy) synth.cancel();
-
-    if (wasBusy) {
-      // Chrome drops speak() issued in the same turn as cancel().
+    const start = (attempt = 0) => {
+      if (myGen !== generation) return;
+      if (synth.paused) synth.resume();
+      const utterance = createUtterance();
+      let started = false;
+      utterance.onstart = () => {
+        started = true;
+      };
+      synth.speak(utterance);
+      startKeepAlive();
+      if (attempt >= 1) return;
+      // One retry only when Chrome dropped the utterance. If audio already
+      // started, a second speak() would cut the sentence off.
       window.setTimeout(() => {
-        if (myGen !== generation) return;
-        pump();
-      }, 60);
+        if (myGen !== generation || started) return;
+        if (!synth.speaking && !synth.pending) start(attempt + 1);
+      }, 450);
+    };
+
+    if (synth.speaking || synth.pending) {
+      synth.cancel();
+      // Chrome drops speak() issued in the same turn as cancel().
+      window.setTimeout(() => start(0), 80);
       return;
     }
 
-    // First narration must start inside the user gesture (iOS/Safari).
-    pump();
+    start(0);
   }, [speechEnabled]);
 
   return {

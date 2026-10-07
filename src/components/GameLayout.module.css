@@ -160,6 +160,7 @@
   margin-bottom: 12px;
   gap: 16px;
   position: relative;
+  flex-shrink: 0;
 }
 
 .titleContainer {
@@ -242,6 +243,7 @@
   cursor: pointer;
   transition: var(--transition-smooth);
   position: relative;
+  flex-shrink: 0;
 }
 
 .instructionBox:hover {
@@ -301,9 +303,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   position: relative;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 @media (max-width: 768px) {

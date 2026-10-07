@@ -55,12 +55,15 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
   };
 
   React.useEffect(() => {
-    const timer = setTimeout(() => {
-      speak(instructionText);
-    }, 800);
-    
+    const phrase = instructionText.trim();
+    if (!phrase) return;
+
+    const timer = window.setTimeout(() => {
+      speak(phrase);
+    }, 0);
+
     return () => {
-      clearTimeout(timer);
+      window.clearTimeout(timer);
       cancelSpeech();
     };
   }, [instructionText, currentStep, speak, cancelSpeech]);
