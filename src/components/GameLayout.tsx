@@ -26,6 +26,13 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
   const { soundEnabled, setSoundEnabled, speechEnabled, setSpeechEnabled, setCurrentView } = useGame();
   const { playClick, playHover } = useAudioEngine();
   const { speak, cancelSpeech } = useSpeechSynthesis();
+  const speakRef = React.useRef(speak);
+
+  const trimmedInstruction = instructionText.trim();
+  const spokenInstruction =
+    currentStep != null && totalSteps != null && trimmedInstruction
+      ? `Pergunta ${currentStep}. ${trimmedInstruction}`
+      : trimmedInstruction;
 
   const handleBack = () => {
     playClick();
@@ -43,7 +50,7 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
     const nextState = !speechEnabled;
     setSpeechEnabled(nextState);
     if (nextState) {
-      speak(instructionText, true);
+      speak(spokenInstruction, true);
     } else {
       cancelSpeech();
     }
@@ -51,22 +58,24 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
 
   const handleNarrationClick = () => {
     playClick();
-    speak(instructionText);
+    speak(spokenInstruction);
   };
 
   React.useEffect(() => {
-    const phrase = instructionText.trim();
+    speakRef.current = speak;
+  });
+
+  // Say the line for this phase. Don't cancel in this cleanup: cancelling and
+  // speaking in the same turn is what left the next question silent.
+  React.useEffect(() => {
+    const phrase = spokenInstruction.trim();
     if (!phrase) return;
+    speakRef.current(phrase);
+  }, [spokenInstruction]);
 
-    const timer = window.setTimeout(() => {
-      speak(phrase);
-    }, 0);
-
-    return () => {
-      window.clearTimeout(timer);
-      cancelSpeech();
-    };
-  }, [instructionText, currentStep, speak, cancelSpeech]);
+  React.useEffect(() => () => {
+    cancelSpeech();
+  }, [cancelSpeech]);
 
   return (
     <div className={styles.container}>

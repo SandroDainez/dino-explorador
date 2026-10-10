@@ -205,10 +205,13 @@ export const GameAnimals: React.FC = () => {
   }, []);
 
   const currentQuestion = questions[step];
-  
-  const instructionText = currentQuestion
-    ? `Qual animal faz essa sombra escura na floresta?`
-    : '';
+  const starsForRun = totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1;
+
+  const instructionText = gameState === 'victory'
+    ? `Muito bem! Você descobriu todos os animais da floresta! Você ganhou ${starsForRun} estrelas!`
+    : currentQuestion
+      ? `Qual animal faz essa sombra escura na floresta?`
+      : '';
 
   const handleAnimalClick = (animal: AnimalOption) => {
     if (gameState === 'victory' || dinoEmotion !== 'idle' || isRevealed) return;
@@ -291,8 +294,8 @@ export const GameAnimals: React.FC = () => {
   return (
     <GameLayout
       title="Floresta dos Animais"
-      instructionText={gameState === 'victory' ? 'Sombra encontrada!' : instructionText}
-      starsEarned={gameState === 'victory' ? (totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1) : 0}
+      instructionText={instructionText}
+      starsEarned={gameState === 'victory' ? starsForRun : 0}
       currentStep={gameState === 'victory' ? undefined : step + 1}
       totalSteps={gameState === 'victory' ? undefined : totalQuestions}
     >

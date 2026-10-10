@@ -66,10 +66,13 @@ export const GameCounting: React.FC = () => {
   }, []);
 
   const currentQuestion = questions[step];
-  
-  const instructionText = currentQuestion
-    ? `Dino entrou na caverna! Quantos vaga-lumes brilhantes você consegue contar?`
-    : '';
+  const starsForRun = totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1;
+
+  const instructionText = gameState === 'victory'
+    ? `Muito bem! Você contou todos os vaga-lumes! Você ganhou ${starsForRun} estrelas!`
+    : currentQuestion
+      ? `Dino entrou na caverna! Quantos vaga-lumes brilhantes você consegue contar?`
+      : '';
 
   const handleNumberClick = (num: number) => {
     if (gameState === 'victory' || dinoEmotion !== 'idle' || isCounted) return;
@@ -179,8 +182,8 @@ export const GameCounting: React.FC = () => {
   return (
     <GameLayout
       title="Caverna da Contagem"
-      instructionText={gameState === 'victory' ? 'Vaga-lumes contados!' : instructionText}
-      starsEarned={gameState === 'victory' ? (totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1) : 0}
+      instructionText={instructionText}
+      starsEarned={gameState === 'victory' ? starsForRun : 0}
       currentStep={gameState === 'victory' ? undefined : step + 1}
       totalSteps={gameState === 'victory' ? undefined : totalQuestions}
     >
