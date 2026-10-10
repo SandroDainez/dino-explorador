@@ -1,6 +1,8 @@
 // Chrome and Safari drop speechSynthesis.speak() when it happens in the same
 // turn as cancel(), and cancel() while the engine is idle can mute the next
-// line. Phase changes used to do exactly that, so some questions never spoke.
+// line. Replacing the current question used to do exactly that, so some
+// phases never spoke. Lines are queued instead, and a cancelled line waits
+// before the next one starts.
 
 const CANCEL_GAP_MS = 200;
 const SILENT_RETRY_MS = 450;
@@ -37,10 +39,16 @@ type SynthLike = {
 
 type TimerHandle = ReturnType<typeof setTimeout>;
 
+type SpeechItem = {
+  phrase: string;
+  gen: number;
+};
+
 let generation = 0;
+let runId = 0;
 let lastCancelAt = 0;
-let activeStarted = false;
-let activeGeneration = -1;
+let queue: SpeechItem[] = [];
+let current: (SpeechItem & { run: number; started: boolean }) | null = null;
 let startTimer: TimerHandle | null = null;
 let watchTimer: TimerHandle | null = null;
 let keepAliveTimer: TimerHandle | null = null;
@@ -125,28 +133,6 @@ function armGesture(phrase: string, gen: number) {
   gestureGeneration = gen;
 }
 
-function bindGestureReplay() {
-  if (gestureBound || typeof window === 'undefined') return;
-  gestureBound = true;
-  window.addEventListener(
-    'pointerdown',
-    () => {
-      const synth = getSynth();
-      if (!synth) return;
-      if (synth.paused) synth.resume();
-      if (!gesturePhrase || gestureGeneration !== generation) return;
-      if (activeStarted && activeGeneration === generation) return;
-      if (synth.speaking || synth.pending) return;
-      const phrase = gesturePhrase;
-      const gen = gestureGeneration;
-      gesturePhrase = null;
-      clearStartTimer();
-      launch(phrase, gen, 1);
-    },
-    true,
-  );
-}
-
 function createUtterance(phrase: string): UtteranceLike {
   const Utterance = SpeechSynthesisUtterance as unknown as new (text: string) => UtteranceLike;
   const utterance = new Utterance(phrase);
@@ -162,31 +148,37 @@ function createUtterance(phrase: string): UtteranceLike {
   return utterance;
 }
 
-function launch(phrase: string, gen: number, attempt: number) {
-  const synth = getSynth();
-  if (!synth || gen !== generation) return;
+function finish(run: number) {
+  if (!current || current.run !== run) return;
+  current = null;
+  stopKeepAlive();
+  pump();
+}
 
+function play(item: SpeechItem, attempt: number) {
+  const synth = getSynth();
+  if (!synth || item.gen !== generation) return;
+
+  const myRun = ++runId;
   clearWatchTimer();
+  current = { ...item, run: myRun, started: false };
   if (synth.paused) synth.resume();
 
-  const utterance = createUtterance(phrase);
-  let started = false;
-  activeStarted = false;
-  activeGeneration = gen;
+  const utterance = createUtterance(item.phrase);
+  const startedAt = Date.now();
 
   utterance.onstart = () => {
-    started = true;
-    activeStarted = true;
-    if (gestureGeneration === gen) gesturePhrase = null;
+    if (!current || current.run !== myRun) return;
+    current.started = true;
+    if (gestureGeneration === item.gen && gesturePhrase === item.phrase) gesturePhrase = null;
   };
   utterance.onend = () => {
-    if (gen !== generation) return;
-    stopKeepAlive();
+    finish(myRun);
   };
   utterance.onerror = (event) => {
-    if (gen !== generation) return;
+    if (item.gen !== generation) return;
     if (event.error === 'not-allowed' || event.error === 'synthesis-failed') {
-      armGesture(phrase, gen);
+      armGesture(item.phrase, item.gen);
     }
   };
 
@@ -194,80 +186,116 @@ function launch(phrase: string, gen: number, attempt: number) {
   synth.speak(utterance);
   startKeepAlive();
 
-  const startedAt = Date.now();
   const watch = () => {
     watchTimer = null;
-    if (gen !== generation || started) return;
-
+    if (!current || current.run !== myRun || current.started) return;
     const busy = synth.speaking || synth.pending;
     if (!busy) {
       if (attempt < 1) {
-        launch(phrase, gen, attempt + 1);
+        current = null;
+        play(item, attempt + 1);
         return;
       }
-      armGesture(phrase, gen);
+      armGesture(item.phrase, item.gen);
+      finish(myRun);
       return;
     }
 
-    // A slow voice can take a moment to fire onstart. Only treat the engine
-    // as stuck when it stays "speaking" without ever starting.
     if (Date.now() - startedAt < STUCK_RETRY_MS) {
       watchTimer = window.setTimeout(watch, 250);
       return;
     }
 
-    if (attempt >= 1) {
-      synth.cancel();
-      lastCancelAt = Date.now();
-      armGesture(phrase, gen);
+    synth.cancel();
+    lastCancelAt = Date.now();
+    if (attempt < 1) {
+      current = null;
+      clearStartTimer();
+      startTimer = window.setTimeout(() => {
+        startTimer = null;
+        if (item.gen !== generation) return;
+        play(item, attempt + 1);
+      }, CANCEL_GAP_MS);
       return;
     }
 
-    synth.cancel();
-    lastCancelAt = Date.now();
-    armGesture(phrase, gen);
-    clearStartTimer();
-    startTimer = window.setTimeout(() => {
-      startTimer = null;
-      launch(phrase, gen, attempt + 1);
-    }, CANCEL_GAP_MS);
+    armGesture(item.phrase, item.gen);
+    finish(myRun);
   };
 
   watchTimer = window.setTimeout(watch, SILENT_RETRY_MS);
 }
 
-function scheduleLaunch(phrase: string, gen: number) {
+function pump() {
+  if (current || startTimer !== null || queue.length === 0) return;
+
   const wait = Math.max(0, lastCancelAt + CANCEL_GAP_MS - Date.now());
-  clearStartTimer();
-  if (wait === 0) {
-    launch(phrase, gen, 0);
+  if (wait > 0) {
+    startTimer = window.setTimeout(() => {
+      startTimer = null;
+      pump();
+    }, wait);
     return;
   }
-  startTimer = window.setTimeout(() => {
-    startTimer = null;
-    if (gen !== generation) return;
-    launch(phrase, gen, 0);
-  }, wait);
+
+  const next = queue[0];
+  if (next.gen !== generation) {
+    queue.shift();
+    pump();
+    return;
+  }
+
+  queue.shift();
+  play(next, 0);
 }
 
-export function speakPhrase(text: string) {
+function bindGestureReplay() {
+  if (gestureBound || typeof window === 'undefined') return;
+  gestureBound = true;
+  window.addEventListener(
+    'pointerdown',
+    () => {
+      const synth = getSynth();
+      if (!synth) return;
+      if (synth.paused) synth.resume();
+      if (!gesturePhrase || gestureGeneration !== generation) return;
+      if (current?.started) return;
+      if (synth.speaking || synth.pending) return;
+      const phrase = gesturePhrase;
+      const gen = gestureGeneration;
+      gesturePhrase = null;
+      clearStartTimer();
+      clearWatchTimer();
+      current = null;
+      play({ phrase, gen }, 1);
+    },
+    true,
+  );
+}
+
+export function speakPhrase(text: string, interrupt = false) {
   bindGestureReplay();
   const phrase = text.replace(/\s+/g, ' ').trim();
   if (!phrase || !getSynth()) return;
 
-  generation += 1;
-  const gen = generation;
-  activeStarted = false;
-  gesturePhrase = null;
-  clearStartTimer();
-  clearWatchTimer();
-  cancelIfBusy();
-  scheduleLaunch(phrase, gen);
+  if (interrupt) {
+    generation += 1;
+    queue = [];
+    current = null;
+    gesturePhrase = null;
+    clearStartTimer();
+    clearWatchTimer();
+    cancelIfBusy();
+  }
+
+  queue.push({ phrase, gen: generation });
+  pump();
 }
 
 export function cancelPhrase() {
   generation += 1;
-  activeStarted = false;
+  queue = [];
+  current = null;
   gesturePhrase = null;
   clearStartTimer();
   clearWatchTimer();
@@ -279,8 +307,6 @@ export function resetSpeechEngineForTests() {
   cancelPhrase();
   generation = 0;
   lastCancelAt = 0;
-  activeStarted = false;
-  activeGeneration = -1;
   gesturePhrase = null;
   gestureGeneration = -1;
   stopKeepAlive();

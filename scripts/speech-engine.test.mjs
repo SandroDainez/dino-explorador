@@ -10,6 +10,7 @@ function delay(ms) {
 function installSpeechShim() {
   const calls = [];
   const cancels = [];
+  const utterances = [];
   let dropRemaining = 0;
   let stuck = false;
   const listeners = new Map();
@@ -27,9 +28,11 @@ function installSpeechShim() {
         at: Date.now(),
         dropped,
       });
+      utterances.push(utterance);
       if (dropped) {
         this.speaking = false;
         this.pending = false;
+        utterance.onerror?.({ error: 'not-allowed' });
         return;
       }
       this.speaking = true;
@@ -89,6 +92,7 @@ function installSpeechShim() {
   return {
     calls,
     cancels,
+    utterances,
     synth,
     setDropRemaining(count) {
       dropRemaining = count;
@@ -109,6 +113,7 @@ test.beforeEach(() => {
   engine.resetSpeechEngineForTests();
   shim.calls.length = 0;
   shim.cancels.length = 0;
+  shim.utterances.length = 0;
   shim.synth.speaking = false;
   shim.synth.pending = false;
   shim.setDropRemaining(0);
@@ -127,29 +132,37 @@ test('does not cancel while the engine is idle', () => {
   assert.equal(shim.cancels.length, 0);
 });
 
+test('queues the next phase instead of cancelling it', () => {
+  engine.speakPhrase('Pergunta 1. Qual é a cor?');
+  engine.speakPhrase('Pergunta 2. Qual é a forma?');
+
+  assert.equal(shim.cancels.length, 0);
+  assert.equal(shim.calls.filter((call) => call.text.startsWith('Pergunta 2')).length, 0);
+
+  shim.utterances[0].onend();
+  const next = shim.calls.filter((call) => call.text.startsWith('Pergunta 2'));
+  assert.equal(next.length, 1);
+  assert.equal(next[0].dropped, false);
+});
+
 test('waits after cancel before speaking the next phase', async () => {
   engine.speakPhrase('Pergunta 1. Qual é a cor?');
-  await delay(0);
+  engine.cancelPhrase();
   const startedAt = Date.now();
   engine.speakPhrase('Pergunta 2. Qual é a forma?');
 
-  assert.equal(shim.cancels.length, 1);
-  const spoken = shim.calls.filter((call) => call.text.startsWith('Pergunta 2'));
-  assert.equal(spoken.length, 0);
-
+  assert.equal(shim.calls.filter((call) => call.text.startsWith('Pergunta 2')).length, 0);
   await delay(260);
   const after = shim.calls.filter((call) => call.text.startsWith('Pergunta 2'));
   assert.equal(after.length, 1);
   assert.ok(after[0].at - startedAt >= 180);
 });
 
-test('retries a phase line Chrome dropped after cancel', async () => {
-  engine.speakPhrase('Pergunta 1. Ache a letra.');
-  await delay(0);
+test('retries a phase line Chrome dropped', async () => {
   shim.setDropRemaining(1);
   engine.speakPhrase('Pergunta 2. Ache a letra.');
 
-  await delay(260);
+  await delay(80);
   const early = shim.calls.filter((call) => call.text.startsWith('Pergunta 2'));
   assert.equal(early.length, 1);
   assert.equal(early[0].dropped, true);
@@ -158,6 +171,20 @@ test('retries a phase line Chrome dropped after cancel', async () => {
   const retried = shim.calls.filter((call) => call.text.startsWith('Pergunta 2'));
   assert.equal(retried.length, 2);
   assert.equal(retried[1].dropped, false);
+});
+
+test('keeps a line recovered by a tap instead of cancelling it', async () => {
+  shim.setDropRemaining(1);
+  engine.speakPhrase('Pergunta 4. Não corte esta frase.');
+  await delay(30);
+  shim.pointerDown();
+
+  const recovered = shim.calls.filter((call) => !call.dropped);
+  assert.equal(recovered.length, 1);
+
+  await delay(1300);
+  assert.equal(shim.cancels.length, 0);
+  assert.equal(shim.calls.filter((call) => !call.dropped).length, 1);
 });
 
 test('says the phase on the next tap when speech never starts', async () => {

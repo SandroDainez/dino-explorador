@@ -37,7 +37,7 @@ export const useSpeechSynthesis = () => {
 
   const speak = useCallback((text: string, force = false) => {
     if (!(force || speechEnabled)) return;
-    speakPhrase(text);
+    speakPhrase(text, force);
   }, [speechEnabled]);
 
   return {
