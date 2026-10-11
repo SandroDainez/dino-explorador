@@ -26,7 +26,7 @@ const LETTER_QUESTIONS: LetterQuestion[] = [
 export const GameLetters: React.FC = () => {
   const { dino, completeWorld, setCurrentView } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playJump } = useAudioEngine();
-  const { speak, cancelSpeech } = useSpeechSynthesis();
+  const { cancelSpeech } = useSpeechSynthesis();
 
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<LetterQuestion[]>([]);
@@ -53,10 +53,13 @@ export const GameLetters: React.FC = () => {
   }, []);
 
   const currentQuestion = questions[step];
-  
-  const instructionText = currentQuestion
-    ? `Dino quer atravessar o rio! Com qual letra começa a palavra ${currentQuestion.word}?`
-    : '';
+  const starsForRun = totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1;
+
+  const instructionText = gameState === 'victory'
+    ? `Sensacional! Você ajudou o Dino a atravessar todo o Rio das Letras! Você ganhou ${starsForRun} estrelas!`
+    : currentQuestion
+      ? `Dino quer atravessar o rio! Com qual letra começa a palavra ${currentQuestion.word}?`
+      : '';
 
   const handleLetterClick = (letter: string, optionIdx: number) => {
     if (gameState === 'victory' || dinoEmotion !== 'idle' || jumpingStoneIdx !== null) return;
@@ -104,7 +107,6 @@ export const GameLetters: React.FC = () => {
     else if (totalAttempts <= 7) starsEarned = 2;
 
     completeWorld('letters', starsEarned);
-    speak(`Sensacional! Você ajudou o Dino a atravessar todo o Rio das Letras! Você ganhou ${starsEarned} estrelas!`);
   };
 
   const handlePlayAgain = () => {
@@ -137,8 +139,8 @@ export const GameLetters: React.FC = () => {
   return (
     <GameLayout
       title="Rio das Letras"
-      instructionText={gameState === 'victory' ? 'Rio atravessado!' : instructionText}
-      starsEarned={gameState === 'victory' ? (totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1) : 0}
+      instructionText={instructionText}
+      starsEarned={gameState === 'victory' ? starsForRun : 0}
       currentStep={gameState === 'victory' ? undefined : step + 1}
       totalSteps={gameState === 'victory' ? undefined : totalQuestions}
     >

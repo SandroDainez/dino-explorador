@@ -129,7 +129,7 @@ interface Question {
 export const GameColors: React.FC = () => {
   const { dino, completeWorld, setCurrentView } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
-  const { speak, cancelSpeech } = useSpeechSynthesis();
+  const { cancelSpeech } = useSpeechSynthesis();
 
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -167,10 +167,13 @@ export const GameColors: React.FC = () => {
   }, []);
 
   const currentQuestion = questions[step];
-  
-  const instructionText = currentQuestion
-    ? `Dino quer comer uma fruta ${currentQuestion.targetFruit.colorName}! Qual é a correta?`
-    : '';
+  const starsForRun = totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1;
+
+  const instructionText = gameState === 'victory'
+    ? `Muito bem! Você ajudou o Dino a comer todas as frutinhas coloridas! Você ganhou ${starsForRun} estrelas!`
+    : currentQuestion
+      ? `Dino quer comer uma fruta ${currentQuestion.targetFruit.colorName}! Qual é a correta?`
+      : '';
 
   const handleFruitClick = (selectedId: string) => {
     if (gameState === 'victory' || dinoEmotion !== 'idle' || biteFruit !== null) return;
@@ -223,7 +226,6 @@ export const GameColors: React.FC = () => {
     else if (totalAttempts <= 7) starsEarned = 2;
 
     completeWorld('colors', starsEarned);
-    speak(`Muito bem! Você ajudou o Dino a comer todas as frutinhas coloridas! Você ganhou ${starsEarned} estrelas!`);
   };
 
   const handlePlayAgain = () => {
@@ -254,8 +256,8 @@ export const GameColors: React.FC = () => {
   return (
     <GameLayout
       title="Vale das Cores"
-      instructionText={gameState === 'victory' ? 'Parabéns!' : instructionText}
-      starsEarned={gameState === 'victory' ? (totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1) : 0}
+      instructionText={instructionText}
+      starsEarned={gameState === 'victory' ? starsForRun : 0}
       currentStep={gameState === 'victory' ? undefined : step + 1}
       totalSteps={gameState === 'victory' ? undefined : totalQuestions}
     >

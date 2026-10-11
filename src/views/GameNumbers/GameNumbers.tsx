@@ -98,10 +98,13 @@ export const GameNumbers: React.FC = () => {
   }, []);
 
   const currentQuestion = questions[step];
-  
-  const instructionText = currentQuestion
-    ? `A mamãe dinossauro quer encontrar o ninho com ${currentQuestion.targetNumber} ${currentQuestion.targetNumber === 1 ? 'ovo' : 'ovos'}! Ajude ela!`
-    : '';
+  const starsForRun = totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1;
+
+  const instructionText = gameState === 'victory'
+    ? `Muito bem! Você encontrou todos os ninhos! Você ganhou ${starsForRun} estrelas!`
+    : currentQuestion
+      ? `A mamãe dinossauro quer encontrar o ninho com ${currentQuestion.targetNumber} ${currentQuestion.targetNumber === 1 ? 'ovo' : 'ovos'}! Ajude ela!`
+      : '';
 
   // Trigger TTS voice count on correct answer
   const countEggsOutLoud = (count: number) => {
@@ -255,8 +258,8 @@ export const GameNumbers: React.FC = () => {
   return (
     <GameLayout
       title="Ninho dos Números"
-      instructionText={gameState === 'victory' ? 'Ovos encontrados!' : instructionText}
-      starsEarned={gameState === 'victory' ? (totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1) : 0}
+      instructionText={instructionText}
+      starsEarned={gameState === 'victory' ? starsForRun : 0}
       currentStep={gameState === 'victory' ? undefined : step + 1}
       totalSteps={gameState === 'victory' ? undefined : totalQuestions}
     >
