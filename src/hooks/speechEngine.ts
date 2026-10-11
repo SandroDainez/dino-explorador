@@ -48,7 +48,7 @@ let generation = 0;
 let runId = 0;
 let lastCancelAt = 0;
 let queue: SpeechItem[] = [];
-let current: (SpeechItem & { run: number; started: boolean }) | null = null;
+let current: (SpeechItem & { run: number; started: boolean; startedAt: number }) | null = null;
 let startTimer: TimerHandle | null = null;
 let watchTimer: TimerHandle | null = null;
 let keepAliveTimer: TimerHandle | null = null;
@@ -133,7 +133,18 @@ function armGesture(phrase: string, gen: number) {
   gestureGeneration = gen;
 }
 
-function createUtterance(phrase: string): UtteranceLike {
+function chooseVoice(attempt: number): VoiceLike | undefined {
+  const synth = getSynth();
+  if (!synth) return undefined;
+  const best = pickPortugueseVoice(synth.getVoices());
+  if (!best) return undefined;
+  // First try the Portuguese voice. If that never starts, retry with the
+  // browser default instead of pinning a silent network voice.
+  if (attempt > 0 && best.localService === false) return undefined;
+  return best;
+}
+
+function createUtterance(phrase: string, attempt: number): UtteranceLike {
   const Utterance = SpeechSynthesisUtterance as unknown as new (text: string) => UtteranceLike;
   const utterance = new Utterance(phrase);
   retainedUtterances.push(utterance);
@@ -142,9 +153,14 @@ function createUtterance(phrase: string): UtteranceLike {
   utterance.rate = 1;
   utterance.pitch = 1;
   utterance.volume = 1;
-  const synth = getSynth();
-  const voice = synth ? pickPortugueseVoice(synth.getVoices()) : undefined;
-  utterance.voice = voice ?? null;
+  const voice = chooseVoice(attempt);
+  if (voice) {
+    try {
+      utterance.voice = voice;
+    } catch {
+      // A voice the browser rejects must not skip the line.
+    }
+  }
   return utterance;
 }
 
@@ -161,10 +177,13 @@ function play(item: SpeechItem, attempt: number) {
 
   const myRun = ++runId;
   clearWatchTimer();
-  current = { ...item, run: myRun, started: false };
+  current = { ...item, run: myRun, started: false, startedAt: Date.now() };
+  // Keep the line ready for the next tap until audio actually starts.
+  // Mobile browsers ignore speak() that was not inside a user gesture.
+  armGesture(item.phrase, item.gen);
   if (synth.paused) synth.resume();
 
-  const utterance = createUtterance(item.phrase);
+  const utterance = createUtterance(item.phrase, attempt);
   const startedAt = Date.now();
 
   utterance.onstart = () => {
@@ -173,17 +192,21 @@ function play(item: SpeechItem, attempt: number) {
     if (gestureGeneration === item.gen && gesturePhrase === item.phrase) gesturePhrase = null;
   };
   utterance.onend = () => {
+    if (!current || current.run !== myRun || !current.started) return;
     finish(myRun);
   };
   utterance.onerror = (event) => {
     if (item.gen !== generation) return;
-    if (event.error === 'not-allowed' || event.error === 'synthesis-failed') {
-      armGesture(item.phrase, item.gen);
-    }
+    if (event.error === 'interrupted' || event.error === 'canceled') return;
+    armGesture(item.phrase, item.gen);
   };
 
-  synth.resume();
-  synth.speak(utterance);
+  try {
+    synth.speak(utterance);
+  } catch {
+    armGesture(item.phrase, item.gen);
+    return;
+  }
   startKeepAlive();
 
   const watch = () => {
@@ -201,26 +224,15 @@ function play(item: SpeechItem, attempt: number) {
       return;
     }
 
+    // speaking stayed true without onstart. Do not cancel: cancelling here
+    // is what leaves Chrome silent for the rest of the visit. Give a slow
+    // voice time to start, then wait for a tap to unlock audio.
     if (Date.now() - startedAt < STUCK_RETRY_MS) {
       watchTimer = window.setTimeout(watch, 250);
       return;
     }
 
-    synth.cancel();
-    lastCancelAt = Date.now();
-    if (attempt < 1) {
-      current = null;
-      clearStartTimer();
-      startTimer = window.setTimeout(() => {
-        startTimer = null;
-        if (item.gen !== generation) return;
-        play(item, attempt + 1);
-      }, CANCEL_GAP_MS);
-      return;
-    }
-
     armGesture(item.phrase, item.gen);
-    finish(myRun);
   };
 
   watchTimer = window.setTimeout(watch, SILENT_RETRY_MS);
@@ -260,14 +272,35 @@ function bindGestureReplay() {
       if (synth.paused) synth.resume();
       if (!gesturePhrase || gestureGeneration !== generation) return;
       if (current?.started) return;
-      if (synth.speaking || synth.pending) return;
+
+      const busy = synth.speaking || synth.pending;
+      const elapsed = current ? Date.now() - current.startedAt : STUCK_RETRY_MS;
+      // onstart can lag a slow voice. Cancelling during that lag is what
+      // leaves Chrome silent for the rest of the visit.
+      const stuck = busy && elapsed >= STUCK_RETRY_MS;
+      if (busy && !stuck) return;
+
       const phrase = gesturePhrase;
       const gen = gestureGeneration;
       gesturePhrase = null;
       clearStartTimer();
       clearWatchTimer();
       current = null;
-      play({ phrase, gen }, 1);
+      if (stuck) {
+        synth.cancel();
+        lastCancelAt = Date.now();
+      }
+      // Speak inside this tap. iOS only allows that. If cancel() made Chrome
+      // drop it, try once more after the gap.
+      play({ phrase, gen }, stuck ? 1 : 0);
+      if (!stuck) return;
+      const retry = window.setTimeout(() => {
+        if (startTimer === retry) startTimer = null;
+        if (gen !== generation || current?.started) return;
+        current = null;
+        play({ phrase, gen }, 1);
+      }, CANCEL_GAP_MS);
+      startTimer = retry;
     },
     true,
   );

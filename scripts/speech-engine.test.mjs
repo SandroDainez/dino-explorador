@@ -132,13 +132,14 @@ test('does not cancel while the engine is idle', () => {
   assert.equal(shim.cancels.length, 0);
 });
 
-test('queues the next phase instead of cancelling it', () => {
+test('queues the next phase instead of cancelling it', async () => {
   engine.speakPhrase('Pergunta 1. Qual é a cor?');
   engine.speakPhrase('Pergunta 2. Qual é a forma?');
 
   assert.equal(shim.cancels.length, 0);
   assert.equal(shim.calls.filter((call) => call.text.startsWith('Pergunta 2')).length, 0);
 
+  await Promise.resolve();
   shim.utterances[0].onend();
   const next = shim.calls.filter((call) => call.text.startsWith('Pergunta 2'));
   assert.equal(next.length, 1);
@@ -185,6 +186,42 @@ test('keeps a line recovered by a tap instead of cancelling it', async () => {
   await delay(1300);
   assert.equal(shim.cancels.length, 0);
   assert.equal(shim.calls.filter((call) => !call.dropped).length, 1);
+});
+
+test('does not cancel a line that is still starting', async () => {
+  shim.setStuck(true);
+  engine.speakPhrase('Não cancele esta frase.');
+  await delay(1500);
+  assert.equal(shim.cancels.length, 0);
+  assert.equal(shim.calls.length, 1);
+});
+
+test('a tap while the voice is still starting does not cancel it', async () => {
+  shim.setStuck(true);
+  engine.speakPhrase('Pergunta 1. Espere a voz.');
+  await delay(40);
+  shim.pointerDown();
+  assert.equal(shim.cancels.length, 0);
+  assert.equal(shim.calls.length, 1);
+});
+
+test('the next phase speaks after a stuck line is recovered', async () => {
+  shim.setStuck(true);
+  engine.speakPhrase('Pergunta 1. Travou.');
+  await delay(1200);
+  shim.setStuck(false);
+  shim.pointerDown();
+  await delay(250);
+  await Promise.resolve();
+
+  assert.equal(shim.cancels.length, 1);
+  assert.equal(shim.calls.length, 2);
+  assert.equal(shim.calls[1].dropped, false);
+  shim.utterances.at(-1).onend();
+  engine.speakPhrase('Pergunta 2. Agora fala.');
+  const next = shim.calls.filter((call) => call.text.startsWith('Pergunta 2'));
+  assert.equal(next.length, 1);
+  assert.equal(next[0].dropped, false);
 });
 
 test('says the phase on the next tap when speech never starts', async () => {
