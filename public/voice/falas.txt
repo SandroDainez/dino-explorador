@@ -1,0 +1,124 @@
+Voz natural (ElevenLabs)
+========================
+
+Grave cada frase em português do Brasil, voz calma de contador de histórias,
+e salve o mp3 dentro desta pasta (public/voice).
+
+Depois escreva a frase exata como chave em manifest.json e o nome do arquivo
+como valor. Se o arquivo existir, o jogo toca ele. Se não existir, usa a voz
+do navegador.
+
+Exemplo de manifest.json:
+
+{
+  "Pergunta 1.": "pergunta-1.mp3",
+  "Dino quer comer uma fruta Vermelha! Qual é a correta?": "fruta-vermelha.mp3"
+}
+
+O jogo junta "Pergunta 1." com a instrução. Grave os dois pedaços separados
+para não precisar de um áudio para cada combinação.
+
+Perguntas curtas
+----------------
+Pergunta 1.
+Pergunta 2.
+Pergunta 3.
+Pergunta 4.
+Pergunta 5.
+Pergunta 6.
+Pergunta 7.
+Pergunta 8.
+Pergunta 9.
+Pergunta 10.
+
+Abertura e mapa
+----------------
+Olá! Escolha o seu dinossauro. Depois toque no botão verde JOGAR para abrir os joguinhos.
+Este é o mapa das fases! Escolha uma fase para explorar e aprender com o seu dinossauro!
+
+Tamanhos
+--------
+Toque no ovo maior!
+Toque na folha menor!
+Toque na pegada maior!
+Toque na pedra menor!
+Toque na estrela maior!
+
+Sequência
+---------
+Qual bolinha vem depois?
+
+Posições
+--------
+Toque em cima do ninho!
+Toque à esquerda do ninho!
+Toque embaixo do ninho!
+Toque à direita do ninho!
+
+Cores
+-----
+Dino quer comer uma fruta Vermelha! Qual é a correta?
+Dino quer comer uma fruta Amarela! Qual é a correta?
+Dino quer comer uma fruta Laranja! Qual é a correta?
+Dino quer comer uma fruta Verde! Qual é a correta?
+Dino quer comer uma fruta Azul! Qual é a correta?
+Dino quer comer uma fruta Roxa! Qual é a correta?
+
+Formas
+------
+Dino precisa da pedra em forma de Círculo para consertar a ponte! Qual é ela?
+Dino precisa da pedra em forma de Quadrado para consertar a ponte! Qual é ela?
+Dino precisa da pedra em forma de Triângulo para consertar a ponte! Qual é ela?
+Dino precisa da pedra em forma de Retângulo para consertar a ponte! Qual é ela?
+Dino precisa da pedra em forma de Estrela para consertar a ponte! Qual é ela?
+Dino precisa da pedra em forma de Coração para consertar a ponte! Qual é ela?
+Dino precisa da pedra em forma de Oval para consertar a ponte! Qual é ela?
+
+Números (troque a quantidade)
+-----------------------------
+A mamãe dinossauro quer encontrar o ninho com 1 ovo! Ajude ela!
+A mamãe dinossauro quer encontrar o ninho com 2 ovos! Ajude ela!
+A mamãe dinossauro quer encontrar o ninho com 3 ovos! Ajude ela!
+A mamãe dinossauro quer encontrar o ninho com 4 ovos! Ajude ela!
+A mamãe dinossauro quer encontrar o ninho com 5 ovos! Ajude ela!
+A mamãe dinossauro quer encontrar o ninho com 6 ovos! Ajude ela!
+A mamãe dinossauro quer encontrar o ninho com 7 ovos! Ajude ela!
+
+Letras (troque a palavra)
+-------------------------
+Dino quer atravessar o rio! Com qual letra começa a palavra Abelha?
+Dino quer atravessar o rio! Com qual letra começa a palavra Borboleta?
+Dino quer atravessar o rio! Com qual letra começa a palavra Dinossauro?
+Dino quer atravessar o rio! Com qual letra começa a palavra Elefante?
+Dino quer atravessar o rio! Com qual letra começa a palavra Foca?
+Dino quer atravessar o rio! Com qual letra começa a palavra Gato?
+Dino quer atravessar o rio! Com qual letra começa a palavra Iguana?
+Dino quer atravessar o rio! Com qual letra começa a palavra Leão?
+Dino quer atravessar o rio! Com qual letra começa a palavra Macaco?
+Dino quer atravessar o rio! Com qual letra começa a palavra Pato?
+
+Animais
+-------
+Qual animal faz essa sombra escura na floresta?
+É o Sapo! Ouça o sapo coaxando! Rec, rec!
+É o Elefante! Ouça o elefante barulhento! Fuumm!
+É o Leão! Ouça o leão rugindo! Rrrraaar!
+É o Pássaro! Ouça o passarinho cantando! Piu, piu!
+É o Peixe! Ouça o peixe fazendo bolhas! Blu, blu!
+
+Contagem
+--------
+Dino entrou na caverna! Quantos vaga-lumes brilhantes você consegue contar?
+Isso! É 1 vaga-lume!
+Isso! São 2 vaga-lumes!
+Isso! São 3 vaga-lumes!
+Isso! São 4 vaga-lumes!
+Isso! São 5 vaga-lumes!
+Isso! São 6 vaga-lumes!
+Isso! São 7 vaga-lumes!
+Isso! São 8 vaga-lumes!
+Isso! São 9 vaga-lumes!
+Isso! São 10 vaga-lumes!
+
+A frase de vitória muda com 1, 2 ou 3 estrelas. Pode gravar cada uma
+ou deixar essa fala com a voz do navegador.

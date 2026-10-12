@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
-import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
 import { GameLayout } from '../../components/GameLayout';
+import { PhaseComplete } from '../../components/PhaseComplete';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
-import { RotateCcw, Map } from 'lucide-react';
+import { starsForAttempts } from '../../game/journey';
 import styles from './GameShapes.module.css';
 
 interface ShapeOption {
-  id: 'circle' | 'square' | 'triangle' | 'rectangle' | 'star';
+  id: 'circle' | 'square' | 'triangle' | 'rectangle' | 'star' | 'heart' | 'oval';
   name: string;
   color: string;
   svg: (color: string) => React.ReactNode;
@@ -71,6 +71,31 @@ const SHAPES: ShapeOption[] = [
       </svg>
     ),
   },
+  {
+    id: 'heart',
+    name: 'Coração',
+    color: 'var(--color-red)',
+    svg: (color) => (
+      <svg width="80" height="80" viewBox="0 0 100 100">
+        <path
+          d="M50 84 C18 62 8 40 26 28 C38 20 48 28 50 38 C52 28 62 20 74 28 C92 40 82 62 50 84 Z"
+          fill={color}
+          stroke="white"
+          strokeWidth="4"
+        />
+      </svg>
+    ),
+  },
+  {
+    id: 'oval',
+    name: 'Oval',
+    color: 'var(--color-purple)',
+    svg: (color) => (
+      <svg width="80" height="80" viewBox="0 0 100 100">
+        <ellipse cx="50" cy="50" rx="26" ry="38" fill={color} stroke="white" strokeWidth="4" />
+      </svg>
+    ),
+  },
 ];
 
 interface Question {
@@ -88,9 +113,8 @@ function buildShapeQuestions(): Question[] {
 }
 
 export const GameShapes: React.FC = () => {
-  const { dino, completeWorld, setCurrentView } = useGame();
+  const { dino, completeWorld } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
-  const { cancelSpeech } = useSpeechSynthesis();
 
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<Question[]>(buildShapeQuestions);
@@ -99,14 +123,14 @@ export const GameShapes: React.FC = () => {
   const [totalAttempts, setTotalAttempts] = useState(0);
   const [wrongAnswers, setWrongAnswers] = useState<string[]>([]);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [bridgeState, setBridgeState] = useState<boolean[]>([false, false, false, false, false]);
+  const [bridgeState, setBridgeState] = useState<boolean[]>(() => Array(SHAPES.length).fill(false));
   const [animatingShape, setAnimatingShape] = useState<string | null>(null);
 
-  const totalQuestions = 5;
+  const totalQuestions = SHAPES.length;
 
   const currentQuestion = questions[step];
   
-  const starsForRun = totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1;
+  const starsForRun = starsForAttempts(totalAttempts, totalQuestions);
   const instructionText = gameState === 'victory'
     ? `Incrível! Você consertou a ponte inteira! O Dino conseguiu atravessar para o templo e ganhou ${starsForRun} estrelas!`
     : currentQuestion
@@ -163,11 +187,7 @@ export const GameShapes: React.FC = () => {
     setShowConfetti(true);
     playVictory();
 
-    let starsEarned = 1;
-    if (totalAttempts <= 5) starsEarned = 3;
-    else if (totalAttempts <= 7) starsEarned = 2;
-
-    completeWorld('shapes', starsEarned);
+    completeWorld('shapes', starsForAttempts(totalAttempts + 1, totalQuestions));
   };
 
   const handlePlayAgain = () => {
@@ -178,7 +198,7 @@ export const GameShapes: React.FC = () => {
     setTotalAttempts(0);
     setWrongAnswers([]);
     setShowConfetti(false);
-    setBridgeState([false, false, false, false, false]);
+    setBridgeState(Array(SHAPES.length).fill(false));
     setAnimatingShape(null);
 
     setQuestions(buildShapeQuestions());
@@ -202,7 +222,7 @@ export const GameShapes: React.FC = () => {
               <div
                 className={styles.dinoOnBridge}
                 style={{
-                  left: `${15 + step * 15}%`,
+                  left: `${8 + (step / Math.max(totalQuestions - 1, 1)) * 74}%`,
                   transition: 'left 1s ease-in-out',
                 }}
               >
@@ -279,50 +299,16 @@ export const GameShapes: React.FC = () => {
         </div>
       ) : (
         /* Victory Screen */
-        <div className={styles.victoryCard}>
-          <div className={styles.victoryBadge}>👑</div>
-          <h2 className={styles.victoryTitle}>Espetacular!</h2>
-          <p className={styles.victoryText}>
-            Você é um mestre das formas geométricas! A ponte está totalmente consertada e o Dino atravessou com segurança!
-          </p>
-
-          <div className={styles.victoryStarsContainer}>
-            {[1, 2, 3].map((star) => {
-              const finalStars = totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1;
-              return (
-                <span
-                  key={star}
-                  className={`${styles.victoryStar} ${star <= finalStars ? styles.finalStarFilled : styles.finalStarEmpty}`}
-                >
-                  ⭐
-                </span>
-              );
-            })}
-          </div>
-
-          <div className={styles.victoryButtons}>
-            <button
-              id="btn-victory-shapes-replay"
-              className="btn-bubble"
-              style={{ backgroundColor: 'var(--color-blue)', color: 'white' }}
-              onClick={handlePlayAgain}
-              onMouseEnter={playHover}
-            >
-              <RotateCcw size={20} />
-              <span>Jogar de Novo</span>
-            </button>
-            <button
-              id="btn-victory-shapes-map"
-              className="btn-bubble"
-              style={{ backgroundColor: 'var(--color-green)', color: 'white' }}
-              onClick={() => { playClick(); cancelSpeech(); setCurrentView('map'); }}
-              onMouseEnter={playHover}
-            >
-              <Map size={20} />
-              <span>Ir para o Mapa</span>
-            </button>
-          </div>
-        </div>
+        <PhaseComplete
+          worldId="shapes"
+          badge="👑"
+          title="Espetacular!"
+          message="Você é um mestre das formas geométricas! A ponte está totalmente consertada e o Dino atravessou com segurança!"
+          stars={starsForRun}
+          onReplay={handlePlayAgain}
+          replayId="btn-victory-shapes-replay"
+          mapId="btn-victory-shapes-map"
+        />
       )}
     </GameLayout>
   );

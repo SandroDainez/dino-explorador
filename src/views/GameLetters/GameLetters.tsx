@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
-import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
 import { GameLayout } from '../../components/GameLayout';
+import { PhaseComplete } from '../../components/PhaseComplete';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
-import { RotateCcw, Map } from 'lucide-react';
+import { starsForAttempts } from '../../game/journey';
 import styles from './GameLetters.module.css';
 
 interface LetterQuestion {
@@ -21,12 +21,16 @@ const LETTER_QUESTIONS: LetterQuestion[] = [
   { word: 'Dinossauro', emoji: '🦖', targetLetter: 'D', distractors: ['B', 'T'] },
   { word: 'Elefante', emoji: '🐘', targetLetter: 'E', distractors: ['A', 'I'] },
   { word: 'Gato', emoji: '🐱', targetLetter: 'G', distractors: ['J', 'C'] },
+  { word: 'Foca', emoji: '🦭', targetLetter: 'F', distractors: ['V', 'S'] },
+  { word: 'Iguana', emoji: '🦎', targetLetter: 'I', distractors: ['E', 'U'] },
+  { word: 'Leão', emoji: '🦁', targetLetter: 'L', distractors: ['N', 'R'] },
+  { word: 'Macaco', emoji: '🐵', targetLetter: 'M', distractors: ['N', 'B'] },
+  { word: 'Pato', emoji: '🦆', targetLetter: 'P', distractors: ['B', 'T'] },
 ];
 
 export const GameLetters: React.FC = () => {
-  const { dino, completeWorld, setCurrentView } = useGame();
+  const { dino, completeWorld } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playJump } = useAudioEngine();
-  const { cancelSpeech } = useSpeechSynthesis();
 
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<LetterQuestion[]>([]);
@@ -37,13 +41,13 @@ export const GameLetters: React.FC = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [jumpingStoneIdx, setJumpingStoneIdx] = useState<number | null>(null);
 
-  const totalQuestions = 5;
+  const totalQuestions = LETTER_QUESTIONS.length;
 
   useEffect(() => {
     // We shuffle the choices of letters for each question
     const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
     
-    // We shuffle the questions list itself to keep it fresh, but keep them at length 5.
+    // Every word in the list is one phase. Add a word to add a phase.
     const shuffledQuestions = shuffle(LETTER_QUESTIONS).map(q => ({
       ...q,
       distractors: shuffle(q.distractors),
@@ -53,7 +57,7 @@ export const GameLetters: React.FC = () => {
   }, []);
 
   const currentQuestion = questions[step];
-  const starsForRun = totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1;
+  const starsForRun = starsForAttempts(totalAttempts, totalQuestions);
 
   const instructionText = gameState === 'victory'
     ? `Sensacional! Você ajudou o Dino a atravessar todo o Rio das Letras! Você ganhou ${starsForRun} estrelas!`
@@ -102,11 +106,7 @@ export const GameLetters: React.FC = () => {
     setShowConfetti(true);
     playVictory();
 
-    let starsEarned = 1;
-    if (totalAttempts <= 5) starsEarned = 3;
-    else if (totalAttempts <= 7) starsEarned = 2;
-
-    completeWorld('letters', starsEarned);
+    completeWorld('letters', starsForAttempts(totalAttempts + 1, totalQuestions));
   };
 
   const handlePlayAgain = () => {
@@ -209,50 +209,16 @@ export const GameLetters: React.FC = () => {
         </div>
       ) : (
         /* Victory Screen */
-        <div className={styles.victoryCard}>
-          <div className={styles.victoryBadge}>🔤</div>
-          <h2 className={styles.victoryTitle}>Espetacular!</h2>
-          <p className={styles.victoryText}>
-            Você conhece muito bem o alfabeto! O Dino atravessou o rio e completou sua expedição de letras!
-          </p>
-
-          <div className={styles.victoryStarsContainer}>
-            {[1, 2, 3].map((star) => {
-              const finalStars = totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1;
-              return (
-                <span
-                  key={star}
-                  className={`${styles.victoryStar} ${star <= finalStars ? styles.finalStarFilled : styles.finalStarEmpty}`}
-                >
-                  ⭐
-                </span>
-              );
-            })}
-          </div>
-
-          <div className={styles.victoryButtons}>
-            <button
-              id="btn-victory-letters-replay"
-              className="btn-bubble"
-              style={{ backgroundColor: 'var(--color-blue)', color: 'white' }}
-              onClick={handlePlayAgain}
-              onMouseEnter={playHover}
-            >
-              <RotateCcw size={20} />
-              <span>Jogar de Novo</span>
-            </button>
-            <button
-              id="btn-victory-letters-map"
-              className="btn-bubble"
-              style={{ backgroundColor: 'var(--color-green)', color: 'white' }}
-              onClick={() => { playClick(); cancelSpeech(); setCurrentView('map'); }}
-              onMouseEnter={playHover}
-            >
-              <Map size={20} />
-              <span>Ir para o Mapa</span>
-            </button>
-          </div>
-        </div>
+        <PhaseComplete
+          worldId="letters"
+          badge="🔤"
+          title="Espetacular!"
+          message="Você conhece muito bem o alfabeto! O Dino atravessou o rio e completou sua expedição de letras!"
+          stars={starsForRun}
+          onReplay={handlePlayAgain}
+          replayId="btn-victory-letters-replay"
+          mapId="btn-victory-letters-map"
+        />
       )}
     </GameLayout>
   );

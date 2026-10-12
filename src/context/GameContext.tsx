@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { JOURNEY } from '../game/journey';
 
 export type DinoType = 'trex' | 'triceratops' | 'pterodactyl';
 export type DinoColor = 'green' | 'pink' | 'blue' | 'orange';
@@ -10,7 +11,7 @@ export interface DinoConfig {
   accessory: DinoAccessory;
 }
 
-export type GameView = 'home' | 'map' | 'colors' | 'shapes' | 'numbers' | 'letters' | 'animals' | 'counting';
+export type GameView = 'home' | 'map' | 'colors' | 'shapes' | 'numbers' | 'sizes' | 'sequence' | 'positions' | 'letters' | 'animals' | 'counting';
 
 export interface GameProgress {
   stars: Record<string, number>;
@@ -39,14 +40,7 @@ const defaultDino: DinoConfig = {
 };
 
 const defaultProgress: GameProgress = {
-  stars: {
-    colors: 0,
-    shapes: 0,
-    numbers: 0,
-    letters: 0,
-    animals: 0,
-    counting: 0,
-  },
+  stars: Object.fromEntries(JOURNEY.map((world) => [world.id, 0])),
   medals: [],
   completedWorlds: [],
 };
@@ -123,18 +117,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ? prev.completedWorlds
         : [...prev.completedWorlds, worldId];
 
-      // Add a medal if they got 3 stars (or just completed it)
-      const medalMap: Record<string, string> = {
-        colors: 'Medalha das Cores',
-        shapes: 'Medalha das Formas',
-        numbers: 'Medalha dos Números',
-        letters: 'Medalha das Letras',
-        animals: 'Medalha dos Animais',
-        counting: 'Medalha da Contagem',
-      };
-      
-      const newMedal = medalMap[worldId];
-      const medals = prev.medals.includes(newMedal)
+      const newMedal = JOURNEY.find((world) => world.id === worldId)?.medal;
+      const medals = !newMedal || prev.medals.includes(newMedal)
         ? prev.medals
         : newStars >= 2 ? [...prev.medals, newMedal] : prev.medals;
 

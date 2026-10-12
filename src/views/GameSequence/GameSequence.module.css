@@ -1,0 +1,68 @@
+.stage {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.board {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+}
+
+.pattern,
+.options {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dot {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid white;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: #5d4037;
+}
+
+.mystery {
+  background: transparent;
+  border-style: dashed;
+  border-color: #6d4c41;
+  box-shadow: none;
+}
+
+.choice {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.choice:hover .dot {
+  transform: translateY(-4px);
+}
+
+.wrong {
+  opacity: 0.3;
+}
+
+@media (max-width: 768px) {
+  .stage {
+    flex-direction: column;
+  }
+
+  .dot {
+    width: 54px;
+    height: 54px;
+  }
+}

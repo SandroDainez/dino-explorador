@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
-import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
 import { GameLayout } from '../../components/GameLayout';
+import { PhaseComplete } from '../../components/PhaseComplete';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
-import { RotateCcw, Map } from 'lucide-react';
+import { starsForAttempts } from '../../game/journey';
 import styles from './GameColors.module.css';
 
 interface FruitOption {
@@ -127,9 +127,8 @@ interface Question {
 }
 
 export const GameColors: React.FC = () => {
-  const { dino, completeWorld, setCurrentView } = useGame();
+  const { dino, completeWorld } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
-  const { cancelSpeech } = useSpeechSynthesis();
 
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -140,7 +139,7 @@ export const GameColors: React.FC = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [biteFruit, setBiteFruit] = useState<string | null>(null);
 
-  const totalQuestions = 5;
+  const totalQuestions = FRUIT_OPTIONS.length;
 
   // Generate questions
   useEffect(() => {
@@ -167,7 +166,7 @@ export const GameColors: React.FC = () => {
   }, []);
 
   const currentQuestion = questions[step];
-  const starsForRun = totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1;
+  const starsForRun = starsForAttempts(totalAttempts, totalQuestions);
 
   const instructionText = gameState === 'victory'
     ? `Muito bem! Você ajudou o Dino a comer todas as frutinhas coloridas! Você ganhou ${starsForRun} estrelas!`
@@ -217,15 +216,7 @@ export const GameColors: React.FC = () => {
     setShowConfetti(true);
     playVictory();
 
-    // Calculate stars
-    // Best case: 5 questions in 5 attempts = 3 stars.
-    // 6-7 attempts = 2 stars.
-    // More = 1 star.
-    let starsEarned = 1;
-    if (totalAttempts <= 5) starsEarned = 3;
-    else if (totalAttempts <= 7) starsEarned = 2;
-
-    completeWorld('colors', starsEarned);
+    completeWorld('colors', starsForAttempts(totalAttempts + 1, totalQuestions));
   };
 
   const handlePlayAgain = () => {
@@ -318,50 +309,16 @@ export const GameColors: React.FC = () => {
         </div>
       ) : (
         /* Victory Screen */
-        <div className={styles.victoryCard}>
-          <div className={styles.victoryBadge}>🏆</div>
-          <h2 className={styles.victoryTitle}>Incrível!</h2>
-          <p className={styles.victoryText}>
-            Você conhece muito bem as cores! O Dino está de barriga cheia e muito feliz!
-          </p>
-
-          <div className={styles.victoryStarsContainer}>
-            {[1, 2, 3].map((star) => {
-              const finalStars = totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1;
-              return (
-                <span
-                  key={star}
-                  className={`${styles.victoryStar} ${star <= finalStars ? styles.finalStarFilled : styles.finalStarEmpty}`}
-                >
-                  ⭐
-                </span>
-              );
-            })}
-          </div>
-
-          <div className={styles.victoryButtons}>
-            <button
-              id="btn-victory-replay"
-              className="btn-bubble"
-              style={{ backgroundColor: 'var(--color-blue)', color: 'white' }}
-              onClick={handlePlayAgain}
-              onMouseEnter={playHover}
-            >
-              <RotateCcw size={20} />
-              <span>Jogar de Novo</span>
-            </button>
-            <button
-              id="btn-victory-map"
-              className="btn-bubble"
-              style={{ backgroundColor: 'var(--color-green)', color: 'white' }}
-              onClick={() => { playClick(); cancelSpeech(); setCurrentView('map'); }}
-              onMouseEnter={playHover}
-            >
-              <Map size={20} />
-              <span>Ir para o Mapa</span>
-            </button>
-          </div>
-        </div>
+        <PhaseComplete
+          worldId="colors"
+          badge="🏆"
+          title="Incrível!"
+          message="Você conhece muito bem as cores! O Dino está de barriga cheia e muito feliz!"
+          stars={starsForRun}
+          onReplay={handlePlayAgain}
+          replayId="btn-victory-replay"
+          mapId="btn-victory-map"
+        />
       )}
     </GameLayout>
   );

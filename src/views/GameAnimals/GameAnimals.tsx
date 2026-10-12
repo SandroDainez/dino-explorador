@@ -3,9 +3,10 @@ import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
 import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
 import { GameLayout } from '../../components/GameLayout';
+import { PhaseComplete } from '../../components/PhaseComplete';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
-import { RotateCcw, Map } from 'lucide-react';
+import { starsForAttempts } from '../../game/journey';
 import styles from './GameAnimals.module.css';
 
 interface AnimalOption {
@@ -169,9 +170,9 @@ interface Question {
 }
 
 export const GameAnimals: React.FC = () => {
-  const { dino, completeWorld, setCurrentView } = useGame();
+  const { dino, completeWorld } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
-  const { speak, cancelSpeech } = useSpeechSynthesis();
+  const { speak } = useSpeechSynthesis();
 
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -182,14 +183,15 @@ export const GameAnimals: React.FC = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [isRevealed, setIsRevealed] = useState(false);
 
-  const totalQuestions = 5;
+  const animalKeys = ['frog', 'elephant', 'lion', 'bird', 'fish'] as const;
+  const totalQuestions = animalKeys.length;
 
   useEffect(() => {
     const questionsList: Question[] = [];
     const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
 
     // List of keys
-    const keys: ('frog' | 'elephant' | 'lion' | 'bird' | 'fish')[] = ['frog', 'elephant', 'lion', 'bird', 'fish'];
+    const keys = [...animalKeys];
     const shuffledKeys = shuffle(keys);
 
     shuffledKeys.forEach((key) => {
@@ -205,7 +207,7 @@ export const GameAnimals: React.FC = () => {
   }, []);
 
   const currentQuestion = questions[step];
-  const starsForRun = totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1;
+  const starsForRun = starsForAttempts(totalAttempts, totalQuestions);
 
   const instructionText = gameState === 'victory'
     ? `Muito bem! Você descobriu todos os animais da floresta! Você ganhou ${starsForRun} estrelas!`
@@ -257,11 +259,7 @@ export const GameAnimals: React.FC = () => {
     setShowConfetti(true);
     playVictory();
 
-    let starsEarned = 1;
-    if (totalAttempts <= 5) starsEarned = 3;
-    else if (totalAttempts <= 7) starsEarned = 2;
-
-    completeWorld('animals', starsEarned);
+    completeWorld('animals', starsForAttempts(totalAttempts + 1, totalQuestions));
   };
 
   const handlePlayAgain = () => {
@@ -276,7 +274,7 @@ export const GameAnimals: React.FC = () => {
 
     // Regenerate/shuffle questions
     const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
-    const keys: ('frog' | 'elephant' | 'lion' | 'bird' | 'fish')[] = ['frog', 'elephant', 'lion', 'bird', 'fish'];
+    const keys = [...animalKeys];
     const shuffledKeys = shuffle(keys);
     const questionsList: Question[] = [];
 
@@ -367,50 +365,16 @@ export const GameAnimals: React.FC = () => {
         </div>
       ) : (
         /* Victory Screen */
-        <div className={styles.victoryCard}>
-          <div className={styles.victoryBadge}>🦁</div>
-          <h2 className={styles.victoryTitle}>Brilhante!</h2>
-          <p className={styles.victoryText}>
-            Você é um incrível zoólogo! Descobriu todos os animais da floresta com muita facilidade!
-          </p>
-
-          <div className={styles.victoryStarsContainer}>
-            {[1, 2, 3].map((star) => {
-              const finalStars = totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1;
-              return (
-                <span
-                  key={star}
-                  className={`${styles.victoryStar} ${star <= finalStars ? styles.finalStarFilled : styles.finalStarEmpty}`}
-                >
-                  ⭐
-                </span>
-              );
-            })}
-          </div>
-
-          <div className={styles.victoryButtons}>
-            <button
-              id="btn-victory-animals-replay"
-              className="btn-bubble"
-              style={{ backgroundColor: 'var(--color-blue)', color: 'white' }}
-              onClick={handlePlayAgain}
-              onMouseEnter={playHover}
-            >
-              <RotateCcw size={20} />
-              <span>Jogar de Novo</span>
-            </button>
-            <button
-              id="btn-victory-animals-map"
-              className="btn-bubble"
-              style={{ backgroundColor: 'var(--color-green)', color: 'white' }}
-              onClick={() => { playClick(); cancelSpeech(); setCurrentView('map'); }}
-              onMouseEnter={playHover}
-            >
-              <Map size={20} />
-              <span>Ir para o Mapa</span>
-            </button>
-          </div>
-        </div>
+        <PhaseComplete
+          worldId="animals"
+          badge="🦁"
+          title="Brilhante!"
+          message="Você é um incrível zoólogo! Descobriu todos os animais da floresta com muita facilidade!"
+          stars={starsForRun}
+          onReplay={handlePlayAgain}
+          replayId="btn-victory-animals-replay"
+          mapId="btn-victory-animals-map"
+        />
       )}
     </GameLayout>
   );

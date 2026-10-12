@@ -69,8 +69,14 @@
 }
 
 .placedShape {
-  transform: scale(0.9);
+  transform: scale(0.72);
   animation: pop-in 0.4s ease-out;
+}
+
+.placedShape svg,
+.shapeHollowShadow svg {
+  width: 52px;
+  height: 52px;
 }
 
 .shapeHollowShadow {
