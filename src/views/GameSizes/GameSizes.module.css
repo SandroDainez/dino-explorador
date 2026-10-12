@@ -1,0 +1,57 @@
+.gameContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  width: 100%;
+}
+
+.pair {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 28px;
+  width: 100%;
+}
+
+.choice {
+  width: 180px;
+  height: 200px;
+  border-radius: 28px;
+  border: 5px solid white;
+  background: rgba(255, 252, 246, 0.96);
+  box-shadow: var(--shadow-bubble);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-bounce);
+}
+
+.choice:hover {
+  transform: translateY(-4px);
+}
+
+.choice:active {
+  transform: translateY(4px);
+}
+
+.wrong {
+  animation: shake 0.4s ease-in-out;
+  opacity: 0.55;
+}
+
+.correct {
+  border-color: var(--color-green);
+  box-shadow: 0 0 0 6px rgba(76, 175, 80, 0.25);
+}
+
+@media (max-width: 768px) {
+  .choice {
+    width: 140px;
+    height: 160px;
+  }
+  .pair {
+    gap: 14px;
+  }
+}

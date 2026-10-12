@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
-import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
+import { useNarrationSequence } from '../../hooks/useNarration';
+import { starsFor, victoryLine } from '../../audio/lines';
 import { GameLayout } from '../../components/GameLayout';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
@@ -30,7 +31,7 @@ const FIREFLY_POSITIONS = [
 export const GameCounting: React.FC = () => {
   const { dino, completeWorld, setCurrentView } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
-  const { speak, cancelSpeech } = useSpeechSynthesis();
+  const { cancel, playThen } = useNarrationSequence();
 
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -67,36 +68,41 @@ export const GameCounting: React.FC = () => {
 
   const currentQuestion = questions[step];
   
-  const instructionText = currentQuestion
-    ? `Dino entrou na caverna! Quantos vaga-lumes brilhantes você consegue contar?`
-    : '';
+  const starsEarned = gameState === 'victory' ? starsFor(totalAttempts) : 0;
+  const instructionText = gameState === 'victory'
+    ? victoryLine('Muito bem! Você contou todos os vaga-lumes!', starsEarned)
+    : currentQuestion
+      ? 'Dino entrou na caverna! Quantos vaga-lumes brilhantes você consegue contar?'
+      : '';
+  const narrationId = gameState === 'victory'
+    ? `vitoria-contagem-${starsEarned}`
+    : currentQuestion
+      ? 'caverna'
+      : null;
 
   const handleNumberClick = (num: number) => {
     if (gameState === 'victory' || dinoEmotion !== 'idle' || isCounted) return;
 
-    setTotalAttempts((prev) => prev + 1);
+    const nextAttempts = totalAttempts + 1;
+    setTotalAttempts(nextAttempts);
 
     if (num === currentQuestion.fireflyCount) {
-      // Correct!
       playPop();
       playSuccess();
       setIsCounted(true);
       setDinoEmotion('celebrate');
       setWrongAnswers([]);
-      
-      // Narrate count
-      speak(`Isso! São ${currentQuestion.fireflyCount} vaga-lumes!`);
 
-      setTimeout(() => {
+      playThen(`vagalume-${currentQuestion.fireflyCount}`, () => {
         setIsCounted(false);
         setDinoEmotion('idle');
-        
+
         if (step < totalQuestions - 1) {
           setStep((prev) => prev + 1);
         } else {
-          handleVictory();
+          handleVictory(nextAttempts);
         }
-      }, 2000);
+      }, 1200);
 
     } else {
       // Incorrect
@@ -110,16 +116,11 @@ export const GameCounting: React.FC = () => {
     }
   };
 
-  const handleVictory = () => {
+  const handleVictory = (attempts: number) => {
     setGameState('victory');
     setShowConfetti(true);
     playVictory();
-
-    let starsEarned = 1;
-    if (totalAttempts <= 5) starsEarned = 3;
-    else if (totalAttempts <= 7) starsEarned = 2;
-
-    completeWorld('counting', starsEarned);
+    completeWorld('counting', starsFor(attempts));
   };
 
   const handlePlayAgain = () => {
@@ -179,8 +180,9 @@ export const GameCounting: React.FC = () => {
   return (
     <GameLayout
       title="Caverna da Contagem"
-      instructionText={gameState === 'victory' ? 'Vaga-lumes contados!' : instructionText}
-      starsEarned={gameState === 'victory' ? (totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1) : 0}
+      instructionText={instructionText}
+      narrationId={narrationId}
+      starsEarned={starsEarned}
       currentStep={gameState === 'victory' ? undefined : step + 1}
       totalSteps={gameState === 'victory' ? undefined : totalQuestions}
     >
@@ -270,7 +272,7 @@ export const GameCounting: React.FC = () => {
 
           <div className={styles.victoryStarsContainer}>
             {[1, 2, 3].map((star) => {
-              const finalStars = totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1;
+              const finalStars = starsEarned;
               return (
                 <span
                   key={star}
@@ -297,7 +299,7 @@ export const GameCounting: React.FC = () => {
               id="btn-victory-counting-map"
               className="btn-bubble"
               style={{ backgroundColor: 'var(--color-green)', color: 'white' }}
-              onClick={() => { playClick(); cancelSpeech(); setCurrentView('map'); }}
+              onClick={() => { playClick(); cancel(); setCurrentView('map'); }}
               onMouseEnter={playHover}
             >
               <Map size={20} />

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
 import type { GameView } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
-import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
+import { useNarration } from '../../hooks/useNarration';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { PrehistoricScene } from '../../components/PrehistoricScene';
 import { Home, Award, Volume2, VolumeX, RefreshCw } from 'lucide-react';
@@ -35,7 +35,7 @@ const MAP_NODES: MapNode[] = [
       </svg>
     ),
     x: 16,
-    y: 30,
+    y: 18,
     color: '#FF5722',
     desc: 'Aprenda as cores!',
   },
@@ -50,7 +50,7 @@ const MAP_NODES: MapNode[] = [
         <polygon points="50,44 53,51 60,51 55,55 57,62 50,58 43,62 45,55 40,51 47,51" fill="#FFD54F" />
       </svg>
     ),
-    x: 44,
+    x: 50,
     y: 18,
     color: '#9C27B0',
     desc: 'Brinque com as formas!',
@@ -67,8 +67,8 @@ const MAP_NODES: MapNode[] = [
         <ellipse cx="58" cy="55" rx="6" ry="9" fill="#C8E6C9" stroke="#37474F" transform="rotate(20 58 55)" />
       </svg>
     ),
-    x: 76,
-    y: 28,
+    x: 50,
+    y: 46,
     color: '#2196F3',
     desc: 'Conte e choque ovos!',
   },
@@ -83,8 +83,8 @@ const MAP_NODES: MapNode[] = [
         <text x="70" y="54" fontFamily="Fredoka" fontSize="18" fontWeight="bold" fill="white" textAnchor="middle" style={{ textShadow: '1px 1px 0 #263238' }}>B</text>
       </svg>
     ),
-    x: 22,
-    y: 62,
+    x: 84,
+    y: 46,
     color: '#4CAF50',
     desc: 'Ache as letras certas!',
   },
@@ -101,8 +101,8 @@ const MAP_NODES: MapNode[] = [
         <polygon points="74,36 82,24 69,29" fill="#FF9800" />
       </svg>
     ),
-    x: 48,
-    y: 70,
+    x: 16,
+    y: 72,
     color: '#FF9800',
     desc: 'Descubra os animais!',
   },
@@ -117,10 +117,55 @@ const MAP_NODES: MapNode[] = [
         <polygon points="52,78 57,64 62,78" fill="#80D8FF" />
       </svg>
     ),
-    x: 78,
-    y: 58,
+    x: 50,
+    y: 72,
     color: '#00BCD4',
     desc: 'Conte os objetos!',
+  },
+  {
+    id: 'sizes',
+    name: 'Clareira dos Tamanhos',
+    icon: (
+      <svg width="55" height="55" viewBox="0 0 100 100">
+        <circle cx="34" cy="62" r="16" fill="#FFD54F" stroke="#F9A825" strokeWidth="3" />
+        <circle cx="68" cy="52" r="26" fill="#FFB300" stroke="#F57F17" strokeWidth="3" />
+      </svg>
+    ),
+    x: 84,
+    y: 18,
+    color: '#F9A825',
+    desc: 'Compare os tamanhos!',
+  },
+  {
+    id: 'sequence',
+    name: 'Trilha da Sequência',
+    icon: (
+      <svg width="55" height="55" viewBox="0 0 100 100">
+        <circle cx="22" cy="50" r="12" fill="#E53935" />
+        <circle cx="50" cy="50" r="12" fill="#1E88E5" />
+        <circle cx="78" cy="50" r="12" fill="#E53935" />
+      </svg>
+    ),
+    x: 84,
+    y: 72,
+    color: '#8E24AA',
+    desc: 'Complete a sequência!',
+  },
+  {
+    id: 'positions',
+    name: 'Ninho das Posições',
+    icon: (
+      <svg width="55" height="55" viewBox="0 0 100 100">
+        <ellipse cx="50" cy="62" rx="26" ry="12" fill="#8D6E63" />
+        <circle cx="50" cy="28" r="8" fill="#FFEE58" stroke="#F9A825" strokeWidth="2" />
+        <circle cx="78" cy="58" r="8" fill="#81C784" stroke="#388E3C" strokeWidth="2" />
+        <circle cx="22" cy="58" r="8" fill="#64B5F6" stroke="#1565C0" strokeWidth="2" />
+      </svg>
+    ),
+    x: 16,
+    y: 46,
+    color: '#6D4C41',
+    desc: 'Ache em cima e embaixo!',
   },
 ];
 
@@ -137,30 +182,28 @@ export const WorldMap: React.FC = () => {
   } = useGame();
 
   const { playClick, playHover, playJump } = useAudioEngine();
-  const { speak, cancelSpeech } = useSpeechSynthesis();
+  const { play, cancel } = useNarration();
 
   // Track position of dino on map. If null, Dino is at the start (bottom-center or floating).
   const [dinoPosition, setDinoPosition] = useState<{ x: number; y: number } | null>(null);
   const [movingToNode, setMovingToNode] = useState<GameView | null>(null);
 
-  const mapInstructions = "Este é o mapa do nosso mundo pré-histórico! Escolha um dos seis lugares para explorar e aprender com o seu dinossauro!";
-
   useEffect(() => {
     const timer = setTimeout(() => {
-      speak(mapInstructions);
+      void play('mapa');
     }, 0);
 
     return () => {
       clearTimeout(timer);
-      cancelSpeech();
+      cancel();
     };
-  }, [speak, cancelSpeech]);
+  }, [play, cancel]);
 
   const handleNodeClick = (node: MapNode) => {
     if (movingToNode) return; // prevent multiple clicks while moving
     
     playJump();
-    cancelSpeech();
+    cancel();
     setMovingToNode(node.id);
     setDinoPosition({ x: node.x, y: node.y });
 
@@ -172,7 +215,7 @@ export const WorldMap: React.FC = () => {
 
   const handleBackToCustomizer = () => {
     playClick();
-    cancelSpeech();
+    cancel();
     setCurrentView('home');
   };
 
@@ -221,8 +264,7 @@ export const WorldMap: React.FC = () => {
               playClick();
               const nextState = !speechEnabled;
               setSpeechEnabled(nextState);
-              if (nextState) speak(mapInstructions, true);
-              else cancelSpeech();
+              if (!nextState) cancel();
             }}
             onMouseEnter={playHover}
             title="Ativar/Desativar narração"
@@ -256,7 +298,7 @@ export const WorldMap: React.FC = () => {
           <span style={{ fontSize: '1.75rem' }}>🏆</span>
           <div>
             <div className={styles.statLabel}>Medalhas</div>
-            <div className={styles.statVal}>{progress.medals.length} / 6</div>
+            <div className={styles.statVal}>{progress.medals.length} / {MAP_NODES.length}</div>
           </div>
         </div>
       </div>
@@ -272,7 +314,7 @@ export const WorldMap: React.FC = () => {
         </div>
         <svg className={styles.pathwaySvg} viewBox="0 0 100 100" preserveAspectRatio="none">
           <path
-            d="M 16 30 C 28 18, 36 16, 44 18 C 58 22, 66 24, 76 28 C 84 40, 82 50, 78 58 C 70 68, 58 74, 48 70 C 36 66, 28 66, 22 62"
+            d="M 16 18 C 32 18, 38 18, 50 18 C 66 18, 74 18, 84 18 C 96 30, 96 38, 84 46 C 68 46, 58 46, 50 46 C 34 46, 24 46, 16 46 C 4 58, 4 64, 16 72 C 32 72, 40 72, 50 72 C 66 72, 74 72, 84 72"
             fill="none"
             stroke="#8a5a32"
             strokeWidth="3.2"
@@ -281,7 +323,7 @@ export const WorldMap: React.FC = () => {
             vectorEffect="non-scaling-stroke"
           />
           <path
-            d="M 16 30 C 28 18, 36 16, 44 18 C 58 22, 66 24, 76 28 C 84 40, 82 50, 78 58 C 70 68, 58 74, 48 70 C 36 66, 28 66, 22 62"
+            d="M 16 18 C 32 18, 38 18, 50 18 C 66 18, 74 18, 84 18 C 96 30, 96 38, 84 46 C 68 46, 58 46, 50 46 C 34 46, 24 46, 16 46 C 4 58, 4 64, 16 72 C 32 72, 40 72, 50 72 C 66 72, 74 72, 84 72"
             fill="none"
             stroke="#e6c48a"
             strokeWidth="1.3"
@@ -332,8 +374,8 @@ export const WorldMap: React.FC = () => {
         <div
           className={styles.dinoAvatarOnMap}
           style={{
-            left: dinoPosition ? `${dinoPosition.x}%` : '50%',
-            top: dinoPosition ? `${dinoPosition.y}%` : '55%',
+            left: dinoPosition ? `${dinoPosition.x}%` : '33%',
+            top: dinoPosition ? `${dinoPosition.y}%` : '60%',
             transform: `translate(-50%, -85%) ${movingToNode ? 'scale(1.15)' : 'scale(1)'}`,
             transition: 'left 1.1s cubic-bezier(0.25, 0.46, 0.45, 0.94), top 1.1s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
           }}

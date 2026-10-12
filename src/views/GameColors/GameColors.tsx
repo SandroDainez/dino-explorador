@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
-import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
+import { useNarration } from '../../hooks/useNarration';
+import { starsFor, victoryLine } from '../../audio/lines';
 import { GameLayout } from '../../components/GameLayout';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
@@ -11,6 +12,7 @@ import styles from './GameColors.module.css';
 interface FruitOption {
   id: string;
   colorName: string;
+  clip: string;
   colorHex: string;
   type: 'apple' | 'banana' | 'orange' | 'grapes' | 'blueberry' | 'plum';
   svg: React.ReactNode;
@@ -20,6 +22,7 @@ const FRUIT_OPTIONS: FruitOption[] = [
   {
     id: 'red',
     colorName: 'Vermelha',
+    clip: 'fruta-vermelha',
     colorHex: '#E53935',
     type: 'apple',
     svg: (
@@ -36,6 +39,7 @@ const FRUIT_OPTIONS: FruitOption[] = [
   {
     id: 'yellow',
     colorName: 'Amarela',
+    clip: 'fruta-amarela',
     colorHex: '#FBC02D',
     type: 'banana',
     svg: (
@@ -51,6 +55,7 @@ const FRUIT_OPTIONS: FruitOption[] = [
   {
     id: 'orange',
     colorName: 'Laranja',
+    clip: 'fruta-laranja',
     colorHex: '#FB8C00',
     type: 'orange',
     svg: (
@@ -70,6 +75,7 @@ const FRUIT_OPTIONS: FruitOption[] = [
   {
     id: 'green',
     colorName: 'Verde',
+    clip: 'fruta-verde',
     colorHex: '#4CAF50',
     type: 'grapes',
     svg: (
@@ -91,6 +97,7 @@ const FRUIT_OPTIONS: FruitOption[] = [
   {
     id: 'blue',
     colorName: 'Azul',
+    clip: 'fruta-azul',
     colorHex: '#1E88E5',
     type: 'blueberry',
     svg: (
@@ -106,6 +113,7 @@ const FRUIT_OPTIONS: FruitOption[] = [
   {
     id: 'purple',
     colorName: 'Roxa',
+    clip: 'fruta-roxa',
     colorHex: '#8E24AA',
     type: 'plum',
     svg: (
@@ -129,7 +137,7 @@ interface Question {
 export const GameColors: React.FC = () => {
   const { dino, completeWorld, setCurrentView } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
-  const { speak, cancelSpeech } = useSpeechSynthesis();
+  const { cancel } = useNarration();
 
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -168,14 +176,21 @@ export const GameColors: React.FC = () => {
 
   const currentQuestion = questions[step];
   
-  const instructionText = currentQuestion
-    ? `Dino quer comer uma fruta ${currentQuestion.targetFruit.colorName}! Qual é a correta?`
-    : '';
+  const starsEarned = gameState === 'victory' ? starsFor(totalAttempts) : 0;
+  const instructionText = gameState === 'victory'
+    ? victoryLine('Muito bem! Você ajudou o Dino a comer todas as frutinhas coloridas!', starsEarned)
+    : currentQuestion
+      ? `Dino quer comer uma fruta ${currentQuestion.targetFruit.colorName}! Qual é a correta?`
+      : '';
+  const narrationId = gameState === 'victory'
+    ? `vitoria-cores-${starsEarned}`
+    : currentQuestion?.targetFruit.clip ?? null;
 
   const handleFruitClick = (selectedId: string) => {
     if (gameState === 'victory' || dinoEmotion !== 'idle' || biteFruit !== null) return;
 
-    setTotalAttempts((prev) => prev + 1);
+    const nextAttempts = totalAttempts + 1;
+    setTotalAttempts(nextAttempts);
 
     if (selectedId === currentQuestion.targetFruit.id) {
       // Correct!
@@ -193,7 +208,7 @@ export const GameColors: React.FC = () => {
           setStep((prev) => prev + 1);
         } else {
           // Completed all steps!
-          handleVictory();
+          handleVictory(nextAttempts);
         }
       }, 1500);
 
@@ -209,21 +224,11 @@ export const GameColors: React.FC = () => {
     }
   };
 
-  const handleVictory = () => {
+  const handleVictory = (attempts: number) => {
     setGameState('victory');
     setShowConfetti(true);
     playVictory();
-
-    // Calculate stars
-    // Best case: 5 questions in 5 attempts = 3 stars.
-    // 6-7 attempts = 2 stars.
-    // More = 1 star.
-    let starsEarned = 1;
-    if (totalAttempts <= 5) starsEarned = 3;
-    else if (totalAttempts <= 7) starsEarned = 2;
-
-    completeWorld('colors', starsEarned);
-    speak(`Muito bem! Você ajudou o Dino a comer todas as frutinhas coloridas! Você ganhou ${starsEarned} estrelas!`);
+    completeWorld('colors', starsFor(attempts));
   };
 
   const handlePlayAgain = () => {
@@ -254,8 +259,9 @@ export const GameColors: React.FC = () => {
   return (
     <GameLayout
       title="Vale das Cores"
-      instructionText={gameState === 'victory' ? 'Parabéns!' : instructionText}
-      starsEarned={gameState === 'victory' ? (totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1) : 0}
+      instructionText={instructionText}
+      narrationId={narrationId}
+      starsEarned={starsEarned}
       currentStep={gameState === 'victory' ? undefined : step + 1}
       totalSteps={gameState === 'victory' ? undefined : totalQuestions}
     >
@@ -325,7 +331,7 @@ export const GameColors: React.FC = () => {
 
           <div className={styles.victoryStarsContainer}>
             {[1, 2, 3].map((star) => {
-              const finalStars = totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1;
+              const finalStars = starsEarned;
               return (
                 <span
                   key={star}
@@ -352,7 +358,7 @@ export const GameColors: React.FC = () => {
               id="btn-victory-map"
               className="btn-bubble"
               style={{ backgroundColor: 'var(--color-green)', color: 'white' }}
-              onClick={() => { playClick(); cancelSpeech(); setCurrentView('map'); }}
+              onClick={() => { playClick(); cancel(); setCurrentView('map'); }}
               onMouseEnter={playHover}
             >
               <Map size={20} />

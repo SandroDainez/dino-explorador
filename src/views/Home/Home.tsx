@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
 import type { DinoType, DinoColor, DinoAccessory } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
-import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
+import { useNarration } from '../../hooks/useNarration';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { PrehistoricScene } from '../../components/PrehistoricScene';
 import { Volume2, VolumeX, Sparkles } from 'lucide-react';
@@ -23,7 +23,7 @@ export const Home: React.FC = () => {
   } = useGame();
 
   const { playClick, playHover, playSuccess } = useAudioEngine();
-  const { speak, cancelSpeech } = useSpeechSynthesis();
+  const { play, cancel } = useNarration();
 
   const [showSplash, setShowSplash] = useState(initialLoad);
   const [isMobile, setIsMobile] = useState(false);
@@ -41,8 +41,6 @@ export const Home: React.FC = () => {
 
   const dinoSize = isMobile ? 112 : isShort ? 128 : 200;
 
-  const introText = "Olá! Escolha o seu dinossauro. Depois toque no botão verde JOGAR para abrir os joguinhos.";
-
   const handleStartDiscovery = () => {
     playSuccess();
     initialLoad = false;
@@ -51,21 +49,21 @@ export const Home: React.FC = () => {
       ignoreHomeAutoNarration = false;
     }, 1600);
     setShowSplash(false);
-    speak(introText);
+    void play('ola');
   };
 
   useEffect(() => {
     if (showSplash || ignoreHomeAutoNarration) return;
 
     const timer = window.setTimeout(() => {
-      speak(introText);
+      void play('ola');
     }, 0);
 
     return () => {
       window.clearTimeout(timer);
-      cancelSpeech();
+      cancel();
     };
-  }, [showSplash, speak, cancelSpeech]);
+  }, [showSplash, play, cancel]);
 
   if (showSplash) {
     return (
@@ -123,7 +121,7 @@ export const Home: React.FC = () => {
 
   const handleStartGame = () => {
     playSuccess();
-    cancelSpeech();
+    cancel();
     setCurrentView('map');
   };
 
@@ -150,8 +148,7 @@ export const Home: React.FC = () => {
             playClick();
             const nextState = !speechEnabled;
             setSpeechEnabled(nextState);
-            if (nextState) speak(introText, true);
-            else cancelSpeech();
+            if (!nextState) cancel();
           }}
           onMouseEnter={playHover}
           title="Narração por voz"

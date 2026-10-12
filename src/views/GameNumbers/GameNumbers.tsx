@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
-import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
+import { useNarrationSequence } from '../../hooks/useNarration';
+import { starsFor, victoryLine } from '../../audio/lines';
 import { GameLayout } from '../../components/GameLayout';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
@@ -32,7 +33,7 @@ const EGG_COLORS = [
 export const GameNumbers: React.FC = () => {
   const { dino, completeWorld, setCurrentView } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
-  const { speak, cancelSpeech } = useSpeechSynthesis();
+  const { cancel, playThen } = useNarrationSequence();
 
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -99,45 +100,41 @@ export const GameNumbers: React.FC = () => {
 
   const currentQuestion = questions[step];
   
-  const instructionText = currentQuestion
-    ? `A mamãe dinossauro quer encontrar o ninho com ${currentQuestion.targetNumber} ${currentQuestion.targetNumber === 1 ? 'ovo' : 'ovos'}! Ajude ela!`
-    : '';
-
-  // Trigger TTS voice count on correct answer
-  const countEggsOutLoud = (count: number) => {
-    let countStr = '';
-    for (let i = 1; i <= count; i++) {
-      countStr += `${i}... `;
-    }
-    speak(countStr + "Muito bem!");
-  };
+  const starsEarned = gameState === 'victory' ? starsFor(totalAttempts) : 0;
+  const instructionText = gameState === 'victory'
+    ? victoryLine('Muito bem! Você encontrou todos os ninhos!', starsEarned)
+    : currentQuestion
+      ? `A mamãe dinossauro quer encontrar o ninho com ${currentQuestion.targetNumber} ${currentQuestion.targetNumber === 1 ? 'ovo' : 'ovos'}! Ajude ela!`
+      : '';
+  const narrationId = gameState === 'victory'
+    ? `vitoria-numeros-${starsEarned}`
+    : currentQuestion
+      ? `ninho-${currentQuestion.targetNumber}`
+      : null;
 
   const handleNestClick = (option: NestOption) => {
     if (gameState === 'victory' || dinoEmotion !== 'idle' || hatchedNestId !== null) return;
 
-    setTotalAttempts((prev) => prev + 1);
+    const nextAttempts = totalAttempts + 1;
+    setTotalAttempts(nextAttempts);
 
     if (option.eggCount === currentQuestion.targetNumber) {
-      // Correct!
       playPop();
       playSuccess();
       setHatchedNestId(option.id);
       setDinoEmotion('celebrate');
       setWrongAnswers([]);
-      
-      // Count out loud
-      countEggsOutLoud(option.eggCount);
 
-      setTimeout(() => {
+      playThen(`contar-${option.eggCount}`, () => {
         setHatchedNestId(null);
         setDinoEmotion('idle');
-        
+
         if (step < totalQuestions - 1) {
           setStep((prev) => prev + 1);
         } else {
-          handleVictory();
+          handleVictory(nextAttempts);
         }
-      }, 2500); // longer delay so children can see hatched dinos and count them
+      }, 1400);
 
     } else {
       // Incorrect
@@ -151,16 +148,11 @@ export const GameNumbers: React.FC = () => {
     }
   };
 
-  const handleVictory = () => {
+  const handleVictory = (attempts: number) => {
     setGameState('victory');
     setShowConfetti(true);
     playVictory();
-
-    let starsEarned = 1;
-    if (totalAttempts <= 5) starsEarned = 3;
-    else if (totalAttempts <= 7) starsEarned = 2;
-
-    completeWorld('numbers', starsEarned);
+    completeWorld('numbers', starsFor(attempts));
   };
 
   const handlePlayAgain = () => {
@@ -255,8 +247,9 @@ export const GameNumbers: React.FC = () => {
   return (
     <GameLayout
       title="Ninho dos Números"
-      instructionText={gameState === 'victory' ? 'Ovos encontrados!' : instructionText}
-      starsEarned={gameState === 'victory' ? (totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1) : 0}
+      instructionText={instructionText}
+      narrationId={narrationId}
+      starsEarned={starsEarned}
       currentStep={gameState === 'victory' ? undefined : step + 1}
       totalSteps={gameState === 'victory' ? undefined : totalQuestions}
     >
@@ -324,7 +317,7 @@ export const GameNumbers: React.FC = () => {
 
           <div className={styles.victoryStarsContainer}>
             {[1, 2, 3].map((star) => {
-              const finalStars = totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1;
+              const finalStars = starsEarned;
               return (
                 <span
                   key={star}
@@ -351,7 +344,7 @@ export const GameNumbers: React.FC = () => {
               id="btn-victory-numbers-map"
               className="btn-bubble"
               style={{ backgroundColor: 'var(--color-green)', color: 'white' }}
-              onClick={() => { playClick(); cancelSpeech(); setCurrentView('map'); }}
+              onClick={() => { playClick(); cancel(); setCurrentView('map'); }}
               onMouseEnter={playHover}
             >
               <Map size={20} />
