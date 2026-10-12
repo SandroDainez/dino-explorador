@@ -6,7 +6,7 @@ import { GameLayout } from '../../components/GameLayout';
 import { PhaseComplete } from '../../components/PhaseComplete';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
-import { starsForAttempts } from '../../game/journey';
+import { starsForAttempts, starsSpoken } from '../../game/journey';
 import styles from './GameNumbers.module.css';
 
 interface NestOption {
@@ -102,7 +102,7 @@ export const GameNumbers: React.FC = () => {
   const starsForRun = starsForAttempts(totalAttempts, totalQuestions);
 
   const instructionText = gameState === 'victory'
-    ? `Muito bem! Você encontrou todos os ninhos! Você ganhou ${starsForRun} estrelas!`
+    ? `Muito bem! Você encontrou todos os ninhos! Você ganhou ${starsSpoken(starsForRun)}!`
     : currentQuestion
       ? `A mamãe dinossauro quer encontrar o ninho com ${currentQuestion.targetNumber} ${currentQuestion.targetNumber === 1 ? 'ovo' : 'ovos'}! Ajude ela!`
       : '';

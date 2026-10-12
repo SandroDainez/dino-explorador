@@ -5,7 +5,7 @@ import { GameLayout } from '../../components/GameLayout';
 import { PhaseComplete } from '../../components/PhaseComplete';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
-import { starsForAttempts } from '../../game/journey';
+import { starsForAttempts, starsSpoken } from '../../game/journey';
 import styles from './GameColors.module.css';
 
 interface FruitOption {
@@ -169,7 +169,7 @@ export const GameColors: React.FC = () => {
   const starsForRun = starsForAttempts(totalAttempts, totalQuestions);
 
   const instructionText = gameState === 'victory'
-    ? `Muito bem! Você ajudou o Dino a comer todas as frutinhas coloridas! Você ganhou ${starsForRun} estrelas!`
+    ? `Muito bem! Você ajudou o Dino a comer todas as frutinhas coloridas! Você ganhou ${starsSpoken(starsForRun)}!`
     : currentQuestion
       ? `Dino quer comer uma fruta ${currentQuestion.targetFruit.colorName}! Qual é a correta?`
       : '';

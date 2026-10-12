@@ -5,7 +5,7 @@ import { GameLayout } from '../../components/GameLayout';
 import { PhaseComplete } from '../../components/PhaseComplete';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
-import { starsForAttempts } from '../../game/journey';
+import { starsForAttempts, starsSpoken } from '../../game/journey';
 import styles from './GameShapes.module.css';
 
 interface ShapeOption {
@@ -132,7 +132,7 @@ export const GameShapes: React.FC = () => {
   
   const starsForRun = starsForAttempts(totalAttempts, totalQuestions);
   const instructionText = gameState === 'victory'
-    ? `Incrível! Você consertou a ponte inteira! O Dino conseguiu atravessar para o templo e ganhou ${starsForRun} estrelas!`
+    ? `Incrível! Você consertou a ponte inteira! O Dino conseguiu atravessar para o templo e ganhou ${starsSpoken(starsForRun)}!`
     : currentQuestion
       ? `Dino precisa da pedra em forma de ${currentQuestion.targetShape.name} para consertar a ponte! Qual é ela?`
       : '';

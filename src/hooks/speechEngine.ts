@@ -147,9 +147,11 @@ function clipsFor(phrase: string): string[] | null {
   if (!match) return null;
   const intro = voiceManifest[`Pergunta ${match[1]}.`];
   const body = voiceManifest[match[2]];
-  const files = [intro, body].filter((file): file is string => typeof file === 'string' && file.length > 0);
-  if (!files.length) return null;
-  return files.map(clipUrl);
+  const introFile = typeof intro === 'string' && intro ? clipUrl(intro) : null;
+  const bodyFile = typeof body === 'string' && body ? clipUrl(body) : null;
+  if (introFile && bodyFile) return [introFile, bodyFile];
+  if (bodyFile) return [bodyFile];
+  return null;
 }
 
 function stopAudio() {

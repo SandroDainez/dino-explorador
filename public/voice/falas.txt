@@ -1,124 +1,327 @@
-Voz natural (ElevenLabs)
-========================
+Grave em português do Brasil e salve o mp3 nesta pasta (public/voice).
+O nome do arquivo tem de ser exatamente o da lista. Fale só o texto, sem o nome do arquivo.
+Enquanto o mp3 não existir, o jogo usa a voz do navegador.
 
-Grave cada frase em português do Brasil, voz calma de contador de histórias,
-e salve o mp3 dentro desta pasta (public/voice).
+Nas fases, "Pergunta 1." toca antes da instrução. Grave os dois separados.
 
-Depois escreva a frase exata como chave em manifest.json e o nome do arquivo
-como valor. Se o arquivo existir, o jogo toca ele. Se não existir, usa a voz
-do navegador.
-
-Exemplo de manifest.json:
-
-{
-  "Pergunta 1.": "pergunta-1.mp3",
-  "Dino quer comer uma fruta Vermelha! Qual é a correta?": "fruta-vermelha.mp3"
-}
-
-O jogo junta "Pergunta 1." com a instrução. Grave os dois pedaços separados
-para não precisar de um áudio para cada combinação.
-
-Perguntas curtas
-----------------
-Pergunta 1.
-Pergunta 2.
-Pergunta 3.
-Pergunta 4.
-Pergunta 5.
-Pergunta 6.
-Pergunta 7.
-Pergunta 8.
-Pergunta 9.
-Pergunta 10.
-
-Abertura e mapa
-----------------
+Abertura
+ola.mp3
 Olá! Escolha o seu dinossauro. Depois toque no botão verde JOGAR para abrir os joguinhos.
+
+mapa.mp3
 Este é o mapa das fases! Escolha uma fase para explorar e aprender com o seu dinossauro!
 
-Tamanhos
---------
-Toque no ovo maior!
-Toque na folha menor!
-Toque na pegada maior!
-Toque na pedra menor!
-Toque na estrela maior!
+Numeração da pergunta
+pergunta-1.mp3
+Pergunta 1.
 
-Sequência
----------
-Qual bolinha vem depois?
+pergunta-2.mp3
+Pergunta 2.
 
-Posições
---------
-Toque em cima do ninho!
-Toque à esquerda do ninho!
-Toque embaixo do ninho!
-Toque à direita do ninho!
+pergunta-3.mp3
+Pergunta 3.
+
+pergunta-4.mp3
+Pergunta 4.
+
+pergunta-5.mp3
+Pergunta 5.
+
+pergunta-6.mp3
+Pergunta 6.
+
+pergunta-7.mp3
+Pergunta 7.
+
+pergunta-8.mp3
+Pergunta 8.
+
+pergunta-9.mp3
+Pergunta 9.
+
+pergunta-10.mp3
+Pergunta 10.
 
 Cores
------
+fruta-vermelha.mp3
 Dino quer comer uma fruta Vermelha! Qual é a correta?
+
+fruta-amarela.mp3
 Dino quer comer uma fruta Amarela! Qual é a correta?
+
+fruta-laranja.mp3
 Dino quer comer uma fruta Laranja! Qual é a correta?
+
+fruta-verde.mp3
 Dino quer comer uma fruta Verde! Qual é a correta?
+
+fruta-azul.mp3
 Dino quer comer uma fruta Azul! Qual é a correta?
+
+fruta-roxa.mp3
 Dino quer comer uma fruta Roxa! Qual é a correta?
 
 Formas
-------
+forma-circulo.mp3
 Dino precisa da pedra em forma de Círculo para consertar a ponte! Qual é ela?
+
+forma-quadrado.mp3
 Dino precisa da pedra em forma de Quadrado para consertar a ponte! Qual é ela?
+
+forma-triangulo.mp3
 Dino precisa da pedra em forma de Triângulo para consertar a ponte! Qual é ela?
+
+forma-retangulo.mp3
 Dino precisa da pedra em forma de Retângulo para consertar a ponte! Qual é ela?
+
+forma-estrela.mp3
 Dino precisa da pedra em forma de Estrela para consertar a ponte! Qual é ela?
+
+forma-coracao.mp3
 Dino precisa da pedra em forma de Coração para consertar a ponte! Qual é ela?
+
+forma-oval.mp3
 Dino precisa da pedra em forma de Oval para consertar a ponte! Qual é ela?
 
-Números (troque a quantidade)
------------------------------
+Números — pergunta
+ninho-1.mp3
 A mamãe dinossauro quer encontrar o ninho com 1 ovo! Ajude ela!
+
+ninho-2.mp3
 A mamãe dinossauro quer encontrar o ninho com 2 ovos! Ajude ela!
+
+ninho-3.mp3
 A mamãe dinossauro quer encontrar o ninho com 3 ovos! Ajude ela!
+
+ninho-4.mp3
 A mamãe dinossauro quer encontrar o ninho com 4 ovos! Ajude ela!
+
+ninho-5.mp3
 A mamãe dinossauro quer encontrar o ninho com 5 ovos! Ajude ela!
+
+ninho-6.mp3
 A mamãe dinossauro quer encontrar o ninho com 6 ovos! Ajude ela!
+
+ninho-7.mp3
 A mamãe dinossauro quer encontrar o ninho com 7 ovos! Ajude ela!
 
-Letras (troque a palavra)
--------------------------
+Números — contagem em voz alta, com uma pausa curta depois de cada número
+contar-1.mp3
+1... Muito bem!
+
+contar-2.mp3
+1... 2... Muito bem!
+
+contar-3.mp3
+1... 2... 3... Muito bem!
+
+contar-4.mp3
+1... 2... 3... 4... Muito bem!
+
+contar-5.mp3
+1... 2... 3... 4... 5... Muito bem!
+
+contar-6.mp3
+1... 2... 3... 4... 5... 6... Muito bem!
+
+contar-7.mp3
+1... 2... 3... 4... 5... 6... 7... Muito bem!
+
+Letras
+letra-abelha.mp3
 Dino quer atravessar o rio! Com qual letra começa a palavra Abelha?
+
+letra-borboleta.mp3
 Dino quer atravessar o rio! Com qual letra começa a palavra Borboleta?
+
+letra-dinossauro.mp3
 Dino quer atravessar o rio! Com qual letra começa a palavra Dinossauro?
+
+letra-elefante.mp3
 Dino quer atravessar o rio! Com qual letra começa a palavra Elefante?
-Dino quer atravessar o rio! Com qual letra começa a palavra Foca?
+
+letra-gato.mp3
 Dino quer atravessar o rio! Com qual letra começa a palavra Gato?
+
+letra-foca.mp3
+Dino quer atravessar o rio! Com qual letra começa a palavra Foca?
+
+letra-iguana.mp3
 Dino quer atravessar o rio! Com qual letra começa a palavra Iguana?
+
+letra-leao.mp3
 Dino quer atravessar o rio! Com qual letra começa a palavra Leão?
+
+letra-macaco.mp3
 Dino quer atravessar o rio! Com qual letra começa a palavra Macaco?
+
+letra-pato.mp3
 Dino quer atravessar o rio! Com qual letra começa a palavra Pato?
 
 Animais
--------
+animal-sombra.mp3
 Qual animal faz essa sombra escura na floresta?
+
+animal-sapo.mp3
 É o Sapo! Ouça o sapo coaxando! Rec, rec!
+
+animal-elefante.mp3
 É o Elefante! Ouça o elefante barulhento! Fuumm!
+
+animal-leao.mp3
 É o Leão! Ouça o leão rugindo! Rrrraaar!
+
+animal-passaro.mp3
 É o Pássaro! Ouça o passarinho cantando! Piu, piu!
+
+animal-peixe.mp3
 É o Peixe! Ouça o peixe fazendo bolhas! Blu, blu!
 
 Contagem
---------
+caverna.mp3
 Dino entrou na caverna! Quantos vaga-lumes brilhantes você consegue contar?
+
+vagalume-1.mp3
 Isso! É 1 vaga-lume!
+
+vagalume-2.mp3
 Isso! São 2 vaga-lumes!
+
+vagalume-3.mp3
 Isso! São 3 vaga-lumes!
+
+vagalume-4.mp3
 Isso! São 4 vaga-lumes!
+
+vagalume-5.mp3
 Isso! São 5 vaga-lumes!
+
+vagalume-6.mp3
 Isso! São 6 vaga-lumes!
+
+vagalume-7.mp3
 Isso! São 7 vaga-lumes!
+
+vagalume-8.mp3
 Isso! São 8 vaga-lumes!
+
+vagalume-9.mp3
 Isso! São 9 vaga-lumes!
+
+vagalume-10.mp3
 Isso! São 10 vaga-lumes!
 
-A frase de vitória muda com 1, 2 ou 3 estrelas. Pode gravar cada uma
-ou deixar essa fala com a voz do navegador.
+Tamanhos
+tamanho-ovo-maior.mp3
+Toque no ovo maior!
+
+tamanho-folha-menor.mp3
+Toque na folha menor!
+
+tamanho-pegada-maior.mp3
+Toque na pegada maior!
+
+tamanho-pedra-menor.mp3
+Toque na pedra menor!
+
+tamanho-estrela-maior.mp3
+Toque na estrela maior!
+
+Sequência
+sequencia.mp3
+Qual bolinha vem depois?
+
+Posições
+posicao-cima.mp3
+Toque em cima do ninho!
+
+posicao-esquerda.mp3
+Toque à esquerda do ninho!
+
+posicao-embaixo.mp3
+Toque embaixo do ninho!
+
+posicao-direita.mp3
+Toque à direita do ninho!
+
+Vitória — grave as três versões, trocando só as estrelas
+vitoria-cores-1.mp3
+Muito bem! Você ajudou o Dino a comer todas as frutinhas coloridas! Você ganhou 1 estrela!
+
+vitoria-cores-2.mp3
+Muito bem! Você ajudou o Dino a comer todas as frutinhas coloridas! Você ganhou 2 estrelas!
+
+vitoria-cores-3.mp3
+Muito bem! Você ajudou o Dino a comer todas as frutinhas coloridas! Você ganhou 3 estrelas!
+
+vitoria-formas-1.mp3
+Incrível! Você consertou a ponte inteira! O Dino conseguiu atravessar para o templo e ganhou 1 estrela!
+
+vitoria-formas-2.mp3
+Incrível! Você consertou a ponte inteira! O Dino conseguiu atravessar para o templo e ganhou 2 estrelas!
+
+vitoria-formas-3.mp3
+Incrível! Você consertou a ponte inteira! O Dino conseguiu atravessar para o templo e ganhou 3 estrelas!
+
+vitoria-numeros-1.mp3
+Muito bem! Você encontrou todos os ninhos! Você ganhou 1 estrela!
+
+vitoria-numeros-2.mp3
+Muito bem! Você encontrou todos os ninhos! Você ganhou 2 estrelas!
+
+vitoria-numeros-3.mp3
+Muito bem! Você encontrou todos os ninhos! Você ganhou 3 estrelas!
+
+vitoria-letras-1.mp3
+Sensacional! Você ajudou o Dino a atravessar todo o Rio das Letras! Você ganhou 1 estrela!
+
+vitoria-letras-2.mp3
+Sensacional! Você ajudou o Dino a atravessar todo o Rio das Letras! Você ganhou 2 estrelas!
+
+vitoria-letras-3.mp3
+Sensacional! Você ajudou o Dino a atravessar todo o Rio das Letras! Você ganhou 3 estrelas!
+
+vitoria-animais-1.mp3
+Muito bem! Você descobriu todos os animais da floresta! Você ganhou 1 estrela!
+
+vitoria-animais-2.mp3
+Muito bem! Você descobriu todos os animais da floresta! Você ganhou 2 estrelas!
+
+vitoria-animais-3.mp3
+Muito bem! Você descobriu todos os animais da floresta! Você ganhou 3 estrelas!
+
+vitoria-contagem-1.mp3
+Muito bem! Você contou todos os vaga-lumes! Você ganhou 1 estrela!
+
+vitoria-contagem-2.mp3
+Muito bem! Você contou todos os vaga-lumes! Você ganhou 2 estrelas!
+
+vitoria-contagem-3.mp3
+Muito bem! Você contou todos os vaga-lumes! Você ganhou 3 estrelas!
+
+vitoria-tamanhos-1.mp3
+Muito bem! Você comparou todos os tamanhos! Você ganhou 1 estrela!
+
+vitoria-tamanhos-2.mp3
+Muito bem! Você comparou todos os tamanhos! Você ganhou 2 estrelas!
+
+vitoria-tamanhos-3.mp3
+Muito bem! Você comparou todos os tamanhos! Você ganhou 3 estrelas!
+
+vitoria-sequencia-1.mp3
+Muito bem! Você completou todas as sequências! Você ganhou 1 estrela!
+
+vitoria-sequencia-2.mp3
+Muito bem! Você completou todas as sequências! Você ganhou 2 estrelas!
+
+vitoria-sequencia-3.mp3
+Muito bem! Você completou todas as sequências! Você ganhou 3 estrelas!
+
+vitoria-posicoes-1.mp3
+Muito bem! Você encontrou todos os lugares! Você ganhou 1 estrela!
+
+vitoria-posicoes-2.mp3
+Muito bem! Você encontrou todos os lugares! Você ganhou 2 estrelas!
+
+vitoria-posicoes-3.mp3
+Muito bem! Você encontrou todos os lugares! Você ganhou 3 estrelas!

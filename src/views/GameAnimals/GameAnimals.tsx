@@ -6,7 +6,7 @@ import { GameLayout } from '../../components/GameLayout';
 import { PhaseComplete } from '../../components/PhaseComplete';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
-import { starsForAttempts } from '../../game/journey';
+import { starsForAttempts, starsSpoken } from '../../game/journey';
 import styles from './GameAnimals.module.css';
 
 interface AnimalOption {
@@ -210,7 +210,7 @@ export const GameAnimals: React.FC = () => {
   const starsForRun = starsForAttempts(totalAttempts, totalQuestions);
 
   const instructionText = gameState === 'victory'
-    ? `Muito bem! Você descobriu todos os animais da floresta! Você ganhou ${starsForRun} estrelas!`
+    ? `Muito bem! Você descobriu todos os animais da floresta! Você ganhou ${starsSpoken(starsForRun)}!`
     : currentQuestion
       ? `Qual animal faz essa sombra escura na floresta?`
       : '';

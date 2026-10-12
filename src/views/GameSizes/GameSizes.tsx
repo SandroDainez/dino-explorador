@@ -5,7 +5,7 @@ import { GameLayout } from '../../components/GameLayout';
 import { PhaseComplete } from '../../components/PhaseComplete';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
-import { starsForAttempts } from '../../game/journey';
+import { starsForAttempts, starsSpoken } from '../../game/journey';
 import styles from './GameSizes.module.css';
 
 type ThingId = 'egg' | 'leaf' | 'print' | 'rock' | 'star';
@@ -87,7 +87,7 @@ export const GameSizes: React.FC = () => {
   const round = rounds[step];
   const starsForRun = starsForAttempts(attempts, totalQuestions);
   const instructionText = gameState === 'victory'
-    ? `Muito bem! Você comparou todos os tamanhos! Você ganhou ${starsForRun} estrelas!`
+    ? `Muito bem! Você comparou todos os tamanhos! Você ganhou ${starsSpoken(starsForRun)}!`
     : round
       ? `Toque ${round.article} ${round.name} ${round.ask}!`
       : '';

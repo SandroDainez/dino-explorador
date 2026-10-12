@@ -5,7 +5,7 @@ import { GameLayout } from '../../components/GameLayout';
 import { PhaseComplete } from '../../components/PhaseComplete';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
-import { starsForAttempts } from '../../game/journey';
+import { starsForAttempts, starsSpoken } from '../../game/journey';
 import styles from './GameLetters.module.css';
 
 interface LetterQuestion {
@@ -60,7 +60,7 @@ export const GameLetters: React.FC = () => {
   const starsForRun = starsForAttempts(totalAttempts, totalQuestions);
 
   const instructionText = gameState === 'victory'
-    ? `Sensacional! Você ajudou o Dino a atravessar todo o Rio das Letras! Você ganhou ${starsForRun} estrelas!`
+    ? `Sensacional! Você ajudou o Dino a atravessar todo o Rio das Letras! Você ganhou ${starsSpoken(starsForRun)}!`
     : currentQuestion
       ? `Dino quer atravessar o rio! Com qual letra começa a palavra ${currentQuestion.word}?`
       : '';

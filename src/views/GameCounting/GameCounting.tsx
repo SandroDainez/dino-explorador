@@ -6,7 +6,7 @@ import { GameLayout } from '../../components/GameLayout';
 import { PhaseComplete } from '../../components/PhaseComplete';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
-import { starsForAttempts } from '../../game/journey';
+import { starsForAttempts, starsSpoken } from '../../game/journey';
 import styles from './GameCounting.module.css';
 
 interface Question {
@@ -70,7 +70,7 @@ export const GameCounting: React.FC = () => {
   const starsForRun = starsForAttempts(totalAttempts, totalQuestions);
 
   const instructionText = gameState === 'victory'
-    ? `Muito bem! Você contou todos os vaga-lumes! Você ganhou ${starsForRun} estrelas!`
+    ? `Muito bem! Você contou todos os vaga-lumes! Você ganhou ${starsSpoken(starsForRun)}!`
     : currentQuestion
       ? `Dino entrou na caverna! Quantos vaga-lumes brilhantes você consegue contar?`
       : '';

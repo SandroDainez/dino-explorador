@@ -5,7 +5,7 @@ import { GameLayout } from '../../components/GameLayout';
 import { PhaseComplete } from '../../components/PhaseComplete';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
-import { starsForAttempts } from '../../game/journey';
+import { starsForAttempts, starsSpoken } from '../../game/journey';
 import styles from './GamePositions.module.css';
 
 type PlaceId = 'up' | 'down' | 'left' | 'right';
@@ -39,7 +39,7 @@ export const GamePositions: React.FC = () => {
   const target = PLACES.find((place) => place.id === ROUND_IDS[step]);
   const starsForRun = starsForAttempts(attempts, totalQuestions);
   const instructionText = gameState === 'victory'
-    ? `Muito bem! Você encontrou todos os lugares! Você ganhou ${starsForRun} estrelas!`
+    ? `Muito bem! Você encontrou todos os lugares! Você ganhou ${starsSpoken(starsForRun)}!`
     : target
       ? `Toque ${target.word} do ninho!`
       : '';

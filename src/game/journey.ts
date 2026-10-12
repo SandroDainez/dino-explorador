@@ -118,6 +118,10 @@ export function nextWorld(worldId: string): WorldSpot | null {
   return JOURNEY[index + 1] ?? null;
 }
 
+export function starsSpoken(stars: number): string {
+  return stars === 1 ? '1 estrela' : `${stars} estrelas`;
+}
+
 export function starsForAttempts(attempts: number, questions: number): number {
   if (questions <= 0) return 1;
   if (attempts <= questions) return 3;

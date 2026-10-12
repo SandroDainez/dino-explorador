@@ -5,7 +5,7 @@ import { GameLayout } from '../../components/GameLayout';
 import { PhaseComplete } from '../../components/PhaseComplete';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
-import { starsForAttempts } from '../../game/journey';
+import { starsForAttempts, starsSpoken } from '../../game/journey';
 import styles from './GameSequence.module.css';
 
 type Dot = 'red' | 'blue' | 'yellow' | 'green';
@@ -65,7 +65,7 @@ export const GameSequence: React.FC = () => {
   const round = rounds[step];
   const starsForRun = starsForAttempts(attempts, totalQuestions);
   const instructionText = gameState === 'victory'
-    ? `Muito bem! Você completou todas as sequências! Você ganhou ${starsForRun} estrelas!`
+    ? `Muito bem! Você completou todas as sequências! Você ganhou ${starsSpoken(starsForRun)}!`
     : 'Qual bolinha vem depois?';
 
   const choose = (color: Dot) => {
