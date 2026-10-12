@@ -3,9 +3,10 @@ import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
 import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
 import { GameLayout } from '../../components/GameLayout';
+import { PhaseComplete } from '../../components/PhaseComplete';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
-import { RotateCcw, Map } from 'lucide-react';
+import { starsForAttempts, starsSpoken } from '../../game/journey';
 import styles from './GameNumbers.module.css';
 
 interface NestOption {
@@ -30,9 +31,9 @@ const EGG_COLORS = [
 ];
 
 export const GameNumbers: React.FC = () => {
-  const { dino, completeWorld, setCurrentView } = useGame();
+  const { dino, completeWorld } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
-  const { speak, cancelSpeech } = useSpeechSynthesis();
+  const { speak } = useSpeechSynthesis();
 
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -43,7 +44,7 @@ export const GameNumbers: React.FC = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [hatchedNestId, setHatchedNestId] = useState<string | null>(null);
 
-  const totalQuestions = 5;
+  const totalQuestions = 7;
 
   const generateNestOption = (id: string, count: number): NestOption => {
     // Eggs positions inside the nest
@@ -75,7 +76,7 @@ export const GameNumbers: React.FC = () => {
     const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
 
     // Target numbers for our 5 questions (e.g. random 5 numbers from 1 to 7)
-    const targets = shuffle([1, 2, 3, 4, 5, 6, 7]).slice(0, 5);
+    const targets = shuffle([1, 2, 3, 4, 5, 6, 7]).slice(0, totalQuestions);
 
     targets.forEach((targetNum) => {
       // Choose two distractor numbers close to target
@@ -98,10 +99,10 @@ export const GameNumbers: React.FC = () => {
   }, []);
 
   const currentQuestion = questions[step];
-  const starsForRun = totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1;
+  const starsForRun = starsForAttempts(totalAttempts, totalQuestions);
 
   const instructionText = gameState === 'victory'
-    ? `Muito bem! Você encontrou todos os ninhos! Você ganhou ${starsForRun} estrelas!`
+    ? `Muito bem! Você encontrou todos os ninhos! Você ganhou ${starsSpoken(starsForRun)}!`
     : currentQuestion
       ? `A mamãe dinossauro quer encontrar o ninho com ${currentQuestion.targetNumber} ${currentQuestion.targetNumber === 1 ? 'ovo' : 'ovos'}! Ajude ela!`
       : '';
@@ -159,11 +160,7 @@ export const GameNumbers: React.FC = () => {
     setShowConfetti(true);
     playVictory();
 
-    let starsEarned = 1;
-    if (totalAttempts <= 5) starsEarned = 3;
-    else if (totalAttempts <= 7) starsEarned = 2;
-
-    completeWorld('numbers', starsEarned);
+    completeWorld('numbers', starsForAttempts(totalAttempts + 1, totalQuestions));
   };
 
   const handlePlayAgain = () => {
@@ -178,7 +175,7 @@ export const GameNumbers: React.FC = () => {
 
     // Regenerate questions
     const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
-    const targets = shuffle([1, 2, 3, 4, 5, 6, 7]).slice(0, 5);
+    const targets = shuffle([1, 2, 3, 4, 5, 6, 7]).slice(0, totalQuestions);
     const questionsList: Question[] = [];
 
     targets.forEach((targetNum) => {
@@ -318,50 +315,16 @@ export const GameNumbers: React.FC = () => {
         </div>
       ) : (
         /* Victory Screen */
-        <div className={styles.victoryCard}>
-          <div className={styles.victoryBadge}>🦖</div>
-          <h2 className={styles.victoryTitle}>Sensacional!</h2>
-          <p className={styles.victoryText}>
-            Você sabe contar muito bem! Todos os ninhos estão em segurança e os bebês dinossauros nasceram felizes!
-          </p>
-
-          <div className={styles.victoryStarsContainer}>
-            {[1, 2, 3].map((star) => {
-              const finalStars = totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1;
-              return (
-                <span
-                  key={star}
-                  className={`${styles.victoryStar} ${star <= finalStars ? styles.finalStarFilled : styles.finalStarEmpty}`}
-                >
-                  ⭐
-                </span>
-              );
-            })}
-          </div>
-
-          <div className={styles.victoryButtons}>
-            <button
-              id="btn-victory-numbers-replay"
-              className="btn-bubble"
-              style={{ backgroundColor: 'var(--color-blue)', color: 'white' }}
-              onClick={handlePlayAgain}
-              onMouseEnter={playHover}
-            >
-              <RotateCcw size={20} />
-              <span>Jogar de Novo</span>
-            </button>
-            <button
-              id="btn-victory-numbers-map"
-              className="btn-bubble"
-              style={{ backgroundColor: 'var(--color-green)', color: 'white' }}
-              onClick={() => { playClick(); cancelSpeech(); setCurrentView('map'); }}
-              onMouseEnter={playHover}
-            >
-              <Map size={20} />
-              <span>Ir para o Mapa</span>
-            </button>
-          </div>
-        </div>
+        <PhaseComplete
+          worldId="numbers"
+          badge="🦖"
+          title="Sensacional!"
+          message="Você sabe contar muito bem! Todos os ninhos estão em segurança e os bebês dinossauros nasceram felizes!"
+          stars={starsForRun}
+          onReplay={handlePlayAgain}
+          replayId="btn-victory-numbers-replay"
+          mapId="btn-victory-numbers-map"
+        />
       )}
     </GameLayout>
   );

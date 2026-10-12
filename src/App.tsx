@@ -8,6 +8,9 @@ import { GameNumbers } from './views/GameNumbers/GameNumbers';
 import { GameLetters } from './views/GameLetters/GameLetters';
 import { GameAnimals } from './views/GameAnimals/GameAnimals';
 import { GameCounting } from './views/GameCounting/GameCounting';
+import { GameSizes } from './views/GameSizes/GameSizes';
+import { GameSequence } from './views/GameSequence/GameSequence';
+import { GamePositions } from './views/GamePositions/GamePositions';
 
 const GameRouter: React.FC = () => {
   const { currentView } = useGame();
@@ -23,6 +26,12 @@ const GameRouter: React.FC = () => {
       return <GameShapes />;
     case 'numbers':
       return <GameNumbers />;
+    case 'sizes':
+      return <GameSizes />;
+    case 'sequence':
+      return <GameSequence />;
+    case 'positions':
+      return <GamePositions />;
     case 'letters':
       return <GameLetters />;
     case 'animals':

@@ -224,6 +224,40 @@ test('the next phase speaks after a stuck line is recovered', async () => {
   assert.equal(next[0].dropped, false);
 });
 
+test('a missing recording falls back to the browser voice', async () => {
+  class FakeAudio {
+    constructor(url) {
+      this.url = url;
+    }
+
+    play() {
+      queueMicrotask(() => this.onerror?.());
+      return Promise.reject(new Error('missing'));
+    }
+
+    pause() {}
+
+    set src(_value) {}
+  }
+
+  const previous = globalThis.Audio;
+  globalThis.Audio = FakeAudio;
+  engine.setVoiceManifestForTests({
+    'Pergunta 1. Conte os vaga-lumes.': 'caverna.mp3',
+  });
+
+  try {
+    engine.speakPhrase('Pergunta 1. Conte os vaga-lumes.');
+    await Promise.resolve();
+    await Promise.resolve();
+    assert.equal(shim.calls.length, 1);
+    assert.equal(shim.calls[0].text, 'Pergunta 1. Conte os vaga-lumes.');
+    assert.equal(shim.calls[0].dropped, false);
+  } finally {
+    globalThis.Audio = previous;
+  }
+});
+
 test('says the phase on the next tap when speech never starts', async () => {
   shim.setDropRemaining(5);
   engine.speakPhrase('Pergunta 3. Quem está escondido?');

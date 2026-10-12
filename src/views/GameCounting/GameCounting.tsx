@@ -3,9 +3,10 @@ import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
 import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
 import { GameLayout } from '../../components/GameLayout';
+import { PhaseComplete } from '../../components/PhaseComplete';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
-import { RotateCcw, Map } from 'lucide-react';
+import { starsForAttempts, starsSpoken } from '../../game/journey';
 import styles from './GameCounting.module.css';
 
 interface Question {
@@ -28,9 +29,9 @@ const FIREFLY_POSITIONS = [
 ];
 
 export const GameCounting: React.FC = () => {
-  const { dino, completeWorld, setCurrentView } = useGame();
+  const { dino, completeWorld } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
-  const { speak, cancelSpeech } = useSpeechSynthesis();
+  const { speak } = useSpeechSynthesis();
 
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -41,14 +42,14 @@ export const GameCounting: React.FC = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [isCounted, setIsCounted] = useState(false);
 
-  const totalQuestions = 5;
+  const totalQuestions = 8;
 
   useEffect(() => {
     const questionsList: Question[] = [];
     const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
 
     // Target counts for our 5 questions (e.g. random numbers from 1 to 10)
-    const targets = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).slice(0, 5);
+    const targets = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).slice(0, totalQuestions);
 
     targets.forEach((targetCount) => {
       // Generate options: targetCount + 3 close distractors
@@ -66,10 +67,10 @@ export const GameCounting: React.FC = () => {
   }, []);
 
   const currentQuestion = questions[step];
-  const starsForRun = totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1;
+  const starsForRun = starsForAttempts(totalAttempts, totalQuestions);
 
   const instructionText = gameState === 'victory'
-    ? `Muito bem! Você contou todos os vaga-lumes! Você ganhou ${starsForRun} estrelas!`
+    ? `Muito bem! Você contou todos os vaga-lumes! Você ganhou ${starsSpoken(starsForRun)}!`
     : currentQuestion
       ? `Dino entrou na caverna! Quantos vaga-lumes brilhantes você consegue contar?`
       : '';
@@ -88,7 +89,8 @@ export const GameCounting: React.FC = () => {
       setWrongAnswers([]);
       
       // Narrate count
-      speak(`Isso! São ${currentQuestion.fireflyCount} vaga-lumes!`);
+      const count = currentQuestion.fireflyCount;
+      speak(count === 1 ? 'Isso! É 1 vaga-lume!' : `Isso! São ${count} vaga-lumes!`);
 
       setTimeout(() => {
         setIsCounted(false);
@@ -118,11 +120,7 @@ export const GameCounting: React.FC = () => {
     setShowConfetti(true);
     playVictory();
 
-    let starsEarned = 1;
-    if (totalAttempts <= 5) starsEarned = 3;
-    else if (totalAttempts <= 7) starsEarned = 2;
-
-    completeWorld('counting', starsEarned);
+    completeWorld('counting', starsForAttempts(totalAttempts + 1, totalQuestions));
   };
 
   const handlePlayAgain = () => {
@@ -137,7 +135,7 @@ export const GameCounting: React.FC = () => {
 
     // Regenerate/shuffle questions
     const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
-    const targets = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).slice(0, 5);
+    const targets = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).slice(0, totalQuestions);
     const questionsList: Question[] = [];
 
     targets.forEach((targetCount) => {
@@ -264,50 +262,16 @@ export const GameCounting: React.FC = () => {
         </div>
       ) : (
         /* Victory Screen */
-        <div className={styles.victoryCard}>
-          <div className={styles.victoryBadge}>🍎</div>
-          <h2 className={styles.victoryTitle}>Brilhante!</h2>
-          <p className={styles.victoryText}>
-            Que inteligência! Você sabe contar até dez perfeitamente e iluminou toda a caverna!
-          </p>
-
-          <div className={styles.victoryStarsContainer}>
-            {[1, 2, 3].map((star) => {
-              const finalStars = totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1;
-              return (
-                <span
-                  key={star}
-                  className={`${styles.victoryStar} ${star <= finalStars ? styles.finalStarFilled : styles.finalStarEmpty}`}
-                >
-                  ⭐
-                </span>
-              );
-            })}
-          </div>
-
-          <div className={styles.victoryButtons}>
-            <button
-              id="btn-victory-counting-replay"
-              className="btn-bubble"
-              style={{ backgroundColor: 'var(--color-blue)', color: 'white' }}
-              onClick={handlePlayAgain}
-              onMouseEnter={playHover}
-            >
-              <RotateCcw size={20} />
-              <span>Jogar de Novo</span>
-            </button>
-            <button
-              id="btn-victory-counting-map"
-              className="btn-bubble"
-              style={{ backgroundColor: 'var(--color-green)', color: 'white' }}
-              onClick={() => { playClick(); cancelSpeech(); setCurrentView('map'); }}
-              onMouseEnter={playHover}
-            >
-              <Map size={20} />
-              <span>Ir para o Mapa</span>
-            </button>
-          </div>
-        </div>
+        <PhaseComplete
+          worldId="counting"
+          badge="🍎"
+          title="Brilhante!"
+          message="Que inteligência! Você sabe contar até dez perfeitamente e iluminou toda a caverna!"
+          stars={starsForRun}
+          onReplay={handlePlayAgain}
+          replayId="btn-victory-counting-replay"
+          mapId="btn-victory-counting-map"
+        />
       )}
     </GameLayout>
   );

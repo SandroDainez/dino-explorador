@@ -47,6 +47,8 @@ type SpeechItem = {
 let generation = 0;
 let runId = 0;
 let lastCancelAt = 0;
+let voiceManifest: Record<string, string> | null = null;
+let currentAudio: HTMLAudioElement | null = null;
 let queue: SpeechItem[] = [];
 let current: (SpeechItem & { run: number; started: boolean; startedAt: number }) | null = null;
 let startTimer: TimerHandle | null = null;
@@ -118,6 +120,51 @@ function pickPortugueseVoice(voices: VoiceLike[]): VoiceLike | undefined {
   return [...pool].sort((a, b) => score(b) - score(a))[0];
 }
 
+function primeVoiceManifest() {
+  if (typeof window === 'undefined' || typeof fetch !== 'function') return;
+  fetch('/voice/manifest.json')
+    .then((response) => (response.ok ? response.json() : {}))
+    .then((data) => {
+      voiceManifest = data && typeof data === 'object' ? data as Record<string, string> : {};
+    })
+    .catch(() => {
+      voiceManifest = {};
+    });
+}
+
+primeVoiceManifest();
+
+function clipUrl(file: string): string {
+  return file.startsWith('/') ? file : `/voice/${file}`;
+}
+
+function clipsFor(phrase: string): string[] | null {
+  if (!voiceManifest) return null;
+  const full = voiceManifest[phrase];
+  if (typeof full === 'string' && full) return [clipUrl(full)];
+
+  const match = phrase.match(/^Pergunta (\d+)\. (.+)$/);
+  if (!match) return null;
+  const intro = voiceManifest[`Pergunta ${match[1]}.`];
+  const body = voiceManifest[match[2]];
+  const introFile = typeof intro === 'string' && intro ? clipUrl(intro) : null;
+  const bodyFile = typeof body === 'string' && body ? clipUrl(body) : null;
+  if (introFile && bodyFile) return [introFile, bodyFile];
+  if (bodyFile) return [bodyFile];
+  return null;
+}
+
+function stopAudio() {
+  if (!currentAudio) return;
+  const audio = currentAudio;
+  currentAudio = null;
+  audio.onplaying = null;
+  audio.onended = null;
+  audio.onerror = null;
+  audio.pause();
+  audio.src = '';
+}
+
 function cancelIfBusy() {
   const synth = getSynth();
   if (!synth) return;
@@ -171,25 +218,22 @@ function finish(run: number) {
   pump();
 }
 
-function play(item: SpeechItem, attempt: number) {
-  const synth = getSynth();
-  if (!synth || item.gen !== generation) return;
+function markStarted(item: SpeechItem, myRun: number) {
+  if (!current || current.run !== myRun) return;
+  current.started = true;
+  if (gestureGeneration === item.gen && gesturePhrase === item.phrase) gesturePhrase = null;
+}
 
-  const myRun = ++runId;
-  clearWatchTimer();
-  current = { ...item, run: myRun, started: false, startedAt: Date.now() };
-  // Keep the line ready for the next tap until audio actually starts.
-  // Mobile browsers ignore speak() that was not inside a user gesture.
-  armGesture(item.phrase, item.gen);
+function speakWithSynth(item: SpeechItem, attempt: number, myRun: number) {
+  const synth = getSynth();
+  if (!synth || item.gen !== generation || !current || current.run !== myRun) return;
   if (synth.paused) synth.resume();
 
   const utterance = createUtterance(item.phrase, attempt);
   const startedAt = Date.now();
 
   utterance.onstart = () => {
-    if (!current || current.run !== myRun) return;
-    current.started = true;
-    if (gestureGeneration === item.gen && gesturePhrase === item.phrase) gesturePhrase = null;
+    markStarted(item, myRun);
   };
   utterance.onend = () => {
     if (!current || current.run !== myRun || !current.started) return;
@@ -236,6 +280,70 @@ function play(item: SpeechItem, attempt: number) {
   };
 
   watchTimer = window.setTimeout(watch, SILENT_RETRY_MS);
+}
+
+function playRecorded(urls: string[], item: SpeechItem, myRun: number, attempt: number) {
+  let index = 0;
+  let fellBack = false;
+
+  const giveUp = () => {
+    if (fellBack || item.gen !== generation || !current || current.run !== myRun) return;
+    fellBack = true;
+    stopAudio();
+    if (current.started) {
+      finish(myRun);
+      return;
+    }
+    speakWithSynth(item, attempt, myRun);
+  };
+
+  const playNext = () => {
+    if (item.gen !== generation || !current || current.run !== myRun) return;
+    if (index >= urls.length) {
+      finish(myRun);
+      return;
+    }
+
+    let audio: HTMLAudioElement;
+    try {
+      audio = new Audio(urls[index]);
+    } catch {
+      giveUp();
+      return;
+    }
+    index += 1;
+    currentAudio = audio;
+    audio.onplaying = () => markStarted(item, myRun);
+    audio.onended = () => {
+      if (currentAudio === audio) currentAudio = null;
+      playNext();
+    };
+    audio.onerror = () => giveUp();
+    audio.play().catch(() => giveUp());
+  };
+
+  playNext();
+}
+
+function play(item: SpeechItem, attempt: number) {
+  const synth = getSynth();
+  if (!synth || item.gen !== generation) return;
+
+  const myRun = ++runId;
+  clearWatchTimer();
+  stopAudio();
+  current = { ...item, run: myRun, started: false, startedAt: Date.now() };
+  // Keep the line ready for the next tap until audio actually starts.
+  // Mobile browsers ignore speak() that was not inside a user gesture.
+  armGesture(item.phrase, item.gen);
+
+  const clips = clipsFor(item.phrase);
+  if (clips && attempt === 0) {
+    playRecorded(clips, item, myRun, attempt);
+    return;
+  }
+
+  speakWithSynth(item, attempt, myRun);
 }
 
 function pump() {
@@ -285,6 +393,7 @@ function bindGestureReplay() {
       gesturePhrase = null;
       clearStartTimer();
       clearWatchTimer();
+      stopAudio();
       current = null;
       if (stuck) {
         synth.cancel();
@@ -318,6 +427,7 @@ export function speakPhrase(text: string, interrupt = false) {
     gesturePhrase = null;
     clearStartTimer();
     clearWatchTimer();
+    stopAudio();
     cancelIfBusy();
   }
 
@@ -333,7 +443,12 @@ export function cancelPhrase() {
   clearStartTimer();
   clearWatchTimer();
   stopKeepAlive();
+  stopAudio();
   cancelIfBusy();
+}
+
+export function setVoiceManifestForTests(manifest: Record<string, string> | null) {
+  voiceManifest = manifest;
 }
 
 export function resetSpeechEngineForTests() {
@@ -342,5 +457,6 @@ export function resetSpeechEngineForTests() {
   lastCancelAt = 0;
   gesturePhrase = null;
   gestureGeneration = -1;
+  voiceManifest = null;
   stopKeepAlive();
 }
