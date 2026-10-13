@@ -56,9 +56,11 @@ function playClip(id: string, token: number, retryFrom: string[]): Promise<boole
     audio.src = `/audio/${id}.mp3`;
 
     let settled = false;
+    let cap = 0;
     const finish = (keepGoing: boolean) => {
       if (settled) return;
       settled = true;
+      window.clearTimeout(cap);
       if (stopCurrent === stop) stopCurrent = null;
       resolve(keepGoing);
     };
@@ -71,10 +73,12 @@ function playClip(id: string, token: number, retryFrom: string[]): Promise<boole
     stopCurrent = stop;
     audio.onended = () => finish(token === generation);
     audio.onerror = () => finish(token === generation);
+    cap = window.setTimeout(() => finish(token === generation), 8000);
     void audio.play().then(() => {
       retryList = null;
     }).catch((error: unknown) => {
-      const blocked = error instanceof DOMException && error.name === 'NotAllowedError';
+      const name = error instanceof DOMException ? error.name : '';
+      const blocked = name === 'NotAllowedError';
       if (blocked && token === generation) retryList = retryFrom;
       finish(!blocked && token === generation);
     });
@@ -93,14 +97,18 @@ export function playNarration(ids: string | string[], enabled: boolean): Promise
   return new Promise((resolve) => {
     waiters.push(resolve);
     void (async () => {
-      for (let index = 0; index < list.length; index += 1) {
-        const keepGoing = await playClip(list[index], token, list.slice(index));
-        if (!keepGoing || token !== generation) {
-          if (token === generation) settle('finished');
-          return;
+      try {
+        for (let index = 0; index < list.length; index += 1) {
+          const keepGoing = await playClip(list[index], token, list.slice(index));
+          if (!keepGoing || token !== generation) {
+            if (token === generation) settle('finished');
+            return;
+          }
         }
+        if (token === generation) settle('finished');
+      } catch {
+        if (token === generation) settle('finished');
       }
-      if (token === generation) settle('finished');
     })();
   });
 }
@@ -125,13 +133,14 @@ export function useNarrationSequence() {
   const alive = useRef(true);
 
   useEffect(() => {
+    alive.current = true;
     return () => {
       alive.current = false;
     };
   }, []);
 
   const playThen = useCallback(
-    (id: string, onDone: () => void, minMs = 1100) => {
+    (id: string, onDone: () => void, minMs = 1100, maxMs = 8000) => {
       const started = performance.now();
       let finished = false;
       const done = () => {
@@ -140,11 +149,17 @@ export function useNarrationSequence() {
         onDone();
       };
 
+      const cap = window.setTimeout(done, Math.max(minMs, maxMs));
       void play(id).then((status) => {
         if (!alive.current || finished) return;
+        window.clearTimeout(cap);
         const elapsed = performance.now() - started;
         const wait = status === 'cancelled' ? 600 : Math.max(0, minMs - elapsed);
         window.setTimeout(done, wait);
+      }).catch(() => {
+        if (!alive.current || finished) return;
+        window.clearTimeout(cap);
+        window.setTimeout(done, 600);
       });
     },
     [play],

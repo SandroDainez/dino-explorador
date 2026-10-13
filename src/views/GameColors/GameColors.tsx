@@ -209,7 +209,7 @@ export const GameColors: React.FC = () => {
         } else {
           handleVictory(nextAttempts);
         }
-      }, 900);
+      }, 900, 2300);
 
     } else {
       // Incorrect
