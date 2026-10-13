@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
-import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
+import { useNarration } from '../../hooks/useNarration';
+import { starsFor, starWords } from '../../audio/lines';
 import { GameLayout } from '../../components/GameLayout';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
@@ -9,8 +10,9 @@ import { RotateCcw, Map } from 'lucide-react';
 import styles from './GameShapes.module.css';
 
 interface ShapeOption {
-  id: 'circle' | 'square' | 'triangle' | 'rectangle' | 'star';
+  id: 'circle' | 'square' | 'triangle' | 'rectangle' | 'star' | 'heart' | 'oval';
   name: string;
+  clip: string;
   color: string;
   svg: (color: string) => React.ReactNode;
 }
@@ -19,6 +21,7 @@ const SHAPES: ShapeOption[] = [
   {
     id: 'circle',
     name: 'Círculo',
+    clip: 'forma-circulo',
     color: 'var(--color-pink)',
     svg: (color) => (
       <svg width="80" height="80" viewBox="0 0 100 100">
@@ -29,6 +32,7 @@ const SHAPES: ShapeOption[] = [
   {
     id: 'square',
     name: 'Quadrado',
+    clip: 'forma-quadrado',
     color: 'var(--color-blue)',
     svg: (color) => (
       <svg width="80" height="80" viewBox="0 0 100 100">
@@ -39,6 +43,7 @@ const SHAPES: ShapeOption[] = [
   {
     id: 'triangle',
     name: 'Triângulo',
+    clip: 'forma-triangulo',
     color: 'var(--color-green)',
     svg: (color) => (
       <svg width="80" height="80" viewBox="0 0 100 100">
@@ -49,6 +54,7 @@ const SHAPES: ShapeOption[] = [
   {
     id: 'rectangle',
     name: 'Retângulo',
+    clip: 'forma-retangulo',
     color: 'var(--color-orange)',
     svg: (color) => (
       <svg width="80" height="80" viewBox="0 0 100 100">
@@ -59,6 +65,7 @@ const SHAPES: ShapeOption[] = [
   {
     id: 'star',
     name: 'Estrela',
+    clip: 'forma-estrela',
     color: 'var(--color-yellow)',
     svg: (color) => (
       <svg width="80" height="80" viewBox="0 0 100 100">
@@ -71,6 +78,33 @@ const SHAPES: ShapeOption[] = [
       </svg>
     ),
   },
+  {
+    id: 'heart',
+    name: 'Coração',
+    clip: 'forma-coracao',
+    color: 'var(--color-red)',
+    svg: (color) => (
+      <svg width="80" height="80" viewBox="0 0 100 100">
+        <path
+          d="M50 82 C18 58, 8 40, 24 26 C36 16, 46 24, 50 34 C54 24, 64 16, 76 26 C92 40, 82 58, 50 82 Z"
+          fill={color}
+          stroke="white"
+          strokeWidth="4"
+        />
+      </svg>
+    ),
+  },
+  {
+    id: 'oval',
+    name: 'Oval',
+    clip: 'forma-oval',
+    color: 'var(--color-purple)',
+    svg: (color) => (
+      <svg width="80" height="80" viewBox="0 0 100 100">
+        <ellipse cx="50" cy="50" rx="38" ry="24" fill={color} stroke="white" strokeWidth="4" />
+      </svg>
+    ),
+  },
 ];
 
 interface Question {
@@ -80,7 +114,7 @@ interface Question {
 
 function buildShapeQuestions(): Question[] {
   const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
-  return shuffle(SHAPES).map((targetShape) => {
+  return shuffle(SHAPES).slice(0, 5).map((targetShape) => {
     const pool = SHAPES.filter((shape) => shape.id !== targetShape.id);
     const randomOthers = shuffle(pool).slice(0, 2);
     return { targetShape, options: shuffle([targetShape, ...randomOthers]) };
@@ -90,7 +124,7 @@ function buildShapeQuestions(): Question[] {
 export const GameShapes: React.FC = () => {
   const { dino, completeWorld, setCurrentView } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
-  const { cancelSpeech } = useSpeechSynthesis();
+  const { cancel } = useNarration();
 
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<Question[]>(buildShapeQuestions);
@@ -106,17 +140,21 @@ export const GameShapes: React.FC = () => {
 
   const currentQuestion = questions[step];
   
-  const starsForRun = totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1;
+  const starsForRun = starsFor(totalAttempts);
   const instructionText = gameState === 'victory'
-    ? `Incrível! Você consertou a ponte inteira! O Dino conseguiu atravessar para o templo e ganhou ${starsForRun} estrelas!`
+    ? `Incrível! Você consertou a ponte inteira! O Dino conseguiu atravessar para o templo e ganhou ${starWords(starsForRun)}!`
     : currentQuestion
       ? `Dino precisa da pedra em forma de ${currentQuestion.targetShape.name} para consertar a ponte! Qual é ela?`
       : '';
+  const narrationId = gameState === 'victory'
+    ? `vitoria-formas-${starsForRun}`
+    : currentQuestion?.targetShape.clip ?? null;
 
   const handleShapeClick = (shapeId: string) => {
     if (gameState === 'victory' || dinoEmotion !== 'idle' || animatingShape !== null) return;
 
-    setTotalAttempts((prev) => prev + 1);
+    const nextAttempts = totalAttempts + 1;
+    setTotalAttempts(nextAttempts);
 
     if (shapeId === currentQuestion.targetShape.id) {
       // Correct!
@@ -141,7 +179,7 @@ export const GameShapes: React.FC = () => {
         if (step < totalQuestions - 1) {
           setStep((prev) => prev + 1);
         } else {
-          handleVictory();
+          handleVictory(nextAttempts);
         }
       }, 1500);
 
@@ -157,17 +195,12 @@ export const GameShapes: React.FC = () => {
     }
   };
 
-  const handleVictory = () => {
+  const handleVictory = (attempts: number) => {
     setDinoEmotion('celebrate');
     setGameState('victory');
     setShowConfetti(true);
     playVictory();
-
-    let starsEarned = 1;
-    if (totalAttempts <= 5) starsEarned = 3;
-    else if (totalAttempts <= 7) starsEarned = 2;
-
-    completeWorld('shapes', starsEarned);
+    completeWorld('shapes', starsFor(attempts));
   };
 
   const handlePlayAgain = () => {
@@ -188,6 +221,7 @@ export const GameShapes: React.FC = () => {
     <GameLayout
       title="Templo das Formas"
       instructionText={instructionText}
+      narrationId={narrationId}
       starsEarned={gameState === 'victory' ? starsForRun : 0}
       currentStep={gameState === 'victory' ? undefined : step + 1}
       totalSteps={gameState === 'victory' ? undefined : totalQuestions}
@@ -288,7 +322,7 @@ export const GameShapes: React.FC = () => {
 
           <div className={styles.victoryStarsContainer}>
             {[1, 2, 3].map((star) => {
-              const finalStars = totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1;
+              const finalStars = starsForRun;
               return (
                 <span
                   key={star}
@@ -315,7 +349,7 @@ export const GameShapes: React.FC = () => {
               id="btn-victory-shapes-map"
               className="btn-bubble"
               style={{ backgroundColor: 'var(--color-green)', color: 'white' }}
-              onClick={() => { playClick(); cancelSpeech(); setCurrentView('map'); }}
+              onClick={() => { playClick(); cancel(); setCurrentView('map'); }}
               onMouseEnter={playHover}
             >
               <Map size={20} />

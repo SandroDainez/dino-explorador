@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
-import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
+import { useNarration } from '../../hooks/useNarration';
+import { starsFor, victoryLine } from '../../audio/lines';
 import { GameLayout } from '../../components/GameLayout';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
@@ -13,20 +14,26 @@ interface LetterQuestion {
   emoji: string;
   targetLetter: string;
   distractors: string[];
+  clip: string;
 }
 
 const LETTER_QUESTIONS: LetterQuestion[] = [
-  { word: 'Abelha', emoji: '🐝', targetLetter: 'A', distractors: ['M', 'O'] },
-  { word: 'Borboleta', emoji: '🦋', targetLetter: 'B', distractors: ['P', 'V'] },
-  { word: 'Dinossauro', emoji: '🦖', targetLetter: 'D', distractors: ['B', 'T'] },
-  { word: 'Elefante', emoji: '🐘', targetLetter: 'E', distractors: ['A', 'I'] },
-  { word: 'Gato', emoji: '🐱', targetLetter: 'G', distractors: ['J', 'C'] },
+  { word: 'Abelha', emoji: '🐝', targetLetter: 'A', distractors: ['M', 'O'], clip: 'letra-abelha' },
+  { word: 'Borboleta', emoji: '🦋', targetLetter: 'B', distractors: ['P', 'V'], clip: 'letra-borboleta' },
+  { word: 'Dinossauro', emoji: '🦖', targetLetter: 'D', distractors: ['B', 'T'], clip: 'letra-dinossauro' },
+  { word: 'Elefante', emoji: '🐘', targetLetter: 'E', distractors: ['A', 'I'], clip: 'letra-elefante' },
+  { word: 'Foca', emoji: '🦭', targetLetter: 'F', distractors: ['V', 'S'], clip: 'letra-foca' },
+  { word: 'Gato', emoji: '🐱', targetLetter: 'G', distractors: ['J', 'C'], clip: 'letra-gato' },
+  { word: 'Iguana', emoji: '🦎', targetLetter: 'I', distractors: ['E', 'U'], clip: 'letra-iguana' },
+  { word: 'Leão', emoji: '🦁', targetLetter: 'L', distractors: ['N', 'R'], clip: 'letra-leao' },
+  { word: 'Macaco', emoji: '🐵', targetLetter: 'M', distractors: ['N', 'B'], clip: 'letra-macaco' },
+  { word: 'Pato', emoji: '🦆', targetLetter: 'P', distractors: ['B', 'T'], clip: 'letra-pato' },
 ];
 
 export const GameLetters: React.FC = () => {
   const { dino, completeWorld, setCurrentView } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playJump } = useAudioEngine();
-  const { speak, cancelSpeech } = useSpeechSynthesis();
+  const { cancel } = useNarration();
 
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<LetterQuestion[]>([]);
@@ -44,7 +51,7 @@ export const GameLetters: React.FC = () => {
     const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
     
     // We shuffle the questions list itself to keep it fresh, but keep them at length 5.
-    const shuffledQuestions = shuffle(LETTER_QUESTIONS).map(q => ({
+    const shuffledQuestions = shuffle(LETTER_QUESTIONS).slice(0, 5).map(q => ({
       ...q,
       distractors: shuffle(q.distractors),
     }));
@@ -54,14 +61,21 @@ export const GameLetters: React.FC = () => {
 
   const currentQuestion = questions[step];
   
-  const instructionText = currentQuestion
-    ? `Dino quer atravessar o rio! Com qual letra começa a palavra ${currentQuestion.word}?`
-    : '';
+  const starsEarned = gameState === 'victory' ? starsFor(totalAttempts) : 0;
+  const instructionText = gameState === 'victory'
+    ? victoryLine('Sensacional! Você ajudou o Dino a atravessar todo o Rio das Letras!', starsEarned)
+    : currentQuestion
+      ? `Dino quer atravessar o rio! Com qual letra começa a palavra ${currentQuestion.word}?`
+      : '';
+  const narrationId = gameState === 'victory'
+    ? `vitoria-letras-${starsEarned}`
+    : currentQuestion?.clip ?? null;
 
   const handleLetterClick = (letter: string, optionIdx: number) => {
     if (gameState === 'victory' || dinoEmotion !== 'idle' || jumpingStoneIdx !== null) return;
 
-    setTotalAttempts((prev) => prev + 1);
+    const nextAttempts = totalAttempts + 1;
+    setTotalAttempts(nextAttempts);
 
     if (letter === currentQuestion.targetLetter) {
       // Correct!
@@ -78,7 +92,7 @@ export const GameLetters: React.FC = () => {
         if (step < totalQuestions - 1) {
           setStep((prev) => prev + 1);
         } else {
-          handleVictory();
+          handleVictory(nextAttempts);
         }
       }, 1500);
 
@@ -94,17 +108,11 @@ export const GameLetters: React.FC = () => {
     }
   };
 
-  const handleVictory = () => {
+  const handleVictory = (attempts: number) => {
     setGameState('victory');
     setShowConfetti(true);
     playVictory();
-
-    let starsEarned = 1;
-    if (totalAttempts <= 5) starsEarned = 3;
-    else if (totalAttempts <= 7) starsEarned = 2;
-
-    completeWorld('letters', starsEarned);
-    speak(`Sensacional! Você ajudou o Dino a atravessar todo o Rio das Letras! Você ganhou ${starsEarned} estrelas!`);
+    completeWorld('letters', starsFor(attempts));
   };
 
   const handlePlayAgain = () => {
@@ -119,7 +127,7 @@ export const GameLetters: React.FC = () => {
 
     // Regenerate/shuffle questions
     const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
-    const shuffledQuestions = shuffle(LETTER_QUESTIONS).map(q => ({
+    const shuffledQuestions = shuffle(LETTER_QUESTIONS).slice(0, 5).map(q => ({
       ...q,
       distractors: shuffle(q.distractors),
     }));
@@ -137,8 +145,9 @@ export const GameLetters: React.FC = () => {
   return (
     <GameLayout
       title="Rio das Letras"
-      instructionText={gameState === 'victory' ? 'Rio atravessado!' : instructionText}
-      starsEarned={gameState === 'victory' ? (totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1) : 0}
+      instructionText={instructionText}
+      narrationId={narrationId}
+      starsEarned={starsEarned}
       currentStep={gameState === 'victory' ? undefined : step + 1}
       totalSteps={gameState === 'victory' ? undefined : totalQuestions}
     >
@@ -216,7 +225,7 @@ export const GameLetters: React.FC = () => {
 
           <div className={styles.victoryStarsContainer}>
             {[1, 2, 3].map((star) => {
-              const finalStars = totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1;
+              const finalStars = starsEarned;
               return (
                 <span
                   key={star}
@@ -243,7 +252,7 @@ export const GameLetters: React.FC = () => {
               id="btn-victory-letters-map"
               className="btn-bubble"
               style={{ backgroundColor: 'var(--color-green)', color: 'white' }}
-              onClick={() => { playClick(); cancelSpeech(); setCurrentView('map'); }}
+              onClick={() => { playClick(); cancel(); setCurrentView('map'); }}
               onMouseEnter={playHover}
             >
               <Map size={20} />

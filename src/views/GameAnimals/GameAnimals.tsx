@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
-import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
+import { useNarrationSequence } from '../../hooks/useNarration';
+import { starsFor, victoryLine } from '../../audio/lines';
 import { GameLayout } from '../../components/GameLayout';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
@@ -12,7 +13,8 @@ interface AnimalOption {
   id: 'frog' | 'elephant' | 'lion' | 'fish' | 'bird';
   name: string;
   svg: (color: string) => React.ReactNode;
-  soundName: string; // sound representation
+  soundName: string;
+  clip: string;
 }
 
 const ANIMALS: Record<string, AnimalOption> = {
@@ -20,6 +22,7 @@ const ANIMALS: Record<string, AnimalOption> = {
     id: 'frog',
     name: 'Sapo',
     soundName: 'o sapo coaxando! Rec, rec!',
+    clip: 'animal-sapo',
     svg: (color) => (
       <svg width="80" height="80" viewBox="0 0 100 100">
         {/* Frog legs */}
@@ -50,6 +53,7 @@ const ANIMALS: Record<string, AnimalOption> = {
     id: 'elephant',
     name: 'Elefante',
     soundName: 'o elefante barulhento! Fuumm!',
+    clip: 'animal-elefante',
     svg: (color) => (
       <svg width="80" height="80" viewBox="0 0 100 100">
         {/* Elephant body */}
@@ -79,6 +83,7 @@ const ANIMALS: Record<string, AnimalOption> = {
     id: 'lion',
     name: 'Leão',
     soundName: 'o leão rugindo! Rrrraaar!',
+    clip: 'animal-leao',
     svg: (color) => (
       <svg width="80" height="80" viewBox="0 0 100 100">
         {/* Lion Mane (Back) */}
@@ -111,6 +116,7 @@ const ANIMALS: Record<string, AnimalOption> = {
     id: 'bird',
     name: 'Pássaro',
     soundName: 'o passarinho cantando! Piu, piu!',
+    clip: 'animal-passaro',
     svg: (color) => (
       <svg width="80" height="80" viewBox="0 0 100 100">
         {/* Tail */}
@@ -139,6 +145,7 @@ const ANIMALS: Record<string, AnimalOption> = {
     id: 'fish',
     name: 'Peixe',
     soundName: 'o peixe fazendo bolhas! Blu, blu!',
+    clip: 'animal-peixe',
     svg: (color) => (
       <svg width="80" height="80" viewBox="0 0 100 100">
         {/* Tail fin */}
@@ -171,7 +178,7 @@ interface Question {
 export const GameAnimals: React.FC = () => {
   const { dino, completeWorld, setCurrentView } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
-  const { speak, cancelSpeech } = useSpeechSynthesis();
+  const { cancel, playThen } = useNarrationSequence();
 
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -206,36 +213,41 @@ export const GameAnimals: React.FC = () => {
 
   const currentQuestion = questions[step];
   
-  const instructionText = currentQuestion
-    ? `Qual animal faz essa sombra escura na floresta?`
-    : '';
+  const starsEarned = gameState === 'victory' ? starsFor(totalAttempts) : 0;
+  const instructionText = gameState === 'victory'
+    ? victoryLine('Muito bem! Você descobriu todos os animais da floresta!', starsEarned)
+    : currentQuestion
+      ? 'Qual animal faz essa sombra escura na floresta?'
+      : '';
+  const narrationId = gameState === 'victory'
+    ? `vitoria-animais-${starsEarned}`
+    : currentQuestion
+      ? 'animal-sombra'
+      : null;
 
   const handleAnimalClick = (animal: AnimalOption) => {
     if (gameState === 'victory' || dinoEmotion !== 'idle' || isRevealed) return;
 
-    setTotalAttempts((prev) => prev + 1);
+    const nextAttempts = totalAttempts + 1;
+    setTotalAttempts(nextAttempts);
 
     if (animal.id === currentQuestion.targetAnimal.id) {
-      // Correct!
       playPop();
       playSuccess();
       setIsRevealed(true);
       setDinoEmotion('celebrate');
       setWrongAnswers([]);
-      
-      // Narrate animal name and sound
-      speak(`É o ${currentQuestion.targetAnimal.name}! Ouça ${currentQuestion.targetAnimal.soundName}`);
 
-      setTimeout(() => {
+      playThen(currentQuestion.targetAnimal.clip, () => {
         setIsRevealed(false);
         setDinoEmotion('idle');
-        
+
         if (step < totalQuestions - 1) {
           setStep((prev) => prev + 1);
         } else {
-          handleVictory();
+          handleVictory(nextAttempts);
         }
-      }, 3000); // 3s so they can hear the narrator talk about the animal
+      }, 1400);
 
     } else {
       // Incorrect
@@ -249,16 +261,11 @@ export const GameAnimals: React.FC = () => {
     }
   };
 
-  const handleVictory = () => {
+  const handleVictory = (attempts: number) => {
     setGameState('victory');
     setShowConfetti(true);
     playVictory();
-
-    let starsEarned = 1;
-    if (totalAttempts <= 5) starsEarned = 3;
-    else if (totalAttempts <= 7) starsEarned = 2;
-
-    completeWorld('animals', starsEarned);
+    completeWorld('animals', starsFor(attempts));
   };
 
   const handlePlayAgain = () => {
@@ -291,8 +298,9 @@ export const GameAnimals: React.FC = () => {
   return (
     <GameLayout
       title="Floresta dos Animais"
-      instructionText={gameState === 'victory' ? 'Sombra encontrada!' : instructionText}
-      starsEarned={gameState === 'victory' ? (totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1) : 0}
+      instructionText={instructionText}
+      narrationId={narrationId}
+      starsEarned={starsEarned}
       currentStep={gameState === 'victory' ? undefined : step + 1}
       totalSteps={gameState === 'victory' ? undefined : totalQuestions}
     >
@@ -373,7 +381,7 @@ export const GameAnimals: React.FC = () => {
 
           <div className={styles.victoryStarsContainer}>
             {[1, 2, 3].map((star) => {
-              const finalStars = totalAttempts <= 5 ? 3 : totalAttempts <= 7 ? 2 : 1;
+              const finalStars = starsEarned;
               return (
                 <span
                   key={star}
@@ -400,7 +408,7 @@ export const GameAnimals: React.FC = () => {
               id="btn-victory-animals-map"
               className="btn-bubble"
               style={{ backgroundColor: 'var(--color-green)', color: 'white' }}
-              onClick={() => { playClick(); cancelSpeech(); setCurrentView('map'); }}
+              onClick={() => { playClick(); cancel(); setCurrentView('map'); }}
               onMouseEnter={playHover}
             >
               <Map size={20} />

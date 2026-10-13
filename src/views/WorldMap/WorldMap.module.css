@@ -393,8 +393,9 @@
   }
   .nodeBadge {
     top: 58px;
-    min-width: 96px;
-    padding: 4px 6px;
+    min-width: 0;
+    max-width: 88px;
+    padding: 4px 5px;
   }
   .mapHeading {
     font-size: 1rem;
@@ -404,7 +405,10 @@
     min-height: 460px;
   }
   .nodeName {
-    font-size: 0.65rem;
+    font-size: 0.62rem;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.15;
   }
   .container {
     padding: 12px;

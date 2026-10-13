@@ -1,7 +1,7 @@
 import React from 'react';
 import { useGame } from '../context/GameContext';
 import { useAudioEngine } from '../hooks/useAudioEngine';
-import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
+import { useNarration } from '../hooks/useNarration';
 import { ArrowLeft, Volume2, VolumeX, HelpCircle } from 'lucide-react';
 import { PrehistoricScene } from './PrehistoricScene';
 import styles from './GameLayout.module.css';
@@ -13,6 +13,7 @@ interface GameLayoutProps {
   starsEarned?: number;
   currentStep?: number;
   totalSteps?: number;
+  narrationId?: string | null;
 }
 
 export const GameLayout: React.FC<GameLayoutProps> = ({
@@ -22,14 +23,22 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
   starsEarned = 0,
   currentStep,
   totalSteps,
+  narrationId,
 }) => {
   const { soundEnabled, setSoundEnabled, speechEnabled, setSpeechEnabled, setCurrentView } = useGame();
   const { playClick, playHover } = useAudioEngine();
-  const { speak, cancelSpeech } = useSpeechSynthesis();
+  const { play, cancel } = useNarration();
+
+  const narrationClips = narrationId
+    ? currentStep
+      ? [`pergunta-${currentStep}`, narrationId]
+      : [narrationId]
+    : [];
+  const narrationKey = narrationClips.join('|');
 
   const handleBack = () => {
     playClick();
-    cancelSpeech();
+    cancel();
     setCurrentView('map');
   };
 
@@ -40,33 +49,26 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
 
   const toggleSpeech = () => {
     playClick();
-    const nextState = !speechEnabled;
-    setSpeechEnabled(nextState);
-    if (nextState) {
-      speak(instructionText, true);
-    } else {
-      cancelSpeech();
-    }
+    setSpeechEnabled(!speechEnabled);
   };
 
   const handleNarrationClick = () => {
     playClick();
-    speak(instructionText);
+    if (narrationClips.length) void play(narrationClips);
   };
 
   React.useEffect(() => {
-    const phrase = instructionText.trim();
-    if (!phrase) return;
+    if (!narrationKey) return;
 
     const timer = window.setTimeout(() => {
-      speak(phrase);
+      play(narrationKey.split('|'));
     }, 0);
 
     return () => {
       window.clearTimeout(timer);
-      cancelSpeech();
+      cancel();
     };
-  }, [instructionText, currentStep, speak, cancelSpeech]);
+  }, [narrationKey, play, cancel]);
 
   return (
     <div className={styles.container}>

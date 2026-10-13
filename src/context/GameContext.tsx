@@ -10,7 +10,18 @@ export interface DinoConfig {
   accessory: DinoAccessory;
 }
 
-export type GameView = 'home' | 'map' | 'colors' | 'shapes' | 'numbers' | 'letters' | 'animals' | 'counting';
+export type GameView =
+  | 'home'
+  | 'map'
+  | 'colors'
+  | 'shapes'
+  | 'numbers'
+  | 'letters'
+  | 'animals'
+  | 'counting'
+  | 'sizes'
+  | 'sequence'
+  | 'positions';
 
 export interface GameProgress {
   stars: Record<string, number>;
@@ -46,6 +57,9 @@ const defaultProgress: GameProgress = {
     letters: 0,
     animals: 0,
     counting: 0,
+    sizes: 0,
+    sequence: 0,
+    positions: 0,
   },
   medals: [],
   completedWorlds: [],
@@ -131,6 +145,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         letters: 'Medalha das Letras',
         animals: 'Medalha dos Animais',
         counting: 'Medalha da Contagem',
+        sizes: 'Medalha dos Tamanhos',
+        sequence: 'Medalha das Sequências',
+        positions: 'Medalha das Posições',
       };
       
       const newMedal = medalMap[worldId];
