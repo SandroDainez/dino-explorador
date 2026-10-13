@@ -452,6 +452,39 @@
   }
 }
 
+@media (max-width: 768px) and (max-height: 720px) {
+  .dinoPlate {
+    width: 96px;
+    height: 96px;
+    border-width: 4px;
+  }
+  .gameTitle {
+    font-size: 1.7rem;
+  }
+  .subtitle {
+    font-size: 0.75rem;
+    margin-top: 2px;
+  }
+  .configSection {
+    padding: 8px 10px;
+    gap: 6px;
+  }
+  .sectionTitle {
+    font-size: 1.05rem;
+  }
+  .choiceBtn {
+    min-height: 40px;
+    padding: 6px 8px;
+  }
+  .previewLabel {
+    margin-top: 2px;
+    font-size: 0.85rem;
+  }
+  .stage {
+    gap: 4px;
+  }
+}
+
 @media (max-height: 760px) {
   .stage {
     justify-content: flex-start;
@@ -519,6 +552,102 @@
 
   .splashTitle {
     font-size: 2.4rem;
+  }
+}
+
+@media (max-height: 520px) {
+  .stage {
+    justify-content: center;
+    gap: 4px;
+    padding: 6px 12px 8px;
+    overflow: hidden;
+  }
+
+  .settingsBar {
+    position: absolute;
+    top: max(6px, env(safe-area-inset-top));
+    right: max(8px, env(safe-area-inset-right));
+  }
+
+  .header {
+    margin-top: 0;
+  }
+
+  .gameTitle {
+    font-size: 1.55rem;
+  }
+
+  .subtitle {
+    display: none;
+  }
+
+  .dinoPlate {
+    width: 92px;
+    height: 92px;
+    border-width: 4px;
+  }
+
+  .previewLabel {
+    display: none;
+  }
+
+  .configSection {
+    padding: 8px 10px;
+    gap: 4px;
+  }
+
+  .sectionTitle {
+    font-size: 0.95rem;
+    padding-bottom: 2px;
+  }
+
+  .choiceBtn {
+    min-height: 34px;
+    padding: 4px 6px;
+    font-size: 0.82rem;
+  }
+
+  .colorCircle {
+    width: 32px;
+    height: 32px;
+  }
+
+  .btnPlay {
+    padding: 6px 12px;
+  }
+
+  .playTitle {
+    font-size: 1.15rem;
+  }
+
+  .splashCard {
+    max-height: 100%;
+    padding: 12px 16px;
+    gap: 8px;
+    overflow: hidden;
+  }
+
+  .splashTitle {
+    font-size: 1.7rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .splashDinoPlate {
+    width: 84px;
+    height: 84px;
+  }
+
+  .splashSubtitle {
+    font-size: 0.85rem;
+    margin-top: 0;
+  }
+
+  .btnStartDiscovery {
+    font-size: 1.05rem;
+    padding: 8px 16px;
   }
 }
 
@@ -657,6 +786,106 @@
   }
   .splashSubtitle {
     font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 768px) and (max-height: 740px) {
+  .stage {
+    gap: 4px;
+    justify-content: flex-start;
+    padding-top: 4px;
+    padding-bottom: 12px;
+  }
+
+  .settingsBar {
+    position: absolute;
+    top: max(6px, env(safe-area-inset-top));
+    right: max(8px, env(safe-area-inset-right));
+  }
+
+  .header {
+    align-self: stretch;
+    text-align: left;
+    padding-right: 108px;
+    margin-top: 0;
+    width: 100%;
+  }
+
+  .gameTitle {
+    align-items: flex-start;
+    font-size: 1.35rem;
+    padding: 0;
+  }
+
+  .subtitle {
+    font-size: 0.72rem;
+    margin-top: 2px;
+  }
+
+  .dinoPlate {
+    width: 84px;
+    height: 84px;
+    border-width: 4px;
+  }
+
+  .previewLabel {
+    margin-top: 2px;
+    font-size: 0.8rem;
+  }
+
+  .configSection {
+    padding: 8px;
+    gap: 4px;
+  }
+
+  .sectionTitle {
+    font-size: 1rem;
+    padding-bottom: 2px;
+  }
+
+  .choiceBtn {
+    min-height: 38px;
+    padding: 4px 6px;
+  }
+}
+
+@media (max-height: 520px) {
+  .splashCard {
+    padding: 10px 14px;
+    gap: 6px;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .splashTitle {
+    font-size: 1.45rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    letter-spacing: 0;
+    gap: 8px;
+  }
+
+  .splashDinoPlate {
+    width: 72px;
+    height: 72px;
+    border-width: 4px;
+    animation: none;
+  }
+
+  .splashSubtitle {
+    font-size: 0.8rem;
+    margin-top: 0;
+  }
+
+  .btnStartDiscovery {
+    font-size: 1rem;
+    padding: 8px 16px;
+  }
+
+  .stage {
+    justify-content: center;
+    overflow: hidden;
   }
 }
 

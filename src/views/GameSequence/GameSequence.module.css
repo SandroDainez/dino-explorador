@@ -56,3 +56,14 @@
 .correct {
   outline: 5px solid var(--color-green);
 }
+
+@media (max-height: 520px) {
+  .gameContainer {
+    gap: 10px;
+  }
+  .ball,
+  .option {
+    width: 48px;
+    height: 48px;
+  }
+}

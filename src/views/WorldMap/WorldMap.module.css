@@ -461,6 +461,69 @@
   }
 }
 
+@media (max-height: 520px) {
+  .container {
+    overflow: hidden;
+    padding: 6px 10px;
+  }
+
+  .topBar {
+    margin-bottom: 4px;
+  }
+
+  .statsPanel {
+    padding: 4px 12px;
+    margin-bottom: 4px;
+    gap: 12px;
+  }
+
+  .statLabel {
+    font-size: 0.65rem;
+  }
+
+  .statVal {
+    font-size: 1rem;
+  }
+
+  .mapHeading {
+    margin: 0 0 4px;
+    font-size: 0.85rem;
+    padding: 3px 10px;
+  }
+
+  .medalsDrawer {
+    display: none;
+  }
+
+  .mapArea {
+    flex: 1 1 auto;
+    min-height: 0;
+    margin-bottom: 0;
+  }
+
+  .mapNode {
+    width: 40px;
+    height: 40px;
+  }
+
+  .nodeBadge {
+    top: 36px;
+    max-width: 96px;
+    padding: 2px 4px;
+  }
+
+  .nodeStars {
+    display: none;
+  }
+
+  .nodeName {
+    font-size: 0.58rem;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.1;
+  }
+}
+
 @media (max-width: 420px) {
   .homeBtn span {
     display: none;
