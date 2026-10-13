@@ -1,3 +1,6 @@
+import type { GameView } from '../context/GameContext';
+import { nextPhase } from '../game/phases';
+
 export function starsFor(attempts: number, questions = 5): 1 | 2 | 3 {
   if (attempts <= questions) return 3;
   if (attempts <= questions + 2) return 2;
@@ -12,4 +15,10 @@ export function starWords(stars: number): string {
 
 export function victoryLine(sentence: string, stars: number): string {
   return `${sentence} Você ganhou ${starWords(stars)}!`;
+}
+
+export function withNextPhase(worldId: GameView, line: string): string {
+  const upcoming = nextPhase(worldId);
+  if (!upcoming) return `${line} Você explorou todas as fases!`;
+  return `${line} Próxima fase: ${upcoming.name}.`;
 }

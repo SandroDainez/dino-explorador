@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
-import { useNarration } from '../../hooks/useNarration';
-import { starsFor, victoryLine } from '../../audio/lines';
+import { starsFor, victoryLine, withNextPhase } from '../../audio/lines';
 import { GameLayout } from '../../components/GameLayout';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
@@ -79,9 +78,8 @@ function ItemArt({ item, large }: { item: SizeItem; large: boolean }) {
 }
 
 export const GameSizes: React.FC = () => {
-  const { dino, completeWorld, setCurrentView } = useGame();
+  const { dino, completeWorld } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory } = useAudioEngine();
-  const { cancel } = useNarration();
 
   const [questions, setQuestions] = useState<SizeQuestion[]>(buildQuestions);
   const [step, setStep] = useState(0);
@@ -96,7 +94,7 @@ export const GameSizes: React.FC = () => {
   const current = questions[step];
   const starsEarned = gameState === 'victory' ? starsFor(totalAttempts, totalQuestions) : 0;
   const instructionText = gameState === 'victory'
-    ? victoryLine('Muito bem! Você comparou todos os tamanhos!', starsEarned)
+    ? withNextPhase('sizes', victoryLine('Muito bem! Você comparou todos os tamanhos!', starsEarned))
     : current?.text ?? '';
   const narrationId = gameState === 'victory'
     ? `vitoria-tamanhos-${starsEarned}`
@@ -190,10 +188,10 @@ export const GameSizes: React.FC = () => {
           title="Que olhar!"
           text="Você comparou os tamanhos com muito cuidado. O Dino está orgulhoso!"
           stars={starsEarned}
+          worldId="sizes"
           replayId="btn-victory-sizes-replay"
           mapId="btn-victory-sizes-map"
           onReplay={handlePlayAgain}
-          onMap={() => { playClick(); cancel(); setCurrentView('map'); }}
         />
       )}
     </GameLayout>

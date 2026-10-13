@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
 import { useNarrationSequence } from '../../hooks/useNarration';
-import { starsFor, victoryLine } from '../../audio/lines';
+import { starsFor, victoryLine, withNextPhase } from '../../audio/lines';
 import { GameLayout } from '../../components/GameLayout';
+import { VictoryActions } from '../../components/VictoryPanel';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
-import { RotateCcw, Map } from 'lucide-react';
 import styles from './GameCounting.module.css';
 
 interface Question {
@@ -29,9 +29,9 @@ const FIREFLY_POSITIONS = [
 ];
 
 export const GameCounting: React.FC = () => {
-  const { dino, completeWorld, setCurrentView } = useGame();
+  const { dino, completeWorld } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
-  const { cancel, playThen } = useNarrationSequence();
+  const { playThen } = useNarrationSequence();
 
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -70,7 +70,7 @@ export const GameCounting: React.FC = () => {
   
   const starsEarned = gameState === 'victory' ? starsFor(totalAttempts) : 0;
   const instructionText = gameState === 'victory'
-    ? victoryLine('Muito bem! Você contou todos os vaga-lumes!', starsEarned)
+    ? withNextPhase('counting', victoryLine('Muito bem! Você contou todos os vaga-lumes!', starsEarned))
     : currentQuestion
       ? 'Dino entrou na caverna! Quantos vaga-lumes brilhantes você consegue contar?'
       : '';
@@ -284,28 +284,12 @@ export const GameCounting: React.FC = () => {
             })}
           </div>
 
-          <div className={styles.victoryButtons}>
-            <button
-              id="btn-victory-counting-replay"
-              className="btn-bubble"
-              style={{ backgroundColor: 'var(--color-blue)', color: 'white' }}
-              onClick={handlePlayAgain}
-              onMouseEnter={playHover}
-            >
-              <RotateCcw size={20} />
-              <span>Jogar de Novo</span>
-            </button>
-            <button
-              id="btn-victory-counting-map"
-              className="btn-bubble"
-              style={{ backgroundColor: 'var(--color-green)', color: 'white' }}
-              onClick={() => { playClick(); cancel(); setCurrentView('map'); }}
-              onMouseEnter={playHover}
-            >
-              <Map size={20} />
-              <span>Ir para o Mapa</span>
-            </button>
-          </div>
+          <VictoryActions
+            worldId="counting"
+            replayId="btn-victory-counting-replay"
+            mapId="btn-victory-counting-map"
+            onReplay={handlePlayAgain}
+          />
         </div>
       )}
     </GameLayout>

@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
-import { useNarration } from '../../hooks/useNarration';
-import { starsFor, victoryLine } from '../../audio/lines';
+import { starsFor, victoryLine, withNextPhase } from '../../audio/lines';
 import { GameLayout } from '../../components/GameLayout';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
@@ -41,9 +40,8 @@ function buildQuestions(): SequenceQuestion[] {
 }
 
 export const GameSequence: React.FC = () => {
-  const { dino, completeWorld, setCurrentView } = useGame();
+  const { dino, completeWorld } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory } = useAudioEngine();
-  const { cancel } = useNarration();
 
   const [questions, setQuestions] = useState<SequenceQuestion[]>(buildQuestions);
   const [step, setStep] = useState(0);
@@ -57,7 +55,7 @@ export const GameSequence: React.FC = () => {
   const current = questions[step];
   const starsEarned = gameState === 'victory' ? starsFor(totalAttempts, totalQuestions) : 0;
   const instructionText = gameState === 'victory'
-    ? victoryLine('Muito bem! Você completou todas as sequências!', starsEarned)
+    ? withNextPhase('sequence', victoryLine('Muito bem! Você completou todas as sequências!', starsEarned))
     : 'Qual bolinha vem depois?';
   const narrationId = gameState === 'victory' ? `vitoria-sequencia-${starsEarned}` : 'sequencia';
 
@@ -145,10 +143,10 @@ export const GameSequence: React.FC = () => {
           title="Sequência certa!"
           text="Você descobriu qual bolinha vinha depois. O caminho ficou completo!"
           stars={starsEarned}
+          worldId="sequence"
           replayId="btn-victory-sequence-replay"
           mapId="btn-victory-sequence-map"
           onReplay={handlePlayAgain}
-          onMap={() => { playClick(); cancel(); setCurrentView('map'); }}
         />
       )}
     </GameLayout>

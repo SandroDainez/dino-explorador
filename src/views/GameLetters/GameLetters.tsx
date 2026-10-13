@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
-import { useNarration } from '../../hooks/useNarration';
-import { starsFor, victoryLine } from '../../audio/lines';
+import { starsFor, victoryLine, withNextPhase } from '../../audio/lines';
 import { GameLayout } from '../../components/GameLayout';
+import { VictoryActions } from '../../components/VictoryPanel';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
-import { RotateCcw, Map } from 'lucide-react';
 import styles from './GameLetters.module.css';
 
 interface LetterQuestion {
@@ -31,9 +30,8 @@ const LETTER_QUESTIONS: LetterQuestion[] = [
 ];
 
 export const GameLetters: React.FC = () => {
-  const { dino, completeWorld, setCurrentView } = useGame();
+  const { dino, completeWorld } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playJump } = useAudioEngine();
-  const { cancel } = useNarration();
 
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<LetterQuestion[]>([]);
@@ -63,7 +61,7 @@ export const GameLetters: React.FC = () => {
   
   const starsEarned = gameState === 'victory' ? starsFor(totalAttempts) : 0;
   const instructionText = gameState === 'victory'
-    ? victoryLine('Sensacional! Você ajudou o Dino a atravessar todo o Rio das Letras!', starsEarned)
+    ? withNextPhase('letters', victoryLine('Sensacional! Você ajudou o Dino a atravessar todo o Rio das Letras!', starsEarned))
     : currentQuestion
       ? `Dino quer atravessar o rio! Com qual letra começa a palavra ${currentQuestion.word}?`
       : '';
@@ -237,28 +235,12 @@ export const GameLetters: React.FC = () => {
             })}
           </div>
 
-          <div className={styles.victoryButtons}>
-            <button
-              id="btn-victory-letters-replay"
-              className="btn-bubble"
-              style={{ backgroundColor: 'var(--color-blue)', color: 'white' }}
-              onClick={handlePlayAgain}
-              onMouseEnter={playHover}
-            >
-              <RotateCcw size={20} />
-              <span>Jogar de Novo</span>
-            </button>
-            <button
-              id="btn-victory-letters-map"
-              className="btn-bubble"
-              style={{ backgroundColor: 'var(--color-green)', color: 'white' }}
-              onClick={() => { playClick(); cancel(); setCurrentView('map'); }}
-              onMouseEnter={playHover}
-            >
-              <Map size={20} />
-              <span>Ir para o Mapa</span>
-            </button>
-          </div>
+          <VictoryActions
+            worldId="letters"
+            replayId="btn-victory-letters-replay"
+            mapId="btn-victory-letters-map"
+            onReplay={handlePlayAgain}
+          />
         </div>
       )}
     </GameLayout>

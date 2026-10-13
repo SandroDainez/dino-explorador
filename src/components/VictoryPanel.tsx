@@ -1,8 +1,82 @@
-import { Map, RotateCcw } from 'lucide-react';
+import { ArrowRight, Map, RotateCcw } from 'lucide-react';
+import type { GameView } from '../context/GameContext';
+import { useGame } from '../context/GameContext';
+import { nextPhase } from '../game/phases';
 import { useAudioEngine } from '../hooks/useAudioEngine';
+import { useNarration } from '../hooks/useNarration';
 import styles from './VictoryPanel.module.css';
 
+interface VictoryActionsProps {
+  worldId: GameView;
+  replayId: string;
+  mapId: string;
+  onReplay: () => void;
+}
+
+export const VictoryActions = ({
+  worldId,
+  replayId,
+  mapId,
+  onReplay,
+}: VictoryActionsProps) => {
+  const { setCurrentView } = useGame();
+  const { playClick, playHover } = useAudioEngine();
+  const { cancel } = useNarration();
+  const upcoming = nextPhase(worldId);
+
+  const goTo = (view: GameView) => {
+    playClick();
+    cancel();
+    setCurrentView(view);
+  };
+
+  return (
+    <div className={styles.victoryActions}>
+      {upcoming ? (
+        <p className={styles.nextHint}>Próxima fase: {upcoming.name}</p>
+      ) : (
+        <p className={styles.nextHint}>Você explorou todas as fases!</p>
+      )}
+      <div className={styles.victoryButtons}>
+        {upcoming && (
+          <button
+            id={`btn-next-${worldId}`}
+            className="btn-bubble"
+            style={{ backgroundColor: 'var(--color-orange)', color: 'white' }}
+            onClick={() => goTo(upcoming.id)}
+            onMouseEnter={playHover}
+          >
+            <ArrowRight size={20} />
+            <span>{upcoming.name}</span>
+          </button>
+        )}
+        <button
+          id={replayId}
+          className="btn-bubble"
+          style={{ backgroundColor: 'var(--color-blue)', color: 'white' }}
+          onClick={onReplay}
+          onMouseEnter={playHover}
+        >
+          <RotateCcw size={20} />
+          <span>Jogar de Novo</span>
+        </button>
+        <button
+          id={mapId}
+          className="btn-bubble"
+          style={{ backgroundColor: 'var(--color-green)', color: 'white' }}
+          onClick={() => goTo('map')}
+          onMouseEnter={playHover}
+        >
+          <Map size={20} />
+          <span>Ir para o Mapa</span>
+        </button>
+      </div>
+    </div>
+  );
+};
+
 interface VictoryPanelProps {
+  worldId: GameView;
   badge: string;
   title: string;
   text: string;
@@ -10,7 +84,6 @@ interface VictoryPanelProps {
   replayId: string;
   mapId: string;
   onReplay: () => void;
-  onMap: () => void;
 }
 
 export const VictoryPanel = ({
@@ -18,13 +91,11 @@ export const VictoryPanel = ({
   title,
   text,
   stars,
+  worldId,
   replayId,
   mapId,
   onReplay,
-  onMap,
 }: VictoryPanelProps) => {
-  const { playHover } = useAudioEngine();
-
   return (
     <div className={styles.victoryCard}>
       <div className={styles.victoryBadge}>{badge}</div>
@@ -40,28 +111,7 @@ export const VictoryPanel = ({
           </span>
         ))}
       </div>
-      <div className={styles.victoryButtons}>
-        <button
-          id={replayId}
-          className="btn-bubble"
-          style={{ backgroundColor: 'var(--color-blue)', color: 'white' }}
-          onClick={onReplay}
-          onMouseEnter={playHover}
-        >
-          <RotateCcw size={20} />
-          <span>Jogar de Novo</span>
-        </button>
-        <button
-          id={mapId}
-          className="btn-bubble"
-          style={{ backgroundColor: 'var(--color-green)', color: 'white' }}
-          onClick={onMap}
-          onMouseEnter={playHover}
-        >
-          <Map size={20} />
-          <span>Ir para o Mapa</span>
-        </button>
-      </div>
+      <VictoryActions worldId={worldId} replayId={replayId} mapId={mapId} onReplay={onReplay} />
     </div>
   );
 };

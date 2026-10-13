@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
-import { useNarration } from '../../hooks/useNarration';
-import { starsFor, starWords } from '../../audio/lines';
+import { starsFor, starWords, withNextPhase } from '../../audio/lines';
 import { GameLayout } from '../../components/GameLayout';
+import { VictoryActions } from '../../components/VictoryPanel';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
-import { RotateCcw, Map } from 'lucide-react';
 import styles from './GameShapes.module.css';
 
 interface ShapeOption {
@@ -122,9 +121,8 @@ function buildShapeQuestions(): Question[] {
 }
 
 export const GameShapes: React.FC = () => {
-  const { dino, completeWorld, setCurrentView } = useGame();
+  const { dino, completeWorld } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
-  const { cancel } = useNarration();
 
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<Question[]>(buildShapeQuestions);
@@ -142,7 +140,7 @@ export const GameShapes: React.FC = () => {
   
   const starsForRun = starsFor(totalAttempts);
   const instructionText = gameState === 'victory'
-    ? `Incrível! Você consertou a ponte inteira! O Dino conseguiu atravessar para o templo e ganhou ${starWords(starsForRun)}!`
+    ? withNextPhase('shapes', `Incrível! Você consertou a ponte inteira! O Dino conseguiu atravessar para o templo e ganhou ${starWords(starsForRun)}!`)
     : currentQuestion
       ? `Dino precisa da pedra em forma de ${currentQuestion.targetShape.name} para consertar a ponte! Qual é ela?`
       : '';
@@ -334,28 +332,12 @@ export const GameShapes: React.FC = () => {
             })}
           </div>
 
-          <div className={styles.victoryButtons}>
-            <button
-              id="btn-victory-shapes-replay"
-              className="btn-bubble"
-              style={{ backgroundColor: 'var(--color-blue)', color: 'white' }}
-              onClick={handlePlayAgain}
-              onMouseEnter={playHover}
-            >
-              <RotateCcw size={20} />
-              <span>Jogar de Novo</span>
-            </button>
-            <button
-              id="btn-victory-shapes-map"
-              className="btn-bubble"
-              style={{ backgroundColor: 'var(--color-green)', color: 'white' }}
-              onClick={() => { playClick(); cancel(); setCurrentView('map'); }}
-              onMouseEnter={playHover}
-            >
-              <Map size={20} />
-              <span>Ir para o Mapa</span>
-            </button>
-          </div>
+          <VictoryActions
+            worldId="shapes"
+            replayId="btn-victory-shapes-replay"
+            mapId="btn-victory-shapes-map"
+            onReplay={handlePlayAgain}
+          />
         </div>
       )}
     </GameLayout>

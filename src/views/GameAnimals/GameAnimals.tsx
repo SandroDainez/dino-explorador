@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
 import { useNarrationSequence } from '../../hooks/useNarration';
-import { starsFor, victoryLine } from '../../audio/lines';
+import { starsFor, victoryLine, withNextPhase } from '../../audio/lines';
 import { GameLayout } from '../../components/GameLayout';
+import { VictoryActions } from '../../components/VictoryPanel';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
-import { RotateCcw, Map } from 'lucide-react';
 import styles from './GameAnimals.module.css';
 
 interface AnimalOption {
@@ -176,9 +176,9 @@ interface Question {
 }
 
 export const GameAnimals: React.FC = () => {
-  const { dino, completeWorld, setCurrentView } = useGame();
+  const { dino, completeWorld } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
-  const { cancel, playThen } = useNarrationSequence();
+  const { playThen } = useNarrationSequence();
 
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -215,7 +215,7 @@ export const GameAnimals: React.FC = () => {
   
   const starsEarned = gameState === 'victory' ? starsFor(totalAttempts) : 0;
   const instructionText = gameState === 'victory'
-    ? victoryLine('Muito bem! Você descobriu todos os animais da floresta!', starsEarned)
+    ? withNextPhase('animals', victoryLine('Muito bem! Você descobriu todos os animais da floresta!', starsEarned))
     : currentQuestion
       ? 'Qual animal faz essa sombra escura na floresta?'
       : '';
@@ -393,28 +393,12 @@ export const GameAnimals: React.FC = () => {
             })}
           </div>
 
-          <div className={styles.victoryButtons}>
-            <button
-              id="btn-victory-animals-replay"
-              className="btn-bubble"
-              style={{ backgroundColor: 'var(--color-blue)', color: 'white' }}
-              onClick={handlePlayAgain}
-              onMouseEnter={playHover}
-            >
-              <RotateCcw size={20} />
-              <span>Jogar de Novo</span>
-            </button>
-            <button
-              id="btn-victory-animals-map"
-              className="btn-bubble"
-              style={{ backgroundColor: 'var(--color-green)', color: 'white' }}
-              onClick={() => { playClick(); cancel(); setCurrentView('map'); }}
-              onMouseEnter={playHover}
-            >
-              <Map size={20} />
-              <span>Ir para o Mapa</span>
-            </button>
-          </div>
+          <VictoryActions
+            worldId="animals"
+            replayId="btn-victory-animals-replay"
+            mapId="btn-victory-animals-map"
+            onReplay={handlePlayAgain}
+          />
         </div>
       )}
     </GameLayout>

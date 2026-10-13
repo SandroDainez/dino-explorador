@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
-import { useNarration } from '../../hooks/useNarration';
-import { starsFor, victoryLine } from '../../audio/lines';
+import { useNarrationSequence } from '../../hooks/useNarration';
+import { starsFor, victoryLine, withNextPhase } from '../../audio/lines';
 import { GameLayout } from '../../components/GameLayout';
+import { VictoryActions } from '../../components/VictoryPanel';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
-import { RotateCcw, Map } from 'lucide-react';
 import styles from './GameColors.module.css';
 
 interface FruitOption {
@@ -135,9 +135,9 @@ interface Question {
 }
 
 export const GameColors: React.FC = () => {
-  const { dino, completeWorld, setCurrentView } = useGame();
+  const { dino, completeWorld } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
-  const { cancel } = useNarration();
+  const { playThen } = useNarrationSequence();
 
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -178,7 +178,7 @@ export const GameColors: React.FC = () => {
   
   const starsEarned = gameState === 'victory' ? starsFor(totalAttempts) : 0;
   const instructionText = gameState === 'victory'
-    ? victoryLine('Muito bem! Você ajudou o Dino a comer todas as frutinhas coloridas!', starsEarned)
+    ? withNextPhase('colors', victoryLine('Muito bem! Você ajudou o Dino a comer todas as frutinhas coloridas!', starsEarned))
     : currentQuestion
       ? `Dino quer comer uma fruta ${currentQuestion.targetFruit.colorName}! Qual é a correta?`
       : '';
@@ -200,17 +200,16 @@ export const GameColors: React.FC = () => {
       setDinoEmotion('celebrate');
       setWrongAnswers([]);
 
-      setTimeout(() => {
+      playThen('contar-1', () => {
         setBiteFruit(null);
         setDinoEmotion('idle');
-        
+
         if (step < totalQuestions - 1) {
           setStep((prev) => prev + 1);
         } else {
-          // Completed all steps!
           handleVictory(nextAttempts);
         }
-      }, 1500);
+      }, 900);
 
     } else {
       // Incorrect
@@ -343,28 +342,12 @@ export const GameColors: React.FC = () => {
             })}
           </div>
 
-          <div className={styles.victoryButtons}>
-            <button
-              id="btn-victory-replay"
-              className="btn-bubble"
-              style={{ backgroundColor: 'var(--color-blue)', color: 'white' }}
-              onClick={handlePlayAgain}
-              onMouseEnter={playHover}
-            >
-              <RotateCcw size={20} />
-              <span>Jogar de Novo</span>
-            </button>
-            <button
-              id="btn-victory-map"
-              className="btn-bubble"
-              style={{ backgroundColor: 'var(--color-green)', color: 'white' }}
-              onClick={() => { playClick(); cancel(); setCurrentView('map'); }}
-              onMouseEnter={playHover}
-            >
-              <Map size={20} />
-              <span>Ir para o Mapa</span>
-            </button>
-          </div>
+          <VictoryActions
+            worldId="colors"
+            replayId="btn-victory-replay"
+            mapId="btn-victory-map"
+            onReplay={handlePlayAgain}
+          />
         </div>
       )}
     </GameLayout>

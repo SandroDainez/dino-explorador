@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
-import { useNarration } from '../../hooks/useNarration';
-import { starsFor, victoryLine } from '../../audio/lines';
+import { starsFor, victoryLine, withNextPhase } from '../../audio/lines';
 import { GameLayout } from '../../components/GameLayout';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
@@ -29,9 +28,8 @@ function buildQuestions(): PositionQuestion[] {
 }
 
 export const GamePositions: React.FC = () => {
-  const { dino, completeWorld, setCurrentView } = useGame();
+  const { dino, completeWorld } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory } = useAudioEngine();
-  const { cancel } = useNarration();
 
   const [questions, setQuestions] = useState<PositionQuestion[]>(buildQuestions);
   const [step, setStep] = useState(0);
@@ -45,7 +43,7 @@ export const GamePositions: React.FC = () => {
   const current = questions[step];
   const starsEarned = gameState === 'victory' ? starsFor(totalAttempts, totalQuestions) : 0;
   const instructionText = gameState === 'victory'
-    ? victoryLine('Muito bem! Você encontrou todos os lugares!', starsEarned)
+    ? withNextPhase('positions', victoryLine('Muito bem! Você encontrou todos os lugares!', starsEarned))
     : current?.text ?? '';
   const narrationId = gameState === 'victory'
     ? `vitoria-posicoes-${starsEarned}`
@@ -134,10 +132,10 @@ export const GamePositions: React.FC = () => {
           title="Lugar certo!"
           text="Você encontrou o que estava em cima, embaixo e dos lados do ninho!"
           stars={starsEarned}
+          worldId="positions"
           replayId="btn-victory-positions-replay"
           mapId="btn-victory-positions-map"
           onReplay={handlePlayAgain}
-          onMap={() => { playClick(); cancel(); setCurrentView('map'); }}
         />
       )}
     </GameLayout>
