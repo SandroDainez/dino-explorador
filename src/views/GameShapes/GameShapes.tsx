@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
 import { starsFor, starWords, withNextPhase } from '../../audio/lines';
+import { useCorrectPraise } from '../../hooks/useNarration';
 import { GameLayout } from '../../components/GameLayout';
 import { VictoryActions } from '../../components/VictoryPanel';
 import { DinoAvatar } from '../../components/DinoAvatar';
@@ -123,6 +124,7 @@ function buildShapeQuestions(): Question[] {
 export const GameShapes: React.FC = () => {
   const { dino, completeWorld } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
+  const praise = useCorrectPraise();
 
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<Question[]>(buildShapeQuestions);
@@ -170,16 +172,16 @@ export const GameShapes: React.FC = () => {
 
       setWrongAnswers([]);
 
-      setTimeout(() => {
+      praise(() => {
         setAnimatingShape(null);
         setDinoEmotion('idle');
-        
+
         if (step < totalQuestions - 1) {
           setStep((prev) => prev + 1);
         } else {
           handleVictory(nextAttempts);
         }
-      }, 1500);
+      });
 
     } else {
       // Incorrect

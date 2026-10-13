@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
-import { useNarrationSequence } from '../../hooks/useNarration';
+import { useCorrectPraise } from '../../hooks/useNarration';
 import { starsFor, victoryLine, withNextPhase } from '../../audio/lines';
 import { GameLayout } from '../../components/GameLayout';
 import { VictoryActions } from '../../components/VictoryPanel';
@@ -33,7 +33,7 @@ const EGG_COLORS = [
 export const GameNumbers: React.FC = () => {
   const { dino, completeWorld } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
-  const { playThen } = useNarrationSequence();
+  const praise = useCorrectPraise();
 
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -125,7 +125,7 @@ export const GameNumbers: React.FC = () => {
       setDinoEmotion('celebrate');
       setWrongAnswers([]);
 
-      playThen(`contar-${option.eggCount}`, () => {
+      praise(() => {
         setHatchedNestId(null);
         setDinoEmotion('idle');
 
@@ -134,7 +134,7 @@ export const GameNumbers: React.FC = () => {
         } else {
           handleVictory(nextAttempts);
         }
-      }, 1400);
+      }, `contar-${option.eggCount}`);
 
     } else {
       // Incorrect

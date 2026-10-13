@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
 import { starsFor, victoryLine, withNextPhase } from '../../audio/lines';
+import { useCorrectPraise } from '../../hooks/useNarration';
 import { GameLayout } from '../../components/GameLayout';
 import { VictoryActions } from '../../components/VictoryPanel';
 import { DinoAvatar } from '../../components/DinoAvatar';
@@ -32,6 +33,7 @@ const LETTER_QUESTIONS: LetterQuestion[] = [
 export const GameLetters: React.FC = () => {
   const { dino, completeWorld } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playJump } = useAudioEngine();
+  const praise = useCorrectPraise();
 
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<LetterQuestion[]>([]);
@@ -83,16 +85,16 @@ export const GameLetters: React.FC = () => {
       setDinoEmotion('walk');
       setWrongAnswers([]);
 
-      setTimeout(() => {
+      praise(() => {
         setJumpingStoneIdx(null);
         setDinoEmotion('idle');
-        
+
         if (step < totalQuestions - 1) {
           setStep((prev) => prev + 1);
         } else {
           handleVictory(nextAttempts);
         }
-      }, 1500);
+      });
 
     } else {
       // Incorrect

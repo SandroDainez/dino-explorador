@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
-import { useNarrationSequence } from '../../hooks/useNarration';
+import { useCorrectPraise } from '../../hooks/useNarration';
 import { starsFor, victoryLine, withNextPhase } from '../../audio/lines';
 import { GameLayout } from '../../components/GameLayout';
 import { VictoryActions } from '../../components/VictoryPanel';
@@ -31,7 +31,7 @@ const FIREFLY_POSITIONS = [
 export const GameCounting: React.FC = () => {
   const { dino, completeWorld } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
-  const { playThen } = useNarrationSequence();
+  const praise = useCorrectPraise();
 
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -93,7 +93,7 @@ export const GameCounting: React.FC = () => {
       setDinoEmotion('celebrate');
       setWrongAnswers([]);
 
-      playThen(`vagalume-${currentQuestion.fireflyCount}`, () => {
+      praise(() => {
         setIsCounted(false);
         setDinoEmotion('idle');
 
@@ -102,7 +102,7 @@ export const GameCounting: React.FC = () => {
         } else {
           handleVictory(nextAttempts);
         }
-      }, 1200);
+      }, `vagalume-${currentQuestion.fireflyCount}`);
 
     } else {
       // Incorrect

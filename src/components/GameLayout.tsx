@@ -1,7 +1,7 @@
 import React from 'react';
 import { useGame } from '../context/GameContext';
 import { useAudioEngine } from '../hooks/useAudioEngine';
-import { useNarration } from '../hooks/useNarration';
+import { isNarrationLocked, useNarration } from '../hooks/useNarration';
 import { ArrowLeft, Volume2, VolumeX, HelpCircle } from 'lucide-react';
 import { PrehistoricScene } from './PrehistoricScene';
 import styles from './GameLayout.module.css';
@@ -58,14 +58,16 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
   };
 
   React.useEffect(() => {
-    if (!narrationKey) return;
+    if (!narrationKey || isNarrationLocked()) return;
 
     const timer = window.setTimeout(() => {
+      if (isNarrationLocked()) return;
       play(narrationKey.split('|'));
     }, 0);
 
     return () => {
       window.clearTimeout(timer);
+      if (isNarrationLocked()) return;
       cancel();
     };
   }, [narrationKey, play, cancel]);

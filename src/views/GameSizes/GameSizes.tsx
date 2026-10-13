@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
 import { starsFor, victoryLine, withNextPhase } from '../../audio/lines';
+import { useCorrectPraise } from '../../hooks/useNarration';
 import { GameLayout } from '../../components/GameLayout';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
@@ -80,6 +81,7 @@ function ItemArt({ item, large }: { item: SizeItem; large: boolean }) {
 export const GameSizes: React.FC = () => {
   const { dino, completeWorld } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory } = useAudioEngine();
+  const praise = useCorrectPraise();
 
   const [questions, setQuestions] = useState<SizeQuestion[]>(buildQuestions);
   const [step, setStep] = useState(0);
@@ -120,12 +122,12 @@ export const GameSizes: React.FC = () => {
       setPickedSide(side);
       setLocked(true);
       setWrongSide(null);
-      window.setTimeout(() => {
+      praise(() => {
         setPickedSide(null);
         setLocked(false);
         if (step < totalQuestions - 1) setStep((prev) => prev + 1);
         else finish(nextAttempts);
-      }, 900);
+      });
       return;
     }
 

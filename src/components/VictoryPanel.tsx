@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { ArrowRight, Map, RotateCcw } from 'lucide-react';
 import type { GameView } from '../context/GameContext';
 import { useGame } from '../context/GameContext';
@@ -19,16 +20,31 @@ export const VictoryActions = ({
   mapId,
   onReplay,
 }: VictoryActionsProps) => {
-  const { setCurrentView } = useGame();
+  const { setCurrentView, speechEnabled } = useGame();
   const { playClick, playHover } = useAudioEngine();
   const { cancel } = useNarration();
   const upcoming = nextPhase(worldId);
+  const left = useRef(false);
 
   const goTo = (view: GameView) => {
+    if (left.current) return;
+    left.current = true;
     playClick();
     cancel();
     setCurrentView(view);
   };
+
+  useEffect(() => {
+    if (!upcoming) return;
+    const delay = speechEnabled ? 5200 : 2400;
+    const timer = window.setTimeout(() => {
+      if (left.current) return;
+      left.current = true;
+      cancel();
+      setCurrentView(upcoming.id);
+    }, delay);
+    return () => window.clearTimeout(timer);
+  }, [upcoming, speechEnabled, cancel, setCurrentView]);
 
   return (
     <div className={styles.victoryActions}>

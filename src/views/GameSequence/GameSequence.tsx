@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
 import { starsFor, victoryLine, withNextPhase } from '../../audio/lines';
+import { useCorrectPraise } from '../../hooks/useNarration';
 import { GameLayout } from '../../components/GameLayout';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
@@ -42,6 +43,7 @@ function buildQuestions(): SequenceQuestion[] {
 export const GameSequence: React.FC = () => {
   const { dino, completeWorld } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory } = useAudioEngine();
+  const praise = useCorrectPraise();
 
   const [questions, setQuestions] = useState<SequenceQuestion[]>(buildQuestions);
   const [step, setStep] = useState(0);
@@ -75,11 +77,11 @@ export const GameSequence: React.FC = () => {
       playSuccess();
       setSolved(true);
       setWrongBall(null);
-      window.setTimeout(() => {
+      praise(() => {
         setSolved(false);
         if (step < totalQuestions - 1) setStep((prev) => prev + 1);
         else finish(nextAttempts);
-      }, 900);
+      });
       return;
     }
 

@@ -8,11 +8,10 @@ let stopCurrent: (() => void) | null = null;
 let waiters: Array<(result: PlayResult) => void> = [];
 let sharedAudio: HTMLAudioElement | null = null;
 let retryList: string[] | null = null;
+let narrationLocked = false;
 
-function getAudio(): HTMLAudioElement | null {
-  if (typeof window === 'undefined') return null;
-  if (!sharedAudio) sharedAudio = new Audio();
-  return sharedAudio;
+export function isNarrationLocked(): boolean {
+  return narrationLocked;
 }
 
 function retryBlockedNarration() {
@@ -41,22 +40,28 @@ export function cancelNarration() {
   settle('cancelled');
 }
 
+function silence(audio: HTMLAudioElement | null) {
+  if (!audio) return;
+  audio.onended = null;
+  audio.onerror = null;
+  audio.pause();
+}
+
 function playClip(id: string, token: number, retryFrom: string[]): Promise<boolean> {
   return new Promise((resolve) => {
-    const audio = getAudio();
-    if (token !== generation || !audio) {
+    if (token !== generation || typeof window === 'undefined') {
       resolve(false);
       return;
     }
 
+    silence(sharedAudio);
+    const audio = new Audio(`/audio/${id}.mp3`);
+    sharedAudio = audio;
     audio.muted = false;
-    audio.onended = null;
-    audio.onerror = null;
-    audio.pause();
-    audio.src = `/audio/${id}.mp3`;
 
     let settled = false;
     let cap = 0;
+    let retried = false;
     const finish = (keepGoing: boolean) => {
       if (settled) return;
       settled = true;
@@ -65,23 +70,30 @@ function playClip(id: string, token: number, retryFrom: string[]): Promise<boole
       resolve(keepGoing);
     };
     const stop = () => {
-      audio.onended = null;
-      audio.onerror = null;
-      audio.pause();
+      silence(audio);
       finish(false);
     };
     stopCurrent = stop;
     audio.onended = () => finish(token === generation);
     audio.onerror = () => finish(token === generation);
-    cap = window.setTimeout(() => finish(token === generation), 8000);
-    void audio.play().then(() => {
-      retryList = null;
-    }).catch((error: unknown) => {
-      const name = error instanceof DOMException ? error.name : '';
-      const blocked = name === 'NotAllowedError';
-      if (blocked && token === generation) retryList = retryFrom;
-      finish(!blocked && token === generation);
-    });
+    cap = window.setTimeout(() => finish(token === generation), 15000);
+
+    const start = () => {
+      void audio.play().then(() => {
+        retryList = null;
+      }).catch((error: unknown) => {
+        const name = error instanceof DOMException ? error.name : '';
+        if (name === 'AbortError' && !retried && token === generation) {
+          retried = true;
+          window.setTimeout(start, 60);
+          return;
+        }
+        const blocked = name === 'NotAllowedError';
+        if (blocked && token === generation) retryList = retryFrom;
+        finish(!blocked && token === generation);
+      });
+    };
+    start();
   });
 }
 
@@ -140,12 +152,15 @@ export function useNarrationSequence() {
   }, []);
 
   const playThen = useCallback(
-    (id: string, onDone: () => void, minMs = 1100, maxMs = 8000) => {
+    (id: string | string[], onDone: () => void, minMs = 1100, maxMs = 8000) => {
       const started = performance.now();
       let finished = false;
+      narrationLocked = true;
       const done = () => {
-        if (finished || !alive.current) return;
+        if (finished) return;
         finished = true;
+        narrationLocked = false;
+        if (!alive.current) return;
         onDone();
       };
 
@@ -166,4 +181,13 @@ export function useNarrationSequence() {
   );
 
   return { play, cancel, playThen };
+}
+
+export function useCorrectPraise() {
+  const { playThen } = useNarrationSequence();
+
+  return useCallback((onDone: () => void, extra?: string) => {
+    const ids = extra ? ['contar-1', extra] : 'contar-1';
+    playThen(ids, onDone, 900, extra ? 14000 : 2600);
+  }, [playThen]);
 }
