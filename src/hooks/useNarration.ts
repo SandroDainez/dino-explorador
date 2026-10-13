@@ -184,6 +184,16 @@ export function useNarrationSequence() {
   return { play, cancel, playThen };
 }
 
+function speakMuitoBem() {
+  const synth = window.speechSynthesis;
+  if (!synth) return;
+  const line = new SpeechSynthesisUtterance('Muito bem!');
+  line.lang = 'pt-BR';
+  line.rate = 1;
+  synth.cancel();
+  synth.speak(line);
+}
+
 function playPraiseClip(id: string): Promise<boolean> {
   if (praiseAudio) {
     praiseAudio.onended = null;
@@ -197,17 +207,33 @@ function playPraiseClip(id: string): Promise<boolean> {
 
   return new Promise((resolve) => {
     let settled = false;
+    let heard = false;
     const finish = (ok: boolean) => {
       if (settled) return;
       settled = true;
       window.clearTimeout(cap);
+      window.clearTimeout(watchdog);
       if (praiseAudio === audio) praiseAudio = null;
       resolve(ok);
     };
+    const markHeard = () => {
+      heard = true;
+      window.clearTimeout(watchdog);
+    };
     const cap = window.setTimeout(() => finish(true), 5000);
+    const watchdog = window.setTimeout(() => {
+      if (!heard) speakMuitoBem();
+    }, 400);
+    audio.onplaying = markHeard;
     audio.onended = () => finish(true);
-    audio.onerror = () => finish(false);
-    void audio.play().catch(() => finish(false));
+    audio.onerror = () => {
+      if (!heard) speakMuitoBem();
+      finish(false);
+    };
+    void audio.play().then(markHeard).catch(() => {
+      if (!heard) speakMuitoBem();
+      finish(false);
+    });
   });
 }
 
