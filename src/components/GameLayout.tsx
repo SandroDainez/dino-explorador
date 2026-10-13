@@ -28,6 +28,21 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
   const { soundEnabled, setSoundEnabled, speechEnabled, setSpeechEnabled, setCurrentView } = useGame();
   const { playClick, playHover } = useAudioEngine();
   const { play, cancel } = useNarration();
+  const [showPraise, setShowPraise] = React.useState(false);
+
+  React.useEffect(() => {
+    let timer = 0;
+    const onPraise = () => {
+      setShowPraise(true);
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => setShowPraise(false), 1700);
+    };
+    window.addEventListener('dino-praise', onPraise);
+    return () => {
+      window.removeEventListener('dino-praise', onPraise);
+      window.clearTimeout(timer);
+    };
+  }, []);
 
   const narrationClips = narrationId
     ? currentStep
@@ -158,6 +173,12 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
           </button>
         </div>
       </header>
+
+      {showPraise && (
+        <div id="praise-banner" className={styles.praiseBurst} role="status">
+          Muito bem!
+        </div>
+      )}
 
       {/* Instruction Box */}
       <div className={styles.instructionBox} onClick={handleNarrationClick}>

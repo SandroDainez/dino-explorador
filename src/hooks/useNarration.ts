@@ -7,6 +7,7 @@ let generation = 0;
 let stopCurrent: (() => void) | null = null;
 let waiters: Array<(result: PlayResult) => void> = [];
 let sharedAudio: HTMLAudioElement | null = null;
+let praiseAudio: HTMLAudioElement | null = null;
 let retryList: string[] | null = null;
 let narrationLocked = false;
 
@@ -183,11 +184,67 @@ export function useNarrationSequence() {
   return { play, cancel, playThen };
 }
 
+function playPraiseClip(id: string): Promise<boolean> {
+  if (praiseAudio) {
+    praiseAudio.onended = null;
+    praiseAudio.onerror = null;
+    praiseAudio.pause();
+  }
+
+  const audio = new Audio(`/audio/${id}.mp3`);
+  praiseAudio = audio;
+  audio.volume = 1;
+
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (ok: boolean) => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(cap);
+      if (praiseAudio === audio) praiseAudio = null;
+      resolve(ok);
+    };
+    const cap = window.setTimeout(() => finish(true), 5000);
+    audio.onended = () => finish(true);
+    audio.onerror = () => finish(false);
+    void audio.play().catch(() => finish(false));
+  });
+}
+
 export function useCorrectPraise() {
-  const { playThen } = useNarrationSequence();
+  const alive = useRef(true);
+
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+    };
+  }, []);
 
   return useCallback((onDone: () => void, extra?: string) => {
-    const ids = extra ? ['contar-1', extra] : 'contar-1';
-    playThen(ids, onDone, 900, extra ? 14000 : 2600);
-  }, [playThen]);
+    const started = performance.now();
+    let finished = false;
+    narrationLocked = true;
+    cancelNarration();
+    window.dispatchEvent(new CustomEvent('dino-praise'));
+
+    const done = () => {
+      if (finished) return;
+      finished = true;
+      narrationLocked = false;
+      if (!alive.current) return;
+      onDone();
+    };
+
+    const cap = window.setTimeout(done, extra ? 14000 : 3200);
+    const first = playPraiseClip('contar-1');
+    void first.then(async () => {
+      if (extra && alive.current) await playPraiseClip(extra);
+      const wait = Math.max(0, 1700 - (performance.now() - started));
+      window.setTimeout(() => {
+        window.clearTimeout(cap);
+        done();
+      }, wait);
+    });
+  }, []);
 }
