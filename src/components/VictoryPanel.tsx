@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { ArrowRight, Map, RotateCcw } from 'lucide-react';
 import type { GameView } from '../context/GameContext';
 import { useGame } from '../context/GameContext';
-import { nextPhase } from '../game/phases';
+import { suggestedNext } from '../game/phases';
 import { useAudioEngine } from '../hooks/useAudioEngine';
 import { useNarration } from '../hooks/useNarration';
 import styles from './VictoryPanel.module.css';
@@ -20,10 +20,10 @@ export const VictoryActions = ({
   mapId,
   onReplay,
 }: VictoryActionsProps) => {
-  const { setCurrentView } = useGame();
+  const { setCurrentView, progress } = useGame();
   const { playClick, playHover } = useAudioEngine();
   const { cancel } = useNarration();
-  const upcoming = nextPhase(worldId);
+  const upcoming = suggestedNext(worldId, progress.stars);
   const left = useRef(false);
 
   const goTo = (view: GameView) => {

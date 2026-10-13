@@ -6,6 +6,16 @@ import { ArrowLeft, Volume2, VolumeX, HelpCircle } from 'lucide-react';
 import { PrehistoricScene } from './PrehistoricScene';
 import styles from './GameLayout.module.css';
 
+function speakInstruction(text: string) {
+  const synth = window.speechSynthesis;
+  if (!synth) return;
+  synth.cancel();
+  const line = new SpeechSynthesisUtterance(text);
+  line.lang = 'pt-BR';
+  line.rate = 0.95;
+  synth.speak(line);
+}
+
 interface GameLayoutProps {
   title: string;
   instructionText: string;
@@ -14,6 +24,7 @@ interface GameLayoutProps {
   currentStep?: number;
   totalSteps?: number;
   narrationId?: string | null;
+  narrationText?: string | null;
 }
 
 export const GameLayout: React.FC<GameLayoutProps> = ({
@@ -24,6 +35,7 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
   currentStep,
   totalSteps,
   narrationId,
+  narrationText,
 }) => {
   const { soundEnabled, setSoundEnabled, speechEnabled, setSpeechEnabled, setCurrentView } = useGame();
   const { playClick, playHover } = useAudioEngine();
@@ -79,10 +91,20 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
 
   const handleNarrationClick = () => {
     playClick();
+    if (narrationText) {
+      if (speechEnabled) speakInstruction(narrationText);
+      return;
+    }
     if (narrationClips.length) void play(narrationClips);
   };
 
   React.useEffect(() => {
+    if (narrationText) {
+      if (!speechEnabled || isNarrationLocked()) return;
+      speakInstruction(narrationText);
+      return () => window.speechSynthesis?.cancel();
+    }
+
     if (!narrationKey || isNarrationLocked()) return;
 
     const timer = window.setTimeout(() => {
@@ -95,7 +117,7 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
       if (isNarrationLocked()) return;
       cancel();
     };
-  }, [narrationKey, play, cancel]);
+  }, [narrationKey, narrationText, speechEnabled, play, cancel]);
 
   return (
     <div className={styles.container}>

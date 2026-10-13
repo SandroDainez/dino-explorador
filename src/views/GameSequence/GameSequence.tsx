@@ -41,7 +41,7 @@ function buildQuestions(): SequenceQuestion[] {
 }
 
 export const GameSequence: React.FC = () => {
-  const { dino, completeWorld } = useGame();
+  const { dino, completeWorld, progress } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory } = useAudioEngine();
   const praise = useCorrectPraise();
   const hint = useWrongHint();
@@ -58,9 +58,11 @@ export const GameSequence: React.FC = () => {
   const current = questions[step];
   const starsEarned = gameState === 'victory' ? starsFor(totalAttempts, totalQuestions) : 0;
   const instructionText = gameState === 'victory'
-    ? withNextPhase('sequence', victoryLine('Muito bem! Você completou todas as sequências!', starsEarned))
+    ? withNextPhase('sequence', victoryLine('Muito bem! Você achou a ordem das bolinhas!', starsEarned), progress.stars)
     : 'Qual bolinha vem depois?';
-  const narrationId = gameState === 'victory' ? `vitoria-sequencia-${starsEarned}` : 'sequencia';
+  // The recorded victory clips still say every sequence was finished.
+  const narrationId = gameState === 'victory' ? null : 'sequencia';
+  const narrationText = gameState === 'victory' ? instructionText : null;
 
   const finish = (attempts: number) => {
     setGameState('victory');
@@ -108,6 +110,7 @@ export const GameSequence: React.FC = () => {
       title="Trilha da Sequência"
       instructionText={instructionText}
       narrationId={narrationId}
+      narrationText={narrationText}
       starsEarned={starsEarned}
       currentStep={gameState === 'victory' ? undefined : step + 1}
       totalSteps={gameState === 'victory' ? undefined : totalQuestions}
@@ -145,7 +148,7 @@ export const GameSequence: React.FC = () => {
         <VictoryPanel
           badge="🔴"
           title="Sequência certa!"
-          text="Você descobriu qual bolinha vinha depois. O caminho ficou completo!"
+          text="Você descobriu qual bolinha vinha depois."
           stars={starsEarned}
           worldId="sequence"
           replayId="btn-victory-sequence-replay"

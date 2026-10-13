@@ -22,3 +22,11 @@ export function nextPhase(current: GameView): Phase | null {
   if (index < 0 || index >= PHASE_TRAIL.length - 1) return null;
   return PHASE_TRAIL[index + 1];
 }
+
+export function suggestedNext(current: GameView, stars: Record<string, number> = {}): Phase | null {
+  const remaining = PHASE_TRAIL.filter((phase) => phase.id !== current && !(stars[phase.id] > 0));
+  if (remaining.length === 0) return null;
+  const upcoming = nextPhase(current);
+  if (upcoming && remaining.some((phase) => phase.id === upcoming.id)) return upcoming;
+  return remaining[0];
+}

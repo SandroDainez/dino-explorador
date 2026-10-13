@@ -79,7 +79,7 @@ function ItemArt({ item, large }: { item: SizeItem; large: boolean }) {
 }
 
 export const GameSizes: React.FC = () => {
-  const { dino, completeWorld } = useGame();
+  const { dino, completeWorld, progress } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory } = useAudioEngine();
   const praise = useCorrectPraise();
   const hint = useWrongHint();
@@ -97,7 +97,7 @@ export const GameSizes: React.FC = () => {
   const current = questions[step];
   const starsEarned = gameState === 'victory' ? starsFor(totalAttempts, totalQuestions) : 0;
   const instructionText = gameState === 'victory'
-    ? withNextPhase('sizes', victoryLine('Muito bem! Você comparou todos os tamanhos!', starsEarned))
+    ? withNextPhase('sizes', victoryLine('Muito bem! Você comparou todos os tamanhos!', starsEarned), progress.stars)
     : current?.text ?? '';
   const narrationId = gameState === 'victory'
     ? `vitoria-tamanhos-${starsEarned}`

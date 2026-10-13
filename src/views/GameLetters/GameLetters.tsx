@@ -31,7 +31,7 @@ const LETTER_QUESTIONS: LetterQuestion[] = [
 ];
 
 export const GameLetters: React.FC = () => {
-  const { dino, completeWorld } = useGame();
+  const { dino, completeWorld, progress } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playJump } = useAudioEngine();
   const praise = useCorrectPraise();
   const hint = useWrongHint();
@@ -64,7 +64,7 @@ export const GameLetters: React.FC = () => {
   
   const starsEarned = gameState === 'victory' ? starsFor(totalAttempts) : 0;
   const instructionText = gameState === 'victory'
-    ? withNextPhase('letters', victoryLine('Sensacional! Você ajudou o Dino a atravessar todo o Rio das Letras!', starsEarned))
+    ? withNextPhase('letters', victoryLine('Sensacional! Você ajudou o Dino a atravessar todo o Rio das Letras!', starsEarned), progress.stars)
     : currentQuestion
       ? `Dino quer atravessar o rio! Com qual letra começa a palavra ${currentQuestion.word}?`
       : '';

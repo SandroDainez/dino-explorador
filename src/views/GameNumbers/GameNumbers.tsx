@@ -31,7 +31,7 @@ const EGG_COLORS = [
 ];
 
 export const GameNumbers: React.FC = () => {
-  const { dino, completeWorld } = useGame();
+  const { dino, completeWorld, progress } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
   const praise = useCorrectPraise();
   const hint = useWrongHint();
@@ -103,7 +103,7 @@ export const GameNumbers: React.FC = () => {
   
   const starsEarned = gameState === 'victory' ? starsFor(totalAttempts) : 0;
   const instructionText = gameState === 'victory'
-    ? withNextPhase('numbers', victoryLine('Muito bem! Você encontrou todos os ninhos!', starsEarned))
+    ? withNextPhase('numbers', victoryLine('Muito bem! Você encontrou todos os ninhos!', starsEarned), progress.stars)
     : currentQuestion
       ? `A mamãe dinossauro quer encontrar o ninho com ${currentQuestion.targetNumber} ${currentQuestion.targetNumber === 1 ? 'ovo' : 'ovos'}! Ajude ela!`
       : '';

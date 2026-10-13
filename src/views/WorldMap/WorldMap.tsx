@@ -35,7 +35,7 @@ const MAP_NODES: MapNode[] = [
       </svg>
     ),
     x: 16,
-    y: 18,
+    y: 16,
     color: '#FF5722',
     desc: 'Aprenda as cores!',
   },
@@ -51,7 +51,7 @@ const MAP_NODES: MapNode[] = [
       </svg>
     ),
     x: 50,
-    y: 18,
+    y: 16,
     color: '#9C27B0',
     desc: 'Brinque com as formas!',
   },
@@ -102,7 +102,7 @@ const MAP_NODES: MapNode[] = [
       </svg>
     ),
     x: 16,
-    y: 72,
+    y: 74,
     color: '#FF9800',
     desc: 'Descubra os animais!',
   },
@@ -118,7 +118,7 @@ const MAP_NODES: MapNode[] = [
       </svg>
     ),
     x: 50,
-    y: 72,
+    y: 74,
     color: '#00BCD4',
     desc: 'Conte os objetos!',
   },
@@ -132,7 +132,7 @@ const MAP_NODES: MapNode[] = [
       </svg>
     ),
     x: 84,
-    y: 18,
+    y: 16,
     color: '#F9A825',
     desc: 'Compare os tamanhos!',
   },
@@ -147,7 +147,7 @@ const MAP_NODES: MapNode[] = [
       </svg>
     ),
     x: 84,
-    y: 72,
+    y: 74,
     color: '#8E24AA',
     desc: 'Complete a sequência!',
   },
@@ -313,7 +313,7 @@ export const WorldMap: React.FC = () => {
         </div>
         <svg className={styles.pathwaySvg} viewBox="0 0 100 100" preserveAspectRatio="none">
           <path
-            d="M 16 18 C 32 18, 38 18, 50 18 C 66 18, 74 18, 84 18 C 96 30, 96 38, 84 46 C 68 46, 58 46, 50 46 C 34 46, 24 46, 16 46 C 4 58, 4 64, 16 72 C 32 72, 40 72, 50 72 C 66 72, 74 72, 84 72"
+            d="M 16 16 C 32 16, 38 16, 50 16 C 66 16, 74 16, 84 16 C 96 28, 96 38, 84 46 C 68 46, 58 46, 50 46 C 34 46, 24 46, 16 46 C 4 58, 4 66, 16 74 C 32 74, 40 74, 50 74 C 66 74, 74 74, 84 74"
             fill="none"
             stroke="#8a5a32"
             strokeWidth="3.2"
@@ -322,7 +322,7 @@ export const WorldMap: React.FC = () => {
             vectorEffect="non-scaling-stroke"
           />
           <path
-            d="M 16 18 C 32 18, 38 18, 50 18 C 66 18, 74 18, 84 18 C 96 30, 96 38, 84 46 C 68 46, 58 46, 50 46 C 34 46, 24 46, 16 46 C 4 58, 4 64, 16 72 C 32 72, 40 72, 50 72 C 66 72, 74 72, 84 72"
+            d="M 16 16 C 32 16, 38 16, 50 16 C 66 16, 74 16, 84 16 C 96 28, 96 38, 84 46 C 68 46, 58 46, 50 46 C 34 46, 24 46, 16 46 C 4 58, 4 66, 16 74 C 32 74, 40 74, 50 74 C 66 74, 74 74, 84 74"
             fill="none"
             stroke="#e6c48a"
             strokeWidth="1.3"
@@ -373,8 +373,8 @@ export const WorldMap: React.FC = () => {
         <div
           className={styles.dinoAvatarOnMap}
           style={{
-            left: dinoPosition ? `${dinoPosition.x}%` : '33%',
-            top: dinoPosition ? `${dinoPosition.y}%` : '60%',
+            left: dinoPosition ? `${dinoPosition.x}%` : undefined,
+            top: dinoPosition ? `${dinoPosition.y}%` : undefined,
             transform: `translate(-50%, -85%) ${movingToNode ? 'scale(1.15)' : 'scale(1)'}`,
             transition: 'left 1.1s cubic-bezier(0.25, 0.46, 0.45, 0.94), top 1.1s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
           }}

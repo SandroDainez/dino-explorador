@@ -176,7 +176,7 @@ interface Question {
 }
 
 export const GameAnimals: React.FC = () => {
-  const { dino, completeWorld } = useGame();
+  const { dino, completeWorld, progress } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
   const praise = useCorrectPraise();
   const hint = useWrongHint();
@@ -216,7 +216,7 @@ export const GameAnimals: React.FC = () => {
   
   const starsEarned = gameState === 'victory' ? starsFor(totalAttempts) : 0;
   const instructionText = gameState === 'victory'
-    ? withNextPhase('animals', victoryLine('Muito bem! Você descobriu todos os animais da floresta!', starsEarned))
+    ? withNextPhase('animals', victoryLine('Muito bem! Você descobriu todos os animais da floresta!', starsEarned), progress.stars)
     : currentQuestion
       ? 'Qual animal faz essa sombra escura na floresta?'
       : '';

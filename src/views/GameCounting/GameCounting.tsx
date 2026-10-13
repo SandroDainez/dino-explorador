@@ -29,7 +29,7 @@ const FIREFLY_POSITIONS = [
 ];
 
 export const GameCounting: React.FC = () => {
-  const { dino, completeWorld } = useGame();
+  const { dino, completeWorld, progress } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
   const praise = useCorrectPraise();
   const hint = useWrongHint();
@@ -71,7 +71,7 @@ export const GameCounting: React.FC = () => {
   
   const starsEarned = gameState === 'victory' ? starsFor(totalAttempts) : 0;
   const instructionText = gameState === 'victory'
-    ? withNextPhase('counting', victoryLine('Muito bem! Você contou todos os vaga-lumes!', starsEarned))
+    ? withNextPhase('counting', victoryLine('Muito bem! Você contou todos os vaga-lumes!', starsEarned), progress.stars)
     : currentQuestion
       ? 'Dino entrou na caverna! Quantos vaga-lumes brilhantes você consegue contar?'
       : '';

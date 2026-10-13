@@ -135,7 +135,7 @@ interface Question {
 }
 
 export const GameColors: React.FC = () => {
-  const { dino, completeWorld } = useGame();
+  const { dino, completeWorld, progress } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
   const praise = useCorrectPraise();
   const hint = useWrongHint();
@@ -179,7 +179,7 @@ export const GameColors: React.FC = () => {
   
   const starsEarned = gameState === 'victory' ? starsFor(totalAttempts) : 0;
   const instructionText = gameState === 'victory'
-    ? withNextPhase('colors', victoryLine('Muito bem! Você ajudou o Dino a comer todas as frutinhas coloridas!', starsEarned))
+    ? withNextPhase('colors', victoryLine('Muito bem! Você ajudou o Dino a comer todas as frutinhas coloridas!', starsEarned), progress.stars)
     : currentQuestion
       ? `Dino quer comer uma fruta ${currentQuestion.targetFruit.colorName}! Qual é a correta?`
       : '';

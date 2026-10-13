@@ -122,7 +122,7 @@ function buildShapeQuestions(): Question[] {
 }
 
 export const GameShapes: React.FC = () => {
-  const { dino, completeWorld } = useGame();
+  const { dino, completeWorld, progress } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
   const praise = useCorrectPraise();
   const hint = useWrongHint();
@@ -143,7 +143,7 @@ export const GameShapes: React.FC = () => {
   
   const starsForRun = starsFor(totalAttempts);
   const instructionText = gameState === 'victory'
-    ? withNextPhase('shapes', `Incrível! Você consertou a ponte inteira! O Dino conseguiu atravessar para o templo e ganhou ${starWords(starsForRun)}!`)
+    ? withNextPhase('shapes', `Incrível! Você consertou a ponte inteira! O Dino conseguiu atravessar para o templo e ganhou ${starWords(starsForRun)}!`, progress.stars)
     : currentQuestion
       ? `Dino precisa da pedra em forma de ${currentQuestion.targetShape.name} para consertar a ponte! Qual é ela?`
       : '';

@@ -29,7 +29,7 @@ function buildQuestions(): PositionQuestion[] {
 }
 
 export const GamePositions: React.FC = () => {
-  const { dino, completeWorld } = useGame();
+  const { dino, completeWorld, progress } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory } = useAudioEngine();
   const praise = useCorrectPraise();
   const hint = useWrongHint();
@@ -46,7 +46,7 @@ export const GamePositions: React.FC = () => {
   const current = questions[step];
   const starsEarned = gameState === 'victory' ? starsFor(totalAttempts, totalQuestions) : 0;
   const instructionText = gameState === 'victory'
-    ? withNextPhase('positions', victoryLine('Muito bem! Você encontrou todos os lugares!', starsEarned))
+    ? withNextPhase('positions', victoryLine('Muito bem! Você encontrou todos os lugares!', starsEarned), progress.stars)
     : current?.text ?? '';
   const narrationId = gameState === 'victory'
     ? `vitoria-posicoes-${starsEarned}`
