@@ -2,19 +2,20 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: auto;
-  min-height: 100%;
+  height: 100%;
+  min-height: 0;
   align-items: center;
-  justify-content: flex-start;
-  gap: 20px;
+  justify-content: center;
+  gap: clamp(8px, 1.6vh, 16px);
   position: relative;
+  overflow: hidden;
 }
 
 /* Cave Ceiling Arena */
 .caveBoard {
   position: relative;
-  width: 500px;
-  height: 250px;
+  width: min(500px, 100%);
+  height: min(220px, 38vh);
   background: radial-gradient(circle at center, #263238 0%, #151a1d 100%);
   border: 6px solid #455a64;
   border-radius: var(--radius-xl);
@@ -27,7 +28,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 100px;
+  height: 38%;
   pointer-events: none;
   z-index: 2;
   opacity: 0.85;
@@ -84,18 +85,20 @@
 /* Number cards options */
 .optionsContainer {
   display: flex;
-  gap: 16px;
+  gap: clamp(8px, 1.5vw, 14px);
   justify-content: center;
   width: 100%;
   flex-wrap: wrap;
+  flex-shrink: 0;
+  padding-bottom: 8px;
 }
 
 .numberBtn {
   background: white;
   border: 4px solid var(--color-gray-200);
   border-radius: var(--radius-xl);
-  width: 72px;
-  height: 72px;
+  width: clamp(48px, 12vw, 72px);
+  height: clamp(48px, 12vw, 72px);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -118,7 +121,7 @@
 
 .numberLabel {
   font-family: var(--font-display);
-  font-size: 2.2rem;
+  font-size: clamp(1.4rem, 4vh, 2rem);
   font-weight: 900;
   color: var(--color-gray-800);
 }
@@ -145,20 +148,9 @@
   opacity: 0.75;
 }
 
-@media (max-width: 768px) {
-  .caveBoard {
-    width: 300px;
-    height: 180px;
-  }
-  /* Scale position coords down slightly using percentages in CSS or similar.
-     For simplicity on smaller screens, we can scale the whole board down using CSS scale! */
+@media (max-width: 768px), (max-height: 760px) {
   .numberBtn {
-    width: 54px;
-    height: 54px;
     border-width: 3px;
-  }
-  .numberLabel {
-    font-size: 1.6rem;
   }
   .dinoCorner {
     display: none;
@@ -173,9 +165,13 @@
   box-shadow: var(--shadow-soft);
   max-width: 500px;
   width: 100%;
+  max-height: 100%;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: safe center;
+  margin: auto;
   animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   border: 4px solid var(--color-green-light);
 }
@@ -229,23 +225,27 @@
   justify-content: center;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-height: 760px) {
   .victoryCard {
-    padding: 24px;
+    padding: 16px 14px;
+  }
+  .victoryBadge {
+    font-size: 2.4rem;
+    margin-bottom: 8px;
   }
   .victoryTitle {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
+    margin-bottom: 6px;
   }
   .victoryText {
     font-size: 0.95rem;
-    margin-bottom: 16px;
+    margin-bottom: 10px;
   }
   .victoryStarsContainer {
-    margin-bottom: 20px;
+    margin-bottom: 12px;
   }
-  .victoryButtons {
-    flex-direction: column;
-    gap: 10px;
+  .victoryStar {
+    font-size: 1.8rem;
   }
 }
 

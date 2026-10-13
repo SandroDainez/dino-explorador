@@ -2,8 +2,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 28px;
+  justify-content: center;
+  gap: clamp(8px, 2vh, 24px);
   width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .pair {
@@ -15,8 +19,9 @@
 }
 
 .choice {
-  width: 180px;
-  height: 200px;
+  width: clamp(108px, 28vw, 180px);
+  height: clamp(112px, 28vh, 190px);
+  max-height: 42%;
   border-radius: 28px;
   border: 5px solid white;
   background: rgba(255, 252, 246, 0.96);
@@ -46,12 +51,19 @@
   box-shadow: 0 0 0 6px rgba(76, 175, 80, 0.25);
 }
 
-@media (max-width: 768px) {
-  .choice {
-    width: 140px;
-    height: 160px;
-  }
+.choice svg {
+  max-width: 74%;
+  max-height: 74%;
+}
+
+.gameContainer > svg {
+  width: clamp(56px, 12vh, 110px);
+  height: auto;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px), (max-height: 700px) {
   .pair {
-    gap: 14px;
+    gap: 12px;
   }
 }

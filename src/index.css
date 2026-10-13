@@ -17,6 +17,13 @@ html, body {
   background: #1d4e89;
   font-family: var(--font-body);
   color: var(--color-gray-900);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  overscroll-behavior: none;
+  touch-action: manipulation;
 }
 
 #root {

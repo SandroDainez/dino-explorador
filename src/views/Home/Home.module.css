@@ -25,7 +25,11 @@
   align-items: center;
   justify-content: safe center;
   gap: 12px;
-  padding: 12px 28px 28px;
+  padding:
+    max(12px, env(safe-area-inset-top))
+    max(16px, env(safe-area-inset-right))
+    max(20px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left));
 }
 
 /* Clouds background */
@@ -162,15 +166,27 @@
 
 @media (max-width: 768px) {
   .gameTitle {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
   }
   .subtitle {
-    font-size: 0.92rem;
+    font-size: 0.9rem;
   }
   .stage {
     justify-content: flex-start;
-    padding: 10px 14px 24px;
-    gap: 10px;
+    padding:
+      max(8px, env(safe-area-inset-top))
+      max(12px, env(safe-area-inset-right))
+      max(16px, env(safe-area-inset-bottom))
+      max(12px, env(safe-area-inset-left));
+    gap: 8px;
+  }
+  .choiceBtn {
+    min-height: 44px;
+  }
+  .btnStartDiscovery {
+    width: 100%;
+    justify-content: center;
+    font-size: 1.2rem;
   }
 }
 
@@ -529,6 +545,8 @@
   position: relative;
   z-index: 2;
   filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.15));
+  max-width: 72%;
+  max-height: 72%;
 }
 
 /* Splash Screen Card Overlay */
@@ -570,6 +588,11 @@
   color: var(--color-green-dark);
   margin-top: -8px;
   font-weight: 600;
+}
+
+.splashDinoPlate svg {
+  max-width: 78%;
+  max-height: 78%;
 }
 
 .splashDinoPlate {

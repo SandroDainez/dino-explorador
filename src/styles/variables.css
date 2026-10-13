@@ -230,3 +230,15 @@ h1, h2, h3, h4, h5, h6 {
   transform: translateY(6px);
   box-shadow: var(--shadow-bubble-active);
 }
+
+@media (max-width: 768px), (max-height: 700px) {
+  .btn-bubble {
+    font-size: 1rem;
+    padding: 10px 14px;
+    min-height: 48px;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.15;
+    justify-content: center;
+  }
+}

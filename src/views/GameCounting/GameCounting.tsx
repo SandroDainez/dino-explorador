@@ -195,7 +195,7 @@ export const GameCounting: React.FC = () => {
           {/* Cave board representing the dark cave ceiling with fireflies */}
           <div className={styles.caveBoard}>
             {/* Draw rock formations / stalactites in SVG */}
-            <svg className={styles.stalactitesSvg}>
+            <svg className={styles.stalactitesSvg} viewBox="0 0 500 100" preserveAspectRatio="none">
               <polygon points="0,0 40,0 20,40" fill="#263238" />
               <polygon points="80,0 150,0 110,60" fill="#263238" />
               <polygon points="200,0 250,0 220,30" fill="#263238" />
@@ -217,8 +217,8 @@ export const GameCounting: React.FC = () => {
                 key={idx}
                 className={styles.fireflyWrapper}
                 style={{
-                  left: `${pos.x}px`,
-                  top: `${pos.y}px`,
+                  left: `${(pos.x / 500) * 100}%`,
+                  top: `${(pos.y / 250) * 100}%`,
                 }}
               >
                 {renderFireflySvg(idx * 0.15)}

@@ -146,8 +146,7 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
       <header className={styles.header}>
         <button
           id="btn-back-to-map"
-          className="btn-bubble"
-          style={{ backgroundColor: 'var(--color-orange)', color: 'white', padding: '10px 18px', fontSize: '1rem' }}
+          className={`${styles.backBtn} btn-bubble`}
           onClick={handleBack}
           onMouseEnter={playHover}
         >

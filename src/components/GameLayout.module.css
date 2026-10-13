@@ -7,7 +7,11 @@
   max-height: 100dvh;
   position: relative;
   background: #1d4e89;
-  padding: 16px;
+  padding:
+    max(10px, env(safe-area-inset-top))
+    max(12px, env(safe-area-inset-right))
+    max(8px, env(safe-area-inset-bottom))
+    max(12px, env(safe-area-inset-left));
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -157,9 +161,17 @@
   align-items: center;
   justify-content: space-between;
   z-index: 10;
-  margin-bottom: 12px;
-  gap: 16px;
+  margin-bottom: 8px;
+  gap: 10px;
   position: relative;
+  flex-shrink: 0;
+}
+
+.backBtn {
+  background-color: var(--color-orange);
+  color: white;
+  padding: 10px 18px;
+  font-size: 1rem;
   flex-shrink: 0;
 }
 
@@ -175,19 +187,23 @@
 }
 
 .title {
-  font-size: 1.6rem;
+  font-size: clamp(1rem, 2.2vw, 1.6rem);
   color: var(--color-green-dark);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.15;
 }
 
 @media (max-width: 768px) {
   .title {
-    font-size: 1.15rem;
+    font-size: 1.05rem;
+    white-space: normal;
   }
   .titleContainer {
     padding: 6px 12px;
+    max-width: none;
+    min-width: 0;
   }
 }
 
@@ -232,14 +248,14 @@
 .instructionBox {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   background: rgba(255, 252, 246, 0.94);
-  padding: 16px 24px;
+  padding: 10px 18px;
   border-radius: var(--radius-xl);
   box-shadow: 0 12px 24px rgba(30, 40, 20, 0.1);
   border: 1px solid rgba(90, 140, 180, 0.25);
   z-index: 10;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
   cursor: pointer;
   transition: var(--transition-smooth);
   position: relative;
@@ -267,10 +283,10 @@
 
 .instruction {
   font-family: var(--font-display);
-  font-size: 1.35rem;
+  font-size: clamp(0.95rem, 2.1vw, 1.3rem);
   color: var(--color-gray-900);
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.3;
   text-align: left;
 }
 
@@ -302,13 +318,14 @@
   text-align: center;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-height: 760px) {
   .instruction {
-    font-size: 1.05rem;
+    font-size: 0.98rem;
   }
   .instructionBox {
-    padding: 12px 16px;
-    margin-bottom: 12px;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    gap: 8px;
   }
   .speechBubbleIcon {
     width: 36px;
@@ -325,21 +342,27 @@
   -webkit-backdrop-filter: blur(12px);
   border-radius: var(--radius-xl);
   border: 1px solid rgba(255, 255, 255, 0.75);
-  padding: 24px;
+  padding: clamp(8px, 1.6vh, 20px);
   box-shadow: 0 16px 30px rgba(30, 40, 20, 0.12);
   z-index: 5;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
+  align-items: stretch;
+  justify-content: stretch;
   position: relative;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
+}
+
+.mainContent > :not(canvas) {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 100%;
+  width: 100%;
 }
 
 @media (max-width: 768px) {
   .mainContent {
-    padding: 16px;
+    padding: 10px;
   }
   .volcanoLeft, .palmTreeRight {
     display: none; /* Hide background illustrations on small mobile to avoid clutter */
@@ -390,4 +413,77 @@
 
 .starEmpty {
   filter: grayscale(1) opacity(0.2);
+}
+
+@media (max-width: 768px), (max-height: 760px) {
+  .container {
+    padding:
+      max(6px, env(safe-area-inset-top))
+      max(8px, env(safe-area-inset-right))
+      max(6px, env(safe-area-inset-bottom))
+      max(8px, env(safe-area-inset-left));
+  }
+
+  .header {
+    margin-bottom: 6px;
+    gap: 8px;
+  }
+
+  .controlBtn {
+    width: 42px;
+    height: 42px;
+  }
+
+  .controls {
+    gap: 8px;
+  }
+
+  .footer {
+    padding-top: 6px;
+  }
+
+  .progressCounter,
+  .starsContainer {
+    padding: 4px 12px;
+  }
+
+  .progressCounter {
+    font-size: 0.95rem;
+  }
+
+  .star {
+    font-size: 1.2rem;
+  }
+
+  .praiseBurst {
+    font-size: 1.7rem;
+    padding: 10px 18px;
+  }
+
+  .hintBurst {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 480px), (max-height: 560px) {
+  .backBtn {
+    padding: 10px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .backBtn span {
+    display: none;
+  }
+
+  .instruction {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .title {
+    font-size: 0.95rem;
+  }
 }

@@ -237,8 +237,7 @@ export const WorldMap: React.FC = () => {
       <div className={styles.topBar}>
         <button
           id="btn-back-to-customizer"
-          className="btn-bubble"
-          style={{ backgroundColor: 'var(--color-pink)', color: 'white', padding: '10px 18px', fontSize: '0.95rem' }}
+          className={`${styles.homeBtn} btn-bubble`}
           onClick={handleBackToCustomizer}
           onMouseEnter={playHover}
         >
