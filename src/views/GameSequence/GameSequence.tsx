@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
 import { starsFor, victoryLine, withNextPhase } from '../../audio/lines';
-import { useCorrectPraise } from '../../hooks/useNarration';
+import { useCorrectPraise, useWrongHint } from '../../hooks/useNarration';
 import { GameLayout } from '../../components/GameLayout';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
@@ -44,6 +44,7 @@ export const GameSequence: React.FC = () => {
   const { dino, completeWorld } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory } = useAudioEngine();
   const praise = useCorrectPraise();
+  const hint = useWrongHint();
 
   const [questions, setQuestions] = useState<SequenceQuestion[]>(buildQuestions);
   const [step, setStep] = useState(0);
@@ -86,6 +87,7 @@ export const GameSequence: React.FC = () => {
     }
 
     playError();
+    hint();
     setWrongBall(ball);
     window.setTimeout(() => setWrongBall(null), 700);
   };

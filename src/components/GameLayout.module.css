@@ -294,6 +294,14 @@
   animation: pop-in 0.35s ease;
 }
 
+.hintBurst {
+  color: var(--color-blue);
+  border-color: var(--color-blue);
+  font-size: 1.8rem;
+  max-width: 90%;
+  text-align: center;
+}
+
 @media (max-width: 768px) {
   .instruction {
     font-size: 1.05rem;

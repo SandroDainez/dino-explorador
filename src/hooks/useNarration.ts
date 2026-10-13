@@ -184,14 +184,18 @@ export function useNarrationSequence() {
   return { play, cancel, playThen };
 }
 
-function speakMuitoBem() {
+function speakLine(text: string) {
   const synth = window.speechSynthesis;
   if (!synth) return;
-  const line = new SpeechSynthesisUtterance('Muito bem!');
+  const line = new SpeechSynthesisUtterance(text);
   line.lang = 'pt-BR';
   line.rate = 1;
   synth.cancel();
   synth.speak(line);
+}
+
+function speakMuitoBem() {
+  speakLine('Muito bem!');
 }
 
 function playPraiseClip(id: string): Promise<boolean> {
@@ -272,5 +276,38 @@ export function useCorrectPraise() {
         done();
       }, wait);
     });
+  }, []);
+}
+
+const WRONG_HINT = 'Você não quer escolher outra opção?';
+
+function playHintClip(id: string, spoken: string) {
+  if (praiseAudio) {
+    praiseAudio.onended = null;
+    praiseAudio.onerror = null;
+    praiseAudio.pause();
+  }
+
+  const audio = new Audio(`/audio/${id}.mp3`);
+  praiseAudio = audio;
+  audio.volume = 1;
+  let spoke = false;
+  const say = () => {
+    if (spoke) return;
+    spoke = true;
+    speakLine(spoken);
+  };
+  audio.onplaying = () => {
+    spoke = true;
+  };
+  audio.onerror = say;
+  void audio.play().catch(say);
+}
+
+export function useWrongHint() {
+  return useCallback(() => {
+    cancelNarration();
+    window.dispatchEvent(new CustomEvent('dino-hint'));
+    playHintClip('outra-opcao', WRONG_HINT);
   }, []);
 }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
-import { useCorrectPraise } from '../../hooks/useNarration';
+import { useCorrectPraise, useWrongHint } from '../../hooks/useNarration';
 import { starsFor, victoryLine, withNextPhase } from '../../audio/lines';
 import { GameLayout } from '../../components/GameLayout';
 import { VictoryActions } from '../../components/VictoryPanel';
@@ -34,6 +34,7 @@ export const GameNumbers: React.FC = () => {
   const { dino, completeWorld } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
   const praise = useCorrectPraise();
+  const hint = useWrongHint();
 
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -139,6 +140,7 @@ export const GameNumbers: React.FC = () => {
     } else {
       // Incorrect
       playError();
+      hint();
       setDinoEmotion('sad');
       setWrongAnswers((prev) => [...prev, option.id]);
 

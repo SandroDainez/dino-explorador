@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
 import { starsFor, victoryLine, withNextPhase } from '../../audio/lines';
-import { useCorrectPraise } from '../../hooks/useNarration';
+import { useCorrectPraise, useWrongHint } from '../../hooks/useNarration';
 import { GameLayout } from '../../components/GameLayout';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { ConfettiCanvas } from '../../components/ConfettiCanvas';
@@ -82,6 +82,7 @@ export const GameSizes: React.FC = () => {
   const { dino, completeWorld } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory } = useAudioEngine();
   const praise = useCorrectPraise();
+  const hint = useWrongHint();
 
   const [questions, setQuestions] = useState<SizeQuestion[]>(buildQuestions);
   const [step, setStep] = useState(0);
@@ -132,6 +133,7 @@ export const GameSizes: React.FC = () => {
     }
 
     playError();
+    hint();
     setWrongSide(side);
     window.setTimeout(() => setWrongSide(null), 700);
   };

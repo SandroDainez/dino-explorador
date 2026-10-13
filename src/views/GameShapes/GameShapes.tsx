@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
 import { starsFor, starWords, withNextPhase } from '../../audio/lines';
-import { useCorrectPraise } from '../../hooks/useNarration';
+import { useCorrectPraise, useWrongHint } from '../../hooks/useNarration';
 import { GameLayout } from '../../components/GameLayout';
 import { VictoryActions } from '../../components/VictoryPanel';
 import { DinoAvatar } from '../../components/DinoAvatar';
@@ -125,6 +125,7 @@ export const GameShapes: React.FC = () => {
   const { dino, completeWorld } = useGame();
   const { playClick, playHover, playSuccess, playError, playVictory, playPop } = useAudioEngine();
   const praise = useCorrectPraise();
+  const hint = useWrongHint();
 
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<Question[]>(buildShapeQuestions);
@@ -186,6 +187,7 @@ export const GameShapes: React.FC = () => {
     } else {
       // Incorrect
       playError();
+      hint();
       setDinoEmotion('sad');
       setWrongAnswers((prev) => [...prev, shapeId]);
 
