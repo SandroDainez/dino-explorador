@@ -6,6 +6,52 @@
   max-height: 100%;
   overflow: hidden;
   box-sizing: border-box;
+  justify-content: safe center;
+  padding: clamp(8px, 1.2vh, 16px) clamp(10px, 2vw, 20px) !important;
+}
+
+/* Keep the badge, the message and the three buttons inside the card. */
+.victory-screen > div:first-child {
+  font-size: clamp(1.4rem, 4.2vh, 2.4rem) !important;
+  line-height: 1 !important;
+  margin: 0 0 clamp(2px, 0.5vh, 8px) !important;
+  flex-shrink: 0;
+  animation: victory-badge-bob 2.4s ease-in-out infinite !important;
+}
+
+.victory-screen > h2 {
+  font-size: clamp(1.15rem, 2.8vh, 1.7rem) !important;
+  line-height: 1.1 !important;
+  margin: 0 0 clamp(2px, 0.4vh, 6px) !important;
+  flex-shrink: 0;
+}
+
+.victory-screen > p {
+  font-size: clamp(0.8rem, 1.8vh, 1rem) !important;
+  line-height: 1.25 !important;
+  margin: 0 0 clamp(4px, 0.7vh, 8px) !important;
+  flex-shrink: 1;
+  min-height: 0;
+}
+
+.victory-screen > div:nth-of-type(2) {
+  margin: 0 0 clamp(4px, 0.7vh, 8px) !important;
+  gap: clamp(6px, 1vh, 12px) !important;
+  flex-shrink: 0;
+}
+
+.victory-screen > div:nth-of-type(2) > span {
+  font-size: clamp(1.15rem, 2.8vh, 1.7rem) !important;
+}
+
+.victory-screen > div:nth-of-type(3) {
+  flex-shrink: 0;
+  width: 100%;
+}
+
+@keyframes victory-badge-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
 }
 
 @media (max-height: 520px) {
@@ -14,7 +60,7 @@
   }
 
   .victory-screen > h2 {
-    font-size: 1.2rem !important;
+    font-size: 1.05rem !important;
     margin-bottom: 2px !important;
   }
 
