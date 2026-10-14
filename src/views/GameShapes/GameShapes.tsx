@@ -247,7 +247,7 @@ export const GameShapes: React.FC = () => {
                   color={dino.color}
                   accessory={dino.accessory}
                   animation={dinoEmotion}
-                  size={116}
+                  size={156}
                 />
               </div>
             </div>

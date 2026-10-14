@@ -97,7 +97,7 @@
 }
 
 .gameContainer > svg {
-  width: clamp(44px, 18cqh, 84px);
+  width: clamp(76px, 22cqh, 132px);
   height: auto;
   flex-shrink: 0;
 }

@@ -128,7 +128,7 @@ export const GamePositions: React.FC = () => {
               </svg>
             </div>
           </div>
-          <DinoAvatar type={dino.type} color={dino.color} accessory={dino.accessory} animation={solved ? 'celebrate' : wrongId ? 'sad' : 'idle'} size={110} />
+          <DinoAvatar type={dino.type} color={dino.color} accessory={dino.accessory} animation={solved ? 'celebrate' : wrongId ? 'sad' : 'idle'} size={132} />
         </div>
       ) : (
         <VictoryPanel

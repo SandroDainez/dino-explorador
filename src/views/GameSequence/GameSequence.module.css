@@ -57,6 +57,12 @@
   outline: 5px solid var(--color-green);
 }
 
+.gameContainer > svg {
+  width: clamp(88px, 18vh, 150px);
+  height: auto;
+  flex-shrink: 0;
+}
+
 @media (max-height: 520px) {
   .gameContainer {
     gap: 10px;

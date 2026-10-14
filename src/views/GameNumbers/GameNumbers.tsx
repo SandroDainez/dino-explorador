@@ -267,7 +267,7 @@ export const GameNumbers: React.FC = () => {
                 color="orange"
                 accessory="none"
                 animation={dinoEmotion}
-                size={120}
+                size={152}
               />
             </div>
             <div className={styles.numberSign}>

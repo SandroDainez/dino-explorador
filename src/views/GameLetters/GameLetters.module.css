@@ -184,7 +184,7 @@
 }
 
 .dinoOnRiver svg {
-  width: clamp(40px, 8vh, 72px);
+  width: clamp(72px, 16vh, 128px);
   height: auto;
 }
 
@@ -199,7 +199,7 @@
     border-width: 3px;
   }
   .dinoOnRiver svg {
-    width: 46px;
+    width: clamp(64px, 12vh, 92px);
   }
 }
 
@@ -231,7 +231,7 @@
     box-shadow: 0 4px 0 #263238;
   }
   .dinoOnRiver svg {
-    width: 32px;
+    width: 56px;
   }
 }
 

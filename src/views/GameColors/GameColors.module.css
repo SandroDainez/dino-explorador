@@ -27,7 +27,7 @@
 }
 
 .dinoContainer svg {
-  width: clamp(72px, 18vh, 168px);
+  width: clamp(104px, 24vh, 210px);
   height: auto;
 }
 

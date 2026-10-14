@@ -146,10 +146,16 @@
 /* Dino helper positioning */
 .dinoCorner {
   position: absolute;
-  bottom: -10px;
-  left: -10px;
+  bottom: 4px;
+  left: 4px;
   pointer-events: none;
-  opacity: 0.8;
+  opacity: 0.95;
+  z-index: 3;
+}
+
+.dinoCorner svg {
+  width: clamp(108px, 20vh, 168px);
+  height: auto;
 }
 
 @media (max-width: 768px) {

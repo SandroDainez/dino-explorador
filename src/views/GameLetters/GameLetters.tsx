@@ -305,7 +305,7 @@ export const GameLetters: React.FC = () => {
                   color={dino.color}
                   accessory={dino.accessory}
                   animation={dinoEmotion}
-                  size={96}
+                  size={128}
                 />
               </div>
             </div>

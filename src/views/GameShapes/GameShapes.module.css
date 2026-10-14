@@ -82,7 +82,7 @@
 .dinoTrack {
   position: relative;
   width: 100%;
-  height: clamp(52px, 13vh, 110px);
+  height: clamp(76px, 18vh, 156px);
   flex-shrink: 1;
   min-height: 0;
   z-index: 2;

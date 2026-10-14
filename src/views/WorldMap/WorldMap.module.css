@@ -333,18 +333,19 @@
   animation: pulse-soft 1s ease-in-out infinite;
 }
 
-/* Dino Avatar Position */
+/* Dino stands in the open grass between the paths, clear of the round buttons. */
 .dinoAvatarOnMap {
   position: absolute;
-  left: 34%;
-  top: 58%;
+  left: 34.8%;
+  top: 61%;
   z-index: 12;
   pointer-events: none;
+  transform: translate(-50%, -58%);
   filter: drop-shadow(0 8px 6px rgba(0, 0, 0, 0.2));
 }
 
 .dinoAvatarOnMap svg {
-  width: clamp(48px, 12cqh, 72px);
+  width: clamp(108px, 24cqh, 168px);
   height: auto;
 }
 
@@ -494,12 +495,34 @@
   }
 
   .dinoAvatarOnMap {
-    left: 33%;
-    top: 37.5%;
+    left: 35%;
+    top: 62%;
   }
 
   .dinoAvatarOnMap svg {
-    width: clamp(30px, 6.4cqh, 46px);
+    width: clamp(72px, 11cqh, 100px);
+  }
+}
+
+@media (max-width: 480px) {
+  .dinoAvatarOnMap {
+    left: 50%;
+    top: 36.5%;
+    transform: translate(-50%, -50%);
+  }
+
+  .dinoAvatarOnMap svg {
+    width: clamp(64px, 12cqh, 92px);
+  }
+}
+
+@media (max-width: 480px) and (max-height: 560px) {
+  .dinoAvatarOnMap {
+    top: 34.5%;
+  }
+
+  .dinoAvatarOnMap svg {
+    width: clamp(32px, 9cqh, 48px);
   }
 }
 
@@ -510,6 +533,12 @@
 
   .nodeBadge {
     top: calc(100% + 2px);
+  }
+}
+
+@media (max-height: 520px) and (min-width: 481px) {
+  .dinoAvatarOnMap svg {
+    width: clamp(88px, 34cqh, 120px);
   }
 }
 

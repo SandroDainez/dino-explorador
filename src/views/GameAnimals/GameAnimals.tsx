@@ -368,7 +368,7 @@ export const GameAnimals: React.FC = () => {
               color={dino.color}
               accessory={dino.accessory}
               animation={dinoEmotion}
-              size={120}
+              size={168}
             />
           </div>
         </div>

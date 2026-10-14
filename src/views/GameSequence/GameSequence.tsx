@@ -140,7 +140,7 @@ export const GameSequence: React.FC = () => {
               />
             ))}
           </div>
-          <DinoAvatar type={dino.type} color={dino.color} accessory={dino.accessory} animation={solved ? 'celebrate' : wrongBall ? 'sad' : 'idle'} size={110} />
+          <DinoAvatar type={dino.type} color={dino.color} accessory={dino.accessory} animation={solved ? 'celebrate' : wrongBall ? 'sad' : 'idle'} size={150} />
         </div>
       ) : (
         <VictoryPanel

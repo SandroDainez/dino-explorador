@@ -358,18 +358,13 @@ export const WorldMap: React.FC = () => {
         })}
 
         {/* Dino Moving Avatar */}
-        <div
-          className={styles.dinoAvatarOnMap}
-          style={{
-            transform: 'translate(-50%, -85%)',
-          }}
-        >
+        <div className={styles.dinoAvatarOnMap}>
           <DinoAvatar
             type={dino.type}
             color={dino.color}
             accessory={dino.accessory}
             animation="idle"
-            size={100}
+            size={168}
           />
         </div>
       </div>

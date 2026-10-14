@@ -32,7 +32,7 @@
 }
 
 .motherDino svg {
-  width: clamp(56px, 12vh, 108px);
+  width: clamp(88px, 18vh, 152px);
   height: auto;
 }
 

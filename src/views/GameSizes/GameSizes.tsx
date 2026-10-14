@@ -184,7 +184,7 @@ export const GameSizes: React.FC = () => {
             {renderChoice('left')}
             {renderChoice('right')}
           </div>
-          <DinoAvatar type={dino.type} color={dino.color} accessory={dino.accessory} animation={pickedSide ? 'celebrate' : wrongSide ? 'sad' : 'idle'} size={110} />
+          <DinoAvatar type={dino.type} color={dino.color} accessory={dino.accessory} animation={pickedSide ? 'celebrate' : wrongSide ? 'sad' : 'idle'} size={148} />
         </div>
       ) : (
         <VictoryPanel
