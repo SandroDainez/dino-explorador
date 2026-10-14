@@ -315,7 +315,7 @@ export const GameShapes: React.FC = () => {
         </div>
       ) : (
         /* Victory Screen */
-        <div className={styles.victoryCard}>
+        <div className={`${styles.victoryCard} victory-screen`}>
           <div className={styles.victoryBadge}>👑</div>
           <h2 className={styles.victoryTitle}>Espetacular!</h2>
           <p className={styles.victoryText}>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
 import type { DinoType, DinoColor, DinoAccessory } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
+import { CLIPS } from '../../audio/catalog';
 import { unlockAudio, useNarration } from '../../hooks/useNarration';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { PrehistoricScene } from '../../components/PrehistoricScene';
@@ -24,6 +25,14 @@ export const Home: React.FC = () => {
 
   const { playClick, playHover, playSuccess } = useAudioEngine();
   const { play, cancel } = useNarration();
+  const homeAlive = React.useRef(true);
+
+  useEffect(() => {
+    homeAlive.current = true;
+    return () => {
+      homeAlive.current = false;
+    };
+  }, []);
 
   const [showSplash, setShowSplash] = useState(initialLoad);
   const [isMobile, setIsMobile] = useState(false);
@@ -43,13 +52,25 @@ export const Home: React.FC = () => {
 
   const handleStartDiscovery = () => {
     playSuccess();
+    unlockAudio();
     initialLoad = false;
     ignoreHomeAutoNarration = true;
-    window.setTimeout(() => {
-      ignoreHomeAutoNarration = false;
-    }, 1600);
     setShowSplash(false);
-    void play('ola');
+    // First tap is the gesture that unlocks audio. The intro plays, then the
+    // existing customizer line, without an extra screen.
+    void play(CLIPS.vamosBrincar).then((status) => {
+      if (!homeAlive.current || status === 'cancelled') {
+        ignoreHomeAutoNarration = false;
+        return;
+      }
+      if (status === 'disabled') {
+        ignoreHomeAutoNarration = false;
+        return;
+      }
+      void play('ola').finally(() => {
+        ignoreHomeAutoNarration = false;
+      });
+    });
   };
 
   useEffect(() => {

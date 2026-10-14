@@ -50,7 +50,7 @@ export const VictoryActions = ({
             onClick={() => goTo(upcoming.id)}
             onMouseEnter={playHover}
           >
-            <ArrowRight size={20} />
+            <ArrowRight size={28} />
             <span>Fazer {upcoming.name}</span>
           </button>
         )}
@@ -58,10 +58,14 @@ export const VictoryActions = ({
           id={replayId}
           className="btn-bubble"
           style={{ backgroundColor: 'var(--color-blue)', color: 'white' }}
-          onClick={onReplay}
+          onClick={() => {
+            unlockAudio();
+            cancel();
+            onReplay();
+          }}
           onMouseEnter={playHover}
         >
-          <RotateCcw size={20} />
+          <RotateCcw size={28} />
           <span>Repetir esta fase</span>
         </button>
         <button
@@ -71,7 +75,7 @@ export const VictoryActions = ({
           onClick={() => goTo('map')}
           onMouseEnter={playHover}
         >
-          <Map size={20} />
+          <Map size={28} />
           <span>Escolher outra</span>
         </button>
       </div>
@@ -101,7 +105,7 @@ export const VictoryPanel = ({
   onReplay,
 }: VictoryPanelProps) => {
   return (
-    <div className={styles.victoryCard}>
+    <div className={`${styles.victoryCard} victory-screen`}>
       <div className={styles.victoryBadge}>{badge}</div>
       <h2 className={styles.victoryTitle}>{title}</h2>
       <p className={styles.victoryText}>{text}</p>

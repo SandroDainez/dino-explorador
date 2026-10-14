@@ -1,5 +1,33 @@
 @import './styles/variables.css';
 
+.victory-screen {
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+@media (max-height: 520px) {
+  .victory-screen > div:first-child {
+    display: none !important;
+  }
+
+  .victory-screen > h2 {
+    font-size: 1.2rem !important;
+    margin-bottom: 2px !important;
+  }
+
+  .victory-screen > p {
+    margin-bottom: 4px !important;
+    font-size: 0.78rem !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
 * {
   box-sizing: border-box;
   margin: 0;

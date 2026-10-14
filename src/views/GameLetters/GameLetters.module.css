@@ -44,22 +44,22 @@
   font-size: clamp(1.3rem, 4vh, 2rem);
   font-weight: 700;
   color: var(--color-blue-dark);
-  letter-spacing: 1px;
-}
-
-.blankLetter,
-.filledLetter {
-  display: inline-block;
-  min-width: 0.7em;
-  margin-right: 0.12em;
-  text-align: center;
+  letter-spacing: 0;
 }
 
 .blankLetter {
+  display: inline-block;
+  min-width: 0.7em;
+  margin: 0;
+  text-align: center;
   border-bottom: 3px solid currentColor;
 }
 
-.filledLetter {
+.filledWord {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  letter-spacing: 0;
   color: var(--color-green-dark);
   animation: letter-pop 0.25s ease-out;
 }
@@ -78,7 +78,7 @@
   font-weight: 900;
   color: var(--color-blue-dark);
   text-shadow: 0 2px 0 white;
-  transition: transform 0.55s cubic-bezier(0.2, 0.85, 0.2, 1);
+  transition: transform 0.56s cubic-bezier(0.2, 0.85, 0.2, 1);
 }
 
 /* River stepping stone arena */
@@ -101,17 +101,28 @@
   width: 100%;
   height: 100%;
   display: flex;
-  align-items: flex-start;
-  justify-content: space-around;
-  padding: 22px 28px 78px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 12px 16px 8px;
   position: relative;
+}
+
+.stonesRow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  flex: 0 0 auto;
+  z-index: 10;
 }
 
 /* River Stones */
 .stone {
   width: clamp(48px, 14vw, 86px);
   height: clamp(48px, 14vw, 86px);
-  max-height: 70%;
+  flex: 0 0 auto;
   border-radius: 50%;
   background: radial-gradient(circle at 30% 30%, #90a4ae 0%, #607d8b 100%);
   border: 4px solid #37474f;
@@ -162,24 +173,65 @@
   opacity: 0;
 }
 
-/* Dino stays in the empty water, under the stones */
+/* Dino stays in the empty water, under the stones, and never covers a letter. */
 .dinoOnRiver {
-  position: absolute;
-  left: 50%;
-  bottom: 2px;
-  transform: translateX(-50%);
-  z-index: 4;
+  position: relative;
+  z-index: 1;
   pointer-events: none;
+  flex: 0 0 auto;
+  line-height: 0;
+  margin-top: auto;
 }
 
 .dinoOnRiver svg {
-  width: clamp(48px, 10vh, 84px);
+  width: clamp(40px, 8vh, 72px);
   height: auto;
 }
 
 @media (max-width: 768px), (max-height: 700px) {
+  .riverArea {
+    min-height: 108px;
+    max-height: 210px;
+  }
   .stone {
+    width: 56px;
+    height: 56px;
     border-width: 3px;
+  }
+  .dinoOnRiver svg {
+    width: 46px;
+  }
+}
+
+@media (max-height: 520px) {
+  .wordCard {
+    padding: 4px 10px;
+    gap: 8px;
+  }
+  .wordEmoji {
+    font-size: 1.4rem;
+  }
+  .wordHint {
+    font-size: 0.85rem;
+  }
+  .wordMystery {
+    font-size: 1.05rem;
+  }
+  .riverArea {
+    min-height: 0;
+    max-height: none;
+  }
+  .riverWater {
+    padding: 4px 8px 2px;
+    gap: 6px;
+  }
+  .stone {
+    width: 44px;
+    height: 44px;
+    box-shadow: 0 4px 0 #263238;
+  }
+  .dinoOnRiver svg {
+    width: 32px;
   }
 }
 
@@ -191,8 +243,11 @@
   box-shadow: var(--shadow-soft);
   max-width: 500px;
   width: 100%;
+  height: 100%;
+  min-height: 0;
   max-height: 100%;
-  overflow-y: auto;
+  overflow: hidden;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -251,7 +306,7 @@
   justify-content: center;
 }
 
-@media (max-width: 768px), (max-height: 760px) {
+@media (max-width: 768px), (max-height: 900px) {
   .victoryCard {
     padding: 16px 14px;
   }

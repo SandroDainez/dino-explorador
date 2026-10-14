@@ -1,6 +1,7 @@
 import React from 'react';
 import { useGame } from '../context/GameContext';
 import { useAudioEngine } from '../hooks/useAudioEngine';
+import { narrationClipsFor } from '../audio/catalog';
 import { isNarrationLocked, useNarration } from '../hooks/useNarration';
 import { ArrowLeft, Volume2, VolumeX, HelpCircle } from 'lucide-react';
 import { PrehistoricScene } from './PrehistoricScene';
@@ -54,7 +55,7 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
     };
   }, []);
 
-  const narrationClips = narrationId ? [narrationId] : [];
+  const narrationClips = narrationClipsFor(narrationId);
   const narrationKey = narrationClips.join('|');
 
   const handleBack = () => {
@@ -70,7 +71,9 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
 
   const toggleSpeech = () => {
     playClick();
-    setSpeechEnabled(!speechEnabled);
+    const next = !speechEnabled;
+    setSpeechEnabled(next);
+    if (!next) cancel();
   };
 
   const handleNarrationClick = () => {

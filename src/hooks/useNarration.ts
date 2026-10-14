@@ -227,7 +227,13 @@ function playPraiseClip(id: string, token: number): Promise<boolean> {
 }
 
 export function useCorrectPraise() {
+  const { speechEnabled } = useGame();
+  const speechRef = useRef(speechEnabled);
   const alive = useRef(true);
+
+  useEffect(() => {
+    speechRef.current = speechEnabled;
+  }, [speechEnabled]);
 
   useEffect(() => {
     alive.current = true;
@@ -237,6 +243,10 @@ export function useCorrectPraise() {
   }, []);
 
   return useCallback((onDone: () => void, clips?: string | string[]) => {
+    if (!speechRef.current) {
+      if (alive.current) onDone();
+      return;
+    }
     const list = (clips ? (Array.isArray(clips) ? clips : [clips]) : ['contar-1']).filter(Boolean);
     cancelNarration();
     const token = generation;
@@ -283,9 +293,16 @@ function playHintClip(id: string) {
 }
 
 export function useWrongHint() {
+  const { speechEnabled } = useGame();
+  const speechRef = useRef(speechEnabled);
+
+  useEffect(() => {
+    speechRef.current = speechEnabled;
+  }, [speechEnabled]);
+
   return useCallback(() => {
-    cancelNarration();
+    if (speechRef.current) cancelNarration();
     window.dispatchEvent(new CustomEvent('dino-hint'));
-    playHintClip('outra-opcao');
+    if (speechRef.current) playHintClip('outra-opcao');
   }, []);
 }
