@@ -89,7 +89,9 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
       if (isNarrationLocked()) return;
       cancel();
     };
-  }, [narrationKey, play, cancel]);
+    // currentStep repeats a question that reuses the same recording, such as
+    // the cave line on every firefly count.
+  }, [narrationKey, currentStep, play, cancel]);
 
   return (
     <div className={styles.container}>
