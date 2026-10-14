@@ -82,15 +82,30 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
   };
 
   React.useEffect(() => {
-    if (!narrationKey || isNarrationLocked()) return;
-    void play(narrationKey.split('|'));
+    if (!narrationKey) return;
+    let alive = true;
+    let timer = 0;
+    const start = () => {
+      if (!alive) return;
+      // Praise can still be finishing when the next question or the choice
+      // screen appears. Wait, then speak. A skipped start used to leave the
+      // next phase silent.
+      if (isNarrationLocked()) {
+        timer = window.setTimeout(start, 120);
+        return;
+      }
+      void play(narrationKey.split('|'));
+    };
+    start();
 
     return () => {
+      alive = false;
+      window.clearTimeout(timer);
       if (isNarrationLocked()) return;
       cancel();
     };
     // currentStep repeats a question that reuses the same recording, such as
-    // the cave line on every firefly count.
+    // the cave line, and the choice lines at the end of every phase.
   }, [narrationKey, currentStep, play, cancel]);
 
   return (
