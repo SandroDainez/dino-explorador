@@ -1,8 +1,7 @@
 /**
- * Ids played by the narration engine. A missing file must not freeze the game:
- * the player treats a failed clip as finished and moves on.
+ * Ids played by the narration engine. A missing or failed file must not freeze
+ * the game: the player treats that clip as finished and moves on.
  *
- * Recordings still needed (do not synthesize):
  * - public/audio/vamos-brincar.mp3
  *   "Vamos brincar! Esse é o joguinho do dinossauro. Você ajuda ele."
  *   Plays on the first tap of INICIAR AVENTURA, before the customizer line.
