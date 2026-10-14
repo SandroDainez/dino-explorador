@@ -163,7 +163,9 @@ export const GameSizes: React.FC = () => {
         onMouseEnter={playHover}
         disabled={locked}
       >
-        <ItemArt item={current.item} large={large} />
+        <span className={large ? styles.bigArt : styles.smallArt}>
+          <ItemArt item={current.item} large={large} />
+        </span>
       </button>
     );
   };
