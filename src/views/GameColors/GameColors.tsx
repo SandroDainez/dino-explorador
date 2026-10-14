@@ -188,7 +188,7 @@ export const GameColors: React.FC = () => {
     : currentQuestion?.targetFruit.clip ?? null;
 
   const handleFruitClick = (selectedId: string) => {
-    if (gameState === 'victory' || dinoEmotion !== 'idle' || biteFruit !== null) return;
+    if (gameState === 'victory' || biteFruit !== null) return;
 
     const nextAttempts = totalAttempts + 1;
     setTotalAttempts(nextAttempts);

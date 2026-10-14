@@ -5,25 +5,14 @@ export type PlayResult = 'finished' | 'disabled' | 'cancelled';
 
 let generation = 0;
 let stopCurrent: (() => void) | null = null;
+let stopPraisePlay: (() => void) | null = null;
 let waiters: Array<(result: PlayResult) => void> = [];
 let sharedAudio: HTMLAudioElement | null = null;
 let praiseAudio: HTMLAudioElement | null = null;
-let retryList: string[] | null = null;
 let narrationLocked = false;
 
 export function isNarrationLocked(): boolean {
   return narrationLocked;
-}
-
-function retryBlockedNarration() {
-  if (!retryList || stopCurrent) return;
-  const list = retryList;
-  retryList = null;
-  void playNarration(list, true);
-}
-
-if (typeof window !== 'undefined') {
-  window.addEventListener('pointerdown', retryBlockedNarration, { capture: true });
 }
 
 function settle(result: PlayResult) {
@@ -32,23 +21,43 @@ function settle(result: PlayResult) {
   pending.forEach((waiter) => waiter(result));
 }
 
-export function cancelNarration() {
-  generation += 1;
-  retryList = null;
-  const stop = stopCurrent;
-  stopCurrent = null;
-  if (stop) stop();
-  settle('cancelled');
-}
-
 function silence(audio: HTMLAudioElement | null) {
   if (!audio) return;
   audio.onended = null;
   audio.onerror = null;
+  audio.onplaying = null;
   audio.pause();
 }
 
-function playClip(id: string, token: number, retryFrom: string[]): Promise<boolean> {
+function stopPraise() {
+  const stop = stopPraisePlay;
+  stopPraisePlay = null;
+  if (stop) stop();
+  silence(praiseAudio);
+  praiseAudio = null;
+}
+
+export function cancelNarration() {
+  generation += 1;
+  narrationLocked = false;
+  const stop = stopCurrent;
+  stopCurrent = null;
+  if (stop) stop();
+  stopPraise();
+  if (typeof window !== 'undefined') window.speechSynthesis?.cancel();
+  settle('cancelled');
+}
+
+const SILENT_WAV = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+
+/** Call inside a tap so the next recorded line is allowed to play. */
+export function unlockAudio() {
+  if (typeof window === 'undefined') return;
+  const audio = new Audio(SILENT_WAV);
+  void audio.play().catch(() => {});
+}
+
+function playClip(id: string, token: number): Promise<boolean> {
   return new Promise((resolve) => {
     if (token !== generation || typeof window === 'undefined') {
       resolve(false);
@@ -58,43 +67,37 @@ function playClip(id: string, token: number, retryFrom: string[]): Promise<boole
     silence(sharedAudio);
     const audio = new Audio(`/audio/${id}.mp3`);
     sharedAudio = audio;
-    audio.muted = false;
 
     let settled = false;
     let cap = 0;
-    let retried = false;
     const finish = (keepGoing: boolean) => {
       if (settled) return;
       settled = true;
       window.clearTimeout(cap);
       if (stopCurrent === stop) stopCurrent = null;
-      resolve(keepGoing);
+      if (!keepGoing) silence(audio);
+      resolve(keepGoing && token === generation);
     };
     const stop = () => {
       silence(audio);
       finish(false);
     };
     stopCurrent = stop;
-    audio.onended = () => finish(token === generation);
-    audio.onerror = () => finish(token === generation);
-    cap = window.setTimeout(() => finish(token === generation), 15000);
+    audio.onended = () => finish(true);
+    audio.onerror = () => finish(true);
+    cap = window.setTimeout(() => finish(true), 20000);
 
-    const start = () => {
-      void audio.play().then(() => {
-        retryList = null;
-      }).catch((error: unknown) => {
-        const name = error instanceof DOMException ? error.name : '';
-        if (name === 'AbortError' && !retried && token === generation) {
-          retried = true;
-          window.setTimeout(start, 60);
-          return;
-        }
-        const blocked = name === 'NotAllowedError';
-        if (blocked && token === generation) retryList = retryFrom;
-        finish(!blocked && token === generation);
-      });
-    };
-    start();
+    void audio.play().catch((error: unknown) => {
+      const name = error instanceof DOMException ? error.name : '';
+      if (name === 'AbortError' && token === generation) {
+        window.setTimeout(() => {
+          if (token !== generation || settled) return;
+          void audio.play().catch(() => finish(true));
+        }, 60);
+        return;
+      }
+      finish(true);
+    });
   });
 }
 
@@ -111,8 +114,8 @@ export function playNarration(ids: string | string[], enabled: boolean): Promise
     waiters.push(resolve);
     void (async () => {
       try {
-        for (let index = 0; index < list.length; index += 1) {
-          const keepGoing = await playClip(list[index], token, list.slice(index));
+        for (const id of list) {
+          const keepGoing = await playClip(id, token);
           if (!keepGoing || token !== generation) {
             if (token === generation) settle('finished');
             return;
@@ -184,60 +187,42 @@ export function useNarrationSequence() {
   return { play, cancel, playThen };
 }
 
-function speakLine(text: string) {
-  const synth = window.speechSynthesis;
-  if (!synth) return;
-  const line = new SpeechSynthesisUtterance(text);
-  line.lang = 'pt-BR';
-  line.rate = 1;
-  synth.cancel();
-  synth.speak(line);
-}
-
-function speakMuitoBem() {
-  speakLine('Muito bem!');
-}
-
-function playPraiseClip(id: string): Promise<boolean> {
-  if (praiseAudio) {
-    praiseAudio.onended = null;
-    praiseAudio.onerror = null;
-    praiseAudio.pause();
-  }
-
-  const audio = new Audio(`/audio/${id}.mp3`);
-  praiseAudio = audio;
-  audio.volume = 1;
-
+function playPraiseClip(id: string, token: number): Promise<boolean> {
   return new Promise((resolve) => {
+    if (token !== generation || typeof window === 'undefined') {
+      resolve(false);
+      return;
+    }
+
+    silence(praiseAudio);
+    const audio = new Audio(`/audio/${id}.mp3`);
+    praiseAudio = audio;
+    audio.volume = 1;
+
     let settled = false;
-    let heard = false;
+    let cap = 0;
     const finish = (ok: boolean) => {
       if (settled) return;
       settled = true;
       window.clearTimeout(cap);
-      window.clearTimeout(watchdog);
-      if (praiseAudio === audio) praiseAudio = null;
-      resolve(ok);
+      if (stopPraisePlay === stop) stopPraisePlay = null;
+      if (!ok) silence(audio);
+      if (praiseAudio === audio && !ok) praiseAudio = null;
+      resolve(ok && token === generation);
     };
-    const markHeard = () => {
-      heard = true;
-      window.clearTimeout(watchdog);
+    const stop = () => {
+      silence(audio);
+      finish(false);
     };
-    const cap = window.setTimeout(() => finish(true), 5000);
-    const watchdog = window.setTimeout(() => {
-      if (!heard) speakMuitoBem();
-    }, 400);
-    audio.onplaying = markHeard;
+    stopPraisePlay = stop;
     audio.onended = () => finish(true);
-    audio.onerror = () => {
-      if (!heard) speakMuitoBem();
-      finish(false);
-    };
-    void audio.play().then(markHeard).catch(() => {
-      if (!heard) speakMuitoBem();
-      finish(false);
-    });
+    audio.onerror = () => finish(true);
+    cap = window.setTimeout(() => {
+      silence(audio);
+      finish(true);
+    }, 20000);
+
+    void audio.play().catch(() => finish(true));
   });
 }
 
@@ -251,63 +236,56 @@ export function useCorrectPraise() {
     };
   }, []);
 
-  return useCallback((onDone: () => void, extra?: string) => {
-    const started = performance.now();
-    let finished = false;
-    narrationLocked = true;
+  return useCallback((onDone: () => void, clips?: string | string[]) => {
+    const list = (clips ? (Array.isArray(clips) ? clips : [clips]) : ['contar-1']).filter(Boolean);
     cancelNarration();
+    const token = generation;
+    narrationLocked = true;
     window.dispatchEvent(new CustomEvent('dino-praise'));
 
-    const done = () => {
+    let finished = false;
+    let safety = 0;
+    const finish = (runDone: boolean) => {
       if (finished) return;
       finished = true;
+      window.clearTimeout(safety);
+      if (token !== generation) return;
       narrationLocked = false;
-      if (!alive.current) return;
-      onDone();
+      stopPraise();
+      if (runDone && alive.current) onDone();
     };
+    safety = window.setTimeout(() => finish(true), 20000);
 
-    const cap = window.setTimeout(done, extra ? 14000 : 3200);
-    const first = playPraiseClip('contar-1');
-    void first.then(async () => {
-      if (extra && alive.current) await playPraiseClip(extra);
-      const wait = Math.max(0, 1700 - (performance.now() - started));
-      window.setTimeout(() => {
-        window.clearTimeout(cap);
-        done();
-      }, wait);
-    });
+    void (async () => {
+      for (const id of list) {
+        const ok = await playPraiseClip(id, token);
+        if (!ok || token !== generation || !alive.current) {
+          finish(false);
+          return;
+        }
+      }
+      finish(true);
+    })();
   }, []);
 }
 
-const WRONG_HINT = 'Você não quer escolher outra opção?';
-
-function playHintClip(id: string, spoken: string) {
-  if (praiseAudio) {
-    praiseAudio.onended = null;
-    praiseAudio.onerror = null;
-    praiseAudio.pause();
-  }
-
+function playHintClip(id: string) {
+  silence(praiseAudio);
   const audio = new Audio(`/audio/${id}.mp3`);
   praiseAudio = audio;
   audio.volume = 1;
-  let spoke = false;
-  const say = () => {
-    if (spoke) return;
-    spoke = true;
-    speakLine(spoken);
+  audio.onended = () => {
+    if (praiseAudio === audio) praiseAudio = null;
   };
-  audio.onplaying = () => {
-    spoke = true;
-  };
-  audio.onerror = say;
-  void audio.play().catch(say);
+  void audio.play().catch(() => {
+    if (praiseAudio === audio) praiseAudio = null;
+  });
 }
 
 export function useWrongHint() {
   return useCallback(() => {
     cancelNarration();
     window.dispatchEvent(new CustomEvent('dino-hint'));
-    playHintClip('outra-opcao', WRONG_HINT);
+    playHintClip('outra-opcao');
   }, []);
 }

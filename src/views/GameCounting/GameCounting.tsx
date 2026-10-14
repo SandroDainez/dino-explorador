@@ -14,18 +14,17 @@ interface Question {
   options: number[];
 }
 
-// Fixed non-overlapping coordinates for up to 10 fireflies inside a 500x250 container
 const FIREFLY_POSITIONS = [
-  { x: 250, y: 125 }, // 1
-  { x: 100, y: 70 },  // 2
-  { x: 400, y: 170 }, // 3
-  { x: 150, y: 180 }, // 4
-  { x: 350, y: 80 },  // 5
-  { x: 250, y: 50 },  // 6
-  { x: 450, y: 100 }, // 7
-  { x: 70, y: 150 },  // 8
-  { x: 200, y: 110 }, // 9
-  { x: 300, y: 180 }, // 10
+  { x: 14, y: 46 },
+  { x: 32, y: 46 },
+  { x: 50, y: 46 },
+  { x: 68, y: 46 },
+  { x: 86, y: 46 },
+  { x: 14, y: 76 },
+  { x: 32, y: 76 },
+  { x: 50, y: 76 },
+  { x: 68, y: 76 },
+  { x: 86, y: 76 },
 ];
 
 export const GameCounting: React.FC = () => {
@@ -82,7 +81,7 @@ export const GameCounting: React.FC = () => {
       : null;
 
   const handleNumberClick = (num: number) => {
-    if (gameState === 'victory' || dinoEmotion !== 'idle' || isCounted) return;
+    if (gameState === 'victory' || isCounted) return;
 
     const nextAttempts = totalAttempts + 1;
     setTotalAttempts(nextAttempts);
@@ -103,7 +102,7 @@ export const GameCounting: React.FC = () => {
         } else {
           handleVictory(nextAttempts);
         }
-      }, `vagalume-${currentQuestion.fireflyCount}`);
+      }, ['contar-1', `vagalume-${currentQuestion.fireflyCount}`]);
 
     } else {
       // Incorrect
@@ -217,8 +216,8 @@ export const GameCounting: React.FC = () => {
                 key={idx}
                 className={styles.fireflyWrapper}
                 style={{
-                  left: `${(pos.x / 500) * 100}%`,
-                  top: `${(pos.y / 250) * 100}%`,
+                  left: `${pos.x}%`,
+                  top: `${pos.y}%`,
                 }}
               >
                 {renderFireflySvg(idx * 0.15)}

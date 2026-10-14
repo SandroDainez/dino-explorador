@@ -152,7 +152,7 @@ export const GameShapes: React.FC = () => {
     : currentQuestion?.targetShape.clip ?? null;
 
   const handleShapeClick = (shapeId: string) => {
-    if (gameState === 'victory' || dinoEmotion !== 'idle' || animatingShape !== null) return;
+    if (gameState === 'victory' || animatingShape !== null) return;
 
     const nextAttempts = totalAttempts + 1;
     setTotalAttempts(nextAttempts);

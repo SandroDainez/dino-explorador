@@ -227,7 +227,7 @@ export const GameAnimals: React.FC = () => {
       : null;
 
   const handleAnimalClick = (animal: AnimalOption) => {
-    if (gameState === 'victory' || dinoEmotion !== 'idle' || isRevealed) return;
+    if (gameState === 'victory' || isRevealed) return;
 
     const nextAttempts = totalAttempts + 1;
     setTotalAttempts(nextAttempts);
@@ -248,7 +248,7 @@ export const GameAnimals: React.FC = () => {
         } else {
           handleVictory(nextAttempts);
         }
-      }, currentQuestion.targetAnimal.clip);
+      }, currentQuestion.targetAnimal.clip ? ['contar-1', currentQuestion.targetAnimal.clip] : 'contar-1');
 
     } else {
       // Incorrect

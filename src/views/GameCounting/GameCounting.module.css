@@ -15,7 +15,9 @@
 .caveBoard {
   position: relative;
   width: min(500px, 100%);
-  height: min(220px, 38vh);
+  flex: 1 1 auto;
+  min-height: 96px;
+  max-height: 68%;
   background: radial-gradient(circle at center, #263238 0%, #151a1d 100%);
   border: 6px solid #455a64;
   border-radius: var(--radius-xl);
@@ -60,6 +62,8 @@
 }
 
 .firefly {
+  width: 40px;
+  height: 40px;
   animation: firefly-flutter 4s ease-in-out infinite;
 }
 

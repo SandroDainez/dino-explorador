@@ -73,7 +73,7 @@ export const GameLetters: React.FC = () => {
     : currentQuestion?.clip ?? null;
 
   const handleLetterClick = (letter: string, optionIdx: number) => {
-    if (gameState === 'victory' || dinoEmotion !== 'idle' || jumpingStoneIdx !== null) return;
+    if (gameState === 'victory' || jumpingStoneIdx !== null) return;
 
     const nextAttempts = totalAttempts + 1;
     setTotalAttempts(nextAttempts);

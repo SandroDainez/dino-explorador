@@ -1,10 +1,9 @@
-import { useRef } from 'react';
 import { ArrowRight, Map, RotateCcw } from 'lucide-react';
 import type { GameView } from '../context/GameContext';
 import { useGame } from '../context/GameContext';
 import { suggestedNext } from '../game/phases';
 import { useAudioEngine } from '../hooks/useAudioEngine';
-import { useNarration } from '../hooks/useNarration';
+import { unlockAudio, useNarration } from '../hooks/useNarration';
 import styles from './VictoryPanel.module.css';
 
 interface VictoryActionsProps {
@@ -24,11 +23,9 @@ export const VictoryActions = ({
   const { playClick, playHover } = useAudioEngine();
   const { cancel } = useNarration();
   const upcoming = suggestedNext(worldId, progress.stars);
-  const left = useRef(false);
 
   const goTo = (view: GameView) => {
-    if (left.current) return;
-    left.current = true;
+    unlockAudio();
     playClick();
     cancel();
     setCurrentView(view);

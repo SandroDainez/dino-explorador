@@ -61,8 +61,7 @@ export const GameSequence: React.FC = () => {
     ? withNextPhase('sequence', victoryLine('Muito bem! Você achou a ordem das bolinhas!', starsEarned), progress.stars)
     : 'Qual bolinha vem depois?';
   // The recorded victory clips still say every sequence was finished.
-  const narrationId = gameState === 'victory' ? null : 'sequencia';
-  const narrationText = gameState === 'victory' ? instructionText : null;
+  const narrationId = gameState === 'victory' ? 'contar-1' : 'sequencia';
 
   const finish = (attempts: number) => {
     setGameState('victory');
@@ -110,7 +109,6 @@ export const GameSequence: React.FC = () => {
       title="Trilha da Sequência"
       instructionText={instructionText}
       narrationId={narrationId}
-      narrationText={narrationText}
       starsEarned={starsEarned}
       currentStep={gameState === 'victory' ? undefined : step + 1}
       totalSteps={gameState === 'victory' ? undefined : totalQuestions}

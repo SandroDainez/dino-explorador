@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
 import type { DinoType, DinoColor, DinoAccessory } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
-import { useNarration } from '../../hooks/useNarration';
+import { unlockAudio, useNarration } from '../../hooks/useNarration';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { PrehistoricScene } from '../../components/PrehistoricScene';
 import { Volume2, VolumeX, Sparkles } from 'lucide-react';
@@ -121,6 +121,7 @@ export const Home: React.FC = () => {
 
   const handleStartGame = () => {
     playSuccess();
+    unlockAudio();
     cancel();
     setCurrentView('map');
   };

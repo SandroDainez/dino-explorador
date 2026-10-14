@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
 import type { GameView } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
-import { useNarration } from '../../hooks/useNarration';
+import { unlockAudio, useNarration } from '../../hooks/useNarration';
 import { DinoAvatar } from '../../components/DinoAvatar';
 import { PrehistoricScene } from '../../components/PrehistoricScene';
 import { Home, Award, Volume2, VolumeX, RefreshCw } from 'lucide-react';
@@ -185,32 +185,20 @@ export const WorldMap: React.FC = () => {
   const { play, cancel } = useNarration();
 
   // Track position of dino on map. If null, Dino is at the start (bottom-center or floating).
-  const [dinoPosition, setDinoPosition] = useState<{ x: number; y: number } | null>(null);
   const [movingToNode, setMovingToNode] = useState<GameView | null>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      void play('mapa');
-    }, 0);
-
-    return () => {
-      clearTimeout(timer);
-      cancel();
-    };
+    void play('mapa');
+    return () => cancel();
   }, [play, cancel]);
 
   const handleNodeClick = (node: MapNode) => {
-    if (movingToNode) return; // prevent multiple clicks while moving
-    
+    if (movingToNode) return;
+    unlockAudio();
     playJump();
     cancel();
     setMovingToNode(node.id);
-    setDinoPosition({ x: node.x, y: node.y });
-
-    // Transition to the game screen after Dino finishes moving
-    setTimeout(() => {
-      setCurrentView(node.id);
-    }, 1200);
+    setCurrentView(node.id);
   };
 
   const handleBackToCustomizer = () => {
@@ -373,17 +361,14 @@ export const WorldMap: React.FC = () => {
         <div
           className={styles.dinoAvatarOnMap}
           style={{
-            left: dinoPosition ? `${dinoPosition.x}%` : undefined,
-            top: dinoPosition ? `${dinoPosition.y}%` : undefined,
-            transform: `translate(-50%, -85%) ${movingToNode ? 'scale(1.15)' : 'scale(1)'}`,
-            transition: 'left 1.1s cubic-bezier(0.25, 0.46, 0.45, 0.94), top 1.1s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            transform: 'translate(-50%, -85%)',
           }}
         >
           <DinoAvatar
             type={dino.type}
             color={dino.color}
             accessory={dino.accessory}
-            animation={movingToNode ? 'walk' : 'idle'}
+            animation="idle"
             size={100}
           />
         </div>

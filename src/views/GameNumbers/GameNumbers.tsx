@@ -114,7 +114,7 @@ export const GameNumbers: React.FC = () => {
       : null;
 
   const handleNestClick = (option: NestOption) => {
-    if (gameState === 'victory' || dinoEmotion !== 'idle' || hatchedNestId !== null) return;
+    if (gameState === 'victory' || hatchedNestId !== null) return;
 
     const nextAttempts = totalAttempts + 1;
     setTotalAttempts(nextAttempts);
