@@ -719,6 +719,15 @@
   font-weight: 600;
 }
 
+.splashIntro {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  line-height: 1.35;
+  color: var(--color-gray-800);
+  margin: 0;
+  max-width: 28rem;
+}
+
 .splashDinoPlate svg {
   max-width: 78%;
   max-height: 78%;
@@ -785,6 +794,9 @@
     font-size: 2.6rem;
   }
   .splashSubtitle {
+    font-size: 0.95rem;
+  }
+  .splashIntro {
     font-size: 0.95rem;
   }
 }
@@ -876,6 +888,11 @@
   .splashSubtitle {
     font-size: 0.8rem;
     margin-top: 0;
+  }
+
+  .splashIntro {
+    font-size: 0.78rem;
+    line-height: 1.25;
   }
 
   .btnStartDiscovery {

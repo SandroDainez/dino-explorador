@@ -38,6 +38,9 @@ export const VictoryActions = ({
       ) : (
         <p className={styles.nextHint}>Você explorou todas as fases!</p>
       )}
+      <p id="continue-hint" className={styles.continueHint}>
+        Vamos continuar. Escolha uma das opções.
+      </p>
       <div className={styles.victoryButtons}>
         {upcoming && (
           <button

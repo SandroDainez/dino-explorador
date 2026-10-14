@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
 import { starsFor, victoryLine, withNextPhase } from '../../audio/lines';
@@ -44,6 +44,20 @@ export const GameLetters: React.FC = () => {
   const [wrongAnswers, setWrongAnswers] = useState<string[]>([]);
   const [showConfetti, setShowConfetti] = useState(false);
   const [jumpingStoneIdx, setJumpingStoneIdx] = useState<number | null>(null);
+  const [letterLanded, setLetterLanded] = useState(false);
+  const [flyOn, setFlyOn] = useState(false);
+  const [fly, setFly] = useState<{ letter: string; x: number; y: number; dx: number; dy: number } | null>(null);
+  const slotRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (!fly) return;
+    const frame = requestAnimationFrame(() => setFlyOn(true));
+    const landed = window.setTimeout(() => setLetterLanded(true), 560);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(landed);
+    };
+  }, [fly]);
 
   const totalQuestions = 5;
 
@@ -79,15 +93,34 @@ export const GameLetters: React.FC = () => {
     setTotalAttempts(nextAttempts);
 
     if (letter === currentQuestion.targetLetter) {
-      // Correct!
       playJump();
       playSuccess();
+      const stone = document.getElementById(`stone-${letter}`);
+      const slot = slotRef.current;
+      if (stone && slot) {
+        const from = stone.getBoundingClientRect();
+        const to = slot.getBoundingClientRect();
+        setFly({
+          letter,
+          x: from.left + from.width / 2,
+          y: from.top + from.height / 2,
+          dx: to.left + to.width / 2 - (from.left + from.width / 2),
+          dy: to.top + to.height / 2 - (from.top + from.height / 2),
+        });
+        setFlyOn(false);
+        setLetterLanded(false);
+      } else {
+        setLetterLanded(true);
+      }
       setJumpingStoneIdx(optionIdx);
-      setDinoEmotion('walk');
+      setDinoEmotion('celebrate');
       setWrongAnswers([]);
 
       praise(() => {
         setJumpingStoneIdx(null);
+        setFly(null);
+        setFlyOn(false);
+        setLetterLanded(false);
         setDinoEmotion('idle');
 
         if (step < totalQuestions - 1) {
@@ -126,6 +159,9 @@ export const GameLetters: React.FC = () => {
     setWrongAnswers([]);
     setShowConfetti(false);
     setJumpingStoneIdx(null);
+    setFly(null);
+    setFlyOn(false);
+    setLetterLanded(false);
 
     // Regenerate/shuffle questions
     const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
@@ -163,7 +199,14 @@ export const GameLetters: React.FC = () => {
             <div className={styles.wordHint}>
               Qual letra começa?
               <span className={styles.wordMystery}>
-                _ {currentQuestion.word.substring(1)}
+                <span
+                  ref={slotRef}
+                  id="letter-slot"
+                  className={letterLanded ? styles.filledLetter : styles.blankLetter}
+                >
+                  {letterLanded ? currentQuestion.targetLetter : '_'}
+                </span>
+                {currentQuestion.word.slice(1)}
               </span>
             </div>
           </div>
@@ -192,19 +235,13 @@ export const GameLetters: React.FC = () => {
                         <span className={styles.sparkle3}>⭐</span>
                       </div>
                     )}
-                    <span className={styles.stoneLetter}>{letter}</span>
+                    <span className={`${styles.stoneLetter} ${letterLanded && letter === currentQuestion.targetLetter ? styles.stoneLetterGone : ''}`}>{letter}</span>
                   </button>
                 );
               })}
 
               {/* Dino Avatar positioned above water, jumping */}
-              <div
-                className={`${styles.dinoOnRiver} ${jumpingStoneIdx !== null ? styles.dinoJumping : ''}`}
-                style={{
-                  left: jumpingStoneIdx !== null ? `${15 + jumpingStoneIdx * 35}%` : '50%',
-                  transform: 'translateX(-50%)',
-                }}
-              >
+              <div className={styles.dinoOnRiver}>
                 <DinoAvatar
                   type={dino.type}
                   color={dino.color}
@@ -246,6 +283,20 @@ export const GameLetters: React.FC = () => {
             onReplay={handlePlayAgain}
           />
         </div>
+      )}
+      {fly && !letterLanded && (
+        <span
+          className={styles.flyingLetter}
+          style={{
+            left: fly.x,
+            top: fly.y,
+            transform: flyOn
+              ? `translate(calc(-50% + ${fly.dx}px), calc(-50% + ${fly.dy}px)) scale(1)`
+              : 'translate(-50%, -50%) scale(1.2)',
+          }}
+        >
+          {fly.letter}
+        </span>
       )}
     </GameLayout>
   );

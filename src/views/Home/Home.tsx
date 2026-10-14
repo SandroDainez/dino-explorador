@@ -77,6 +77,9 @@ export const Home: React.FC = () => {
             <span className={styles.word2}>EXPLORADOR</span>
           </h1>
           <p className={styles.splashSubtitle}>Uma Aventura Educativa Pré-Histórica!</p>
+          <p id="splash-intro" className={styles.splashIntro}>
+            Vamos brincar! Esse é o joguinho do dinossauro. Você ajuda ele.
+          </p>
 
           <div className={styles.splashDinoPlate}>
             <DinoAvatar
