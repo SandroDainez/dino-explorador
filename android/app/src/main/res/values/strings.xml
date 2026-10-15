@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Dino Explorador</string>
+    <string name="title_activity_main">Dino Explorador</string>
+    <string name="package_name">app.joguimho.dinoexplorador</string>
+    <string name="custom_url_scheme">app.joguimho.dinoexplorador</string>
+</resources>
