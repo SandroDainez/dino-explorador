@@ -1,0 +1,237 @@
+.container {
+  min-height: 100dvh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  color: #f7fbff;
+  background: radial-gradient(circle at 20% 15%, #2d6b9b 0%, #10315f 52%, #081f3e 100%);
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.eyebrow {
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.86;
+}
+
+.title {
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  line-height: 1.05;
+  margin-top: 3px;
+}
+
+.subtitle {
+  opacity: 0.9;
+  margin-top: 4px;
+}
+
+.hudBlock {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 12px;
+  padding: 8px 12px;
+  background: rgba(8, 22, 48, 0.45);
+  text-align: right;
+}
+
+.hudLabel {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.75;
+}
+
+.hudGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.hudCard {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  padding: 8px 10px;
+  background: rgba(8, 22, 48, 0.45);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.stateValue {
+  text-transform: capitalize;
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #6de39a 0%, #e6f783 100%);
+  transition: width 0.12s linear;
+}
+
+.track {
+  position: relative;
+  width: 100%;
+  max-width: 920px;
+  align-self: center;
+  height: 300px;
+  border-radius: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  cursor: pointer;
+  background: linear-gradient(180deg, var(--sky-start), var(--sky-end));
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.24);
+}
+
+.levelTitle {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  z-index: 2;
+  font-weight: 700;
+  background: rgba(4, 11, 26, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 999px;
+  padding: 4px 12px;
+}
+
+.runner {
+  position: absolute;
+  z-index: 4;
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  font-size: 2rem;
+  transition: transform 0.08s linear;
+  filter: drop-shadow(0 8px 6px rgba(0, 0, 0, 0.3));
+}
+
+.runner span {
+  transform: rotate(-4deg);
+}
+
+.groundLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--ground-top);
+  height: var(--ground-height);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.18) 0%, transparent 18%), var(--ground-color);
+  border-top: 2px solid rgba(245, 255, 255, 0.44);
+  z-index: 1;
+}
+
+.obstacle {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  border-radius: 10px 10px 4px 4px;
+  border: 2px solid rgba(8, 12, 22, 0.35);
+  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.2);
+}
+
+.obstacle span {
+  font-size: 1.2rem;
+  margin-bottom: 3px;
+  line-height: 1;
+}
+
+.crystal {
+  background: linear-gradient(180deg, #abf3ff 0%, #4dbdd7 100%);
+}
+
+.totem {
+  background: linear-gradient(180deg, #f1dcb0 0%, #a57942 100%);
+}
+
+.rock {
+  background: linear-gradient(180deg, #d6d3da 0%, #7d7890 100%);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: rgba(6, 14, 30, 0.64);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 12px;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.controlButton {
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 12px;
+  background: rgba(8, 22, 48, 0.45);
+  color: #f4f8ff;
+  min-height: 42px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.controlButton:disabled {
+  opacity: 0.46;
+  cursor: not-allowed;
+}
+
+.helper {
+  opacity: 0.88;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 820px) {
+  .hudGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .container {
+    padding: 12px;
+  }
+
+  .header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .hudBlock {
+    align-self: flex-start;
+    text-align: left;
+  }
+
+  .track {
+    height: 270px;
+  }
+}
